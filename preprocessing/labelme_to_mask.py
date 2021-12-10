@@ -28,7 +28,10 @@ def polygons_to_mask(img_shape, polygons):
 
 
 def main():
-    images_dir = os.path.join(config.output_result, 'vgg16_09012200', 'images')
+    images_dir = os.path.join(
+        config.output_result, 
+        'resnet50-20211208-101731',
+        'images')
     for root, _, files in os.walk(images_dir):
         for file in files:
             if os.path.splitext(file)[1] == '.json':
@@ -38,7 +41,7 @@ def main():
                 json_path = os.path.join(root, file)
                 print(json_path)
                 mask = polygons_to_mask([img.shape[0], img.shape[1]], parse_json(json_path)) * 255
-                mask_path = os.path.join(config.result_masks_stl10, json_name + '.png')
+                mask_path = os.path.join(config.result_masks_cifar10, json_name + '.png')
                 image_util.save_cv(mask, mask_path)
 
 
