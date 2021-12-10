@@ -1,0 +1,121 @@
+{
+  "cifar-10": {
+    "model": {
+      "in_channels": 3,
+      "num_classes": 10
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 200
+    },
+    "trainer": {
+      "num_epochs": 200
+    }
+  },
+  "cifar-100": {
+    "model": {
+      "in_channels": 3,
+      "num_classes": 100
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 200
+    },
+    "trainer": {
+      "num_epochs": 200
+    }
+  },
+  "mnist": {
+    "model": {
+      "in_channels": 1,
+      "num_classes": 10
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 100
+    },
+    "trainer": {
+      "num_epochs": 100
+    }
+  },
+  "fashion-mnist": {
+    "model": {
+      "in_channels": 1,
+      "num_classes": 10
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 100
+    },
+    "trainer": {
+      "num_epochs": 100
+    }
+  },
+  "mini-imagenet-10": {
+    "model": {
+      "in_channels": 3,
+      "num_classes": 10
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 200
+    },
+    "trainer": {
+      "num_epochs": 200
+    }
+  },
+  "mini-imagenet": {
+    "model": {
+      "in_channels": 3,
+      "num_classes": 100
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 200
+    },
+    "trainer": {
+      "num_epochs": 200
+    }
+  },
+  "stl-10": {
+    "model": {
+      "in_channels": 3,
+      "num_classes": 10
+    },
+    "optimizer": {
+      "lr": 0.01,
+      "momentum": 0.9,
+      "weight_decay": 5e-4
+    },
+    "scheduler": {
+      "T_max": 200
+    },
+    "trainer": {
+      "num_epochs": 200
+    }
+  }
+}
