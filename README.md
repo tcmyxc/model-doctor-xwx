@@ -28,7 +28,12 @@ Accuracy of  8 : 95.90%
 Accuracy of  9 : 97.20%
 ```
 
-PID 6885
+导出依赖包
+```bash
+conda env export >  model-doctor-conf.yml
+```
+
 resnet50+cifar10
 - 从头训练一个模型：0.9489
-- 原有模型医生调整：0.9527, + 0.3800%
+- 原有的模型医生调整：0.9527, + 0.3800%
+- 只使用正梯度：
