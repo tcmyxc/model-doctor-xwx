@@ -36,4 +36,4 @@ conda env export >  model-doctor-conf.yml
 resnet50+cifar10
 - 从头训练一个模型:    0.9489
 - 原有的模型医生调整:  0.9527, + 0.3800%
-- 只使用正梯度(grad_sift文件用的绝对值，grad_constraint用的绝对值):       0.9562, + 0.7300%
+- 只使用正梯度(grad_sift文件用的正梯度，grad_constraint用的绝对值):       0.9562, + 0.7300%
