@@ -2,7 +2,7 @@ import sys
 
 from torch._C import set_anomaly_enabled
 
-sys.path.append('/home/xwx/model-doctor-xwx') #205
+sys.path.append('/home/xwx/model-doctor-xwx')
 
 import os
 import torch

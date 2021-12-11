@@ -4,6 +4,8 @@ import numpy as np
 import torch
 import json
 
+
+sys.path.append('/home/xwx/model-doctor-xwx')
 import loaders
 import models
 from configs import config
@@ -55,8 +57,12 @@ class GradSift:
     def sum_channel(self, result_path, model_layer):
         # print(self.scores)
         # print(self.nums)
+        flag = 2
+        if flag == 1:
+            grads = torch.abs(self.grads) # grads : (B, C, H, W)
+        elif flag == 2:
+            grads = torch.nn.ReLU()(self.grads)  # 只用正梯度
 
-        grads = torch.abs(self.grads) # grads : (B, C, H, W)
         view_channel(grads, result_path, model_layer)
         # grads_pos = torch.nn.ReLU()(self.grads)
         # grads_neg = torch.nn.ReLU()(-self.grads)
@@ -64,7 +70,8 @@ class GradSift:
 
 def view_channel(grads, result_path, model_layer):
     # grads numpy
-    grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()  # （1， 3， 4） = 一个类别中对应不同通道的grads求和, 保留 (Class, channel)
+    # （1， 3， 4） = 一个类别中对应不同通道的grads求和, 保留 (Class, channel)
+    grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
     grads_path = os.path.join(result_path, 'channel_grads_{}.npy'.format(model_layer))
     np.save(grads_path, grads_sum)
 
@@ -138,8 +145,11 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
         outputs = model(inputs)
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
-        grads = module.grads(outputs=-nll_loss, inputs=module.activations, # 预测结果对于特定feature map计算梯度
-                             retain_graph=True, create_graph=False)   # grads : [B, C, H, W]
+        grads = module.grads(
+            outputs=-nll_loss, 
+            inputs=module.activations, # 预测结果对于特定feature map计算梯度
+            retain_graph=True, 
+            create_graph=False)   # grads : [B, C, H, W]
         nll_loss.backward()  # to release graph
 
         grad_sift(outputs=outputs, labels=labels, grads=grads)
@@ -151,9 +161,16 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
 def main(model_name):
     model_layers = [-1]  # 模型导数第一层，一般是全连接层
-    model_path = os.path.join(config.model_pretrained, "resnet50-20211208-101731", 'checkpoint.pth')
+
+    model_path = os.path.join(
+        config.model_pretrained, 
+        "resnet50-20211208-101731", 
+        'checkpoint.pth')
     
-    result_path = os.path.join(config.result_channels, model_name)
+    result_path = os.path.join(
+        config.result_channels, 
+        "resnet50-20211208-101731")
+
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 

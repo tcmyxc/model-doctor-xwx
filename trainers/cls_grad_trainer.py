@@ -114,14 +114,14 @@ class ClsGradTrainer:
                         label = labels[j]
                         class_correct[label] += correct_flag[j].item()
                         class_total[label] += 1
-                print("\n")
+                
                 for i in range(self.num_classes):
                     class_acc = 100 * class_correct[i] / class_total[i]
                     print('\rAccuracy of %2d : %2d %%' % (i, class_acc))
                 epoch_loss_cls = running_loss_cls / self.dataset_sizes[phase]
                 epoch_loss_gc = running_loss_gc / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
-                print('[{}] Loss CLS: {:.4f} Loss GC: {:.4f} Acc: {:.4f}'
+                print('\n[{}] Loss CLS: {:.4f} Loss GC: {:.4f} Acc: {:.4f}'
                       .format(phase, epoch_loss_cls, epoch_loss_gc, epoch_acc))
 
                 # ----------------------------------------
