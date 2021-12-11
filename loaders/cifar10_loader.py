@@ -33,7 +33,7 @@ def load_images(data_type):
                                 ]))
 
     data_loader = DataLoader(dataset=data_set,
-                             batch_size=64,
+                             batch_size=128,
                              num_workers=4,
                              shuffle=True)
 

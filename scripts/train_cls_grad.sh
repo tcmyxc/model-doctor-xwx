@@ -21,11 +21,9 @@ export model_name='resnet50' #3d
 export result_name='gc/'${model_name}'-20211208-101731-posgrad'
 export pretrained_name=${model_name}'-20211208-101731'
 export model_layers='-1'
-export device_index='1'
+export device_index='0'
 # 导出自己的代码路径到python环境变量
 export PYTHONPATH=${PYTHONPATH}:/home/xwx/model-doctor-xwx
-# hjc
-export PYTHONPATH=${PYTHONPATH}:/disk2/hjc/classification
 python3 engines/train_cls_grad.py --data_name ${data_name} --model_name ${model_name} --result_name ${result_name}  --pretrained_name ${pretrained_name}  --model_layers ${model_layers}  --device_index ${device_index}
 # dos2unix scripts/train_cls_grad.sh
 # bash scripts/train_cls_grad.sh

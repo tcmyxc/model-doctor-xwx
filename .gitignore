@@ -2,3 +2,4 @@
 /output
 *.log
 **/__pycache__
+data/

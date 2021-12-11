@@ -14,7 +14,7 @@ datasets_MNIST = '/workspace/classification/output/data/mnist/images/MNIST/raw'
 datasets_FASHION_MNIST = '/workspace/classification/output/data/fashion_mnist/images/FashionMNIST/raw'
 
 # image data
-output_data = root + '/output/data'
+output_data = "/home/xwx/model-doctor-xwx/data"
 data_cifar10 = output_data + '/cifar10/images'
 data_cifar100 = output_data + '/cifar100/images'
 data_mnist = output_data + '/mnist/images'
