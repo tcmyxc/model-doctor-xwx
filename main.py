@@ -22,9 +22,12 @@ model = models.load_model(model_name="resnet50",
                               num_classes=cfg['model']['num_classes']) # 类别数
 
 model = model.cuda()
-state = torch.load(model_path)['history']
-train_loss_cls = state['train_loss_cls']
-train_loss_gc = state["train_loss_gc"]
-val_acc = state["val_acc"]
+state= torch.load(model_path)
+epoch = state["epoch"] + 1
+history = state['history']
+train_loss_cls = history['train_loss_cls']
+train_loss_gc = history["train_loss_gc"]
+val_acc = history["val_acc"]
 best_val_acc = sorted(val_acc, reverse=True)[0]
-print(f"best_val_acc is {best_val_acc}")
+pretrained_acc = 0.9489
+print(f"pretrained acc is {pretrained_acc}, best_val_acc is {best_val_acc:.4f}, increase {((best_val_acc-pretrained_acc)*100):.4f}%, epoch is {epoch}")

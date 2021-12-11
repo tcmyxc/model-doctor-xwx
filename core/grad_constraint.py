@@ -104,4 +104,16 @@ class GradConstraint:
             )
 
         return loss
+    
+    def loss_spatial(self, outputs, labels, masks):
+        """空间损失"""
+        nll_loss = torch.nn.NLLLoss()(outputs, labels)
+        grads = self.modules[0].grads(outputs=-nll_loss, # grads : (B, C, W, H)
+                                      inputs=self.modules[0].activations)
+        masks = transforms.Resize((grads.shape[2], grads.shape[3]))(masks) # 将mask的size转化成与grads相同
+        masks_bg = 1 - masks # 标注区域转化为除去目标的背景区域
+        grads_bg = torch.abs(masks_bg * grads)
+
+        loss = grads_bg.sum()
+        return loss
 
