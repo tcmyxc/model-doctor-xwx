@@ -65,17 +65,18 @@ def main():
     print('CHECK RESULT PATH:', result_path)
 
     model_path = os.path.join(config.model_pretrained, args.pretrained_name, 'checkpoint.pth')
+    print("\n==> pretrained model path", model_path)
     if not os.path.exists(model_path):
-        print('=' * 42)
-        print("pretrained model_path 路径不存在")
+        print("\n==> pretrained model_path 路径不存在")
         return
 
     if not os.path.exists(config.result_channels):
-        print("result_channels 路径不存在")
+        print("\n==> result_channels 路径不存在")
         return
     channel_paths = [os.path.join(config.result_channels,
                                   args.pretrained_name,
                                   'channels_{}.npy'.format(layer)) for layer in args.model_layers]
+    print("\n==> channel_paths", channel_paths)
 
     trainer = ClsGradTrainer(
         model=model,

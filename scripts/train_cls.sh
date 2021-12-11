@@ -18,8 +18,10 @@ export model_name='resnet50' #2
 #export model_name='mnasnet' #15
 #$(date "+%Y%m%d-%H%M%S")
 # -20211208-101731，训练好的模型
-export result_name='gc/'${model_name}'-'$(date "+%Y%m%d-%H%M%S")
-export device_index='1'
+export result_name='pretrained/'${model_name}'-'${data_name}
+export device_index='0'
+# 导出自己的代码路径到python环境变量
+export PYTHONPATH=${PYTHONPATH}:/home/xwx/model-doctor-xwx
 python3 engines/train_cls.py --data_name ${data_name} --model_name ${model_name} --result_name ${result_name}  --device_index ${device_index}
 # dos2unix scripts/train_cls.sh
 # bash scripts/train_cls.sh

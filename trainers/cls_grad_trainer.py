@@ -47,7 +47,7 @@ class ClsGradTrainer:
         # Each epochs.
         # ----------------------------------------
         for epoch in range(self.num_epochs):
-            print('\nEpoch {}/{}'.format(epoch, self.num_epochs - 1))
+            print('\nEpoch {}/{}'.format(epoch+1, self.num_epochs))
 
             for phase in ['train', 'val']:
                 if phase == 'train':

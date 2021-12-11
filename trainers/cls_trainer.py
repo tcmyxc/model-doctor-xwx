@@ -128,7 +128,7 @@ class ClsTrainer:
             print("模型文件的路径不存在，请检查")
             return
         state = torch.load(cp_path)
-        print("bets res is", state["epoch"], "epoch, optimizer is", state["optimizer"])
+        # print("bets res is", state["epoch"], "epoch, optimizer is", state["optimizer"])
         # return
         self.model.load_state_dict(state['model'])
         self.model.eval()
