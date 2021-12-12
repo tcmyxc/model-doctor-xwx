@@ -151,7 +151,11 @@ class ClsGradTrainer:
                     print('- lr:', self.optimizer.state_dict()['param_groups'][0]['lr'])
 
         time_elapsed = time.time() - since
-        print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+        time_hour = time_elapsed // 3600
+        time_minite = (time_elapsed % 3600) // 60
+        time_second = time_elapsed % 60
+        print(f"\nTraining complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s'")
+        # print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
     def check(self):
         phase = 'val'
@@ -202,9 +206,13 @@ class ClsGradTrainer:
         epoch_acc = running_corrects / self.dataset_sizes[phase]
         print('\rTest CLS Loss: {:.4f} Acc: {:.4f}'.format(epoch_loss, epoch_acc))
         for i in range(self.num_classes):
-            print('Accuracy of {:2d} : {:.2f}%'.format(i, 100 * class_correct[i] / class_total[i]))
+            print('\rAccuracy of {:2d} : {:.2f}%'.format(i, 100 * class_correct[i] / class_total[i]))
         time_elapsed = time.time() - since
-        print('\rPhase:{} complete in {:.0f}m {:.0f}s'.format(phase, time_elapsed // 60, time_elapsed % 60))
+        time_hour = time_elapsed // 3600
+        time_minite = (time_elapsed % 3600) // 60
+        time_second = time_elapsed % 60
+        print(f"\rPhase:{phase} complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s'")
+        # print('\rPhase:{} complete in {:.0f}m {:.0f}s'.format(phase, time_elapsed // 60, time_elapsed % 60))
 
 
 class TrainerHistory(object):

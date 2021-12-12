@@ -57,7 +57,7 @@ class GradSift:
     def sum_channel(self, result_path, model_layer):
         # print(self.scores)
         # print(self.nums)
-        flag = 2
+        flag = 1
         if flag == 1:
             grads = torch.abs(self.grads) # grads : (B, C, H, W)
         elif flag == 2:
@@ -145,9 +145,12 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
         outputs = model(inputs)
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
+        # 12月12日晚，只使用正激活
+        activations = torch.nn.ReLU()(module.activations) # 计算出来的梯度可能为0
+        # activations = module.activations
         grads = module.grads(
             outputs=-nll_loss, 
-            inputs=module.activations, # 预测结果对于特定feature map计算梯度
+            inputs=activations, # 预测结果对于特定feature map计算梯度
             retain_graph=True, 
             create_graph=False)   # grads : [B, C, H, W]
         nll_loss.backward()  # to release graph

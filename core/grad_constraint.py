@@ -23,13 +23,24 @@ class HookModule:
         grads = torch.autograd.grad(outputs=outputs,
                                     inputs=inputs,
                                     retain_graph=retain_graph,
-                                    create_graph=create_graph)[0]
+                                    create_graph=create_graph,
+                                    allow_unused=True)[0]
         self.model.zero_grad()
+
+        if grads is None:
+            grads = torch.zeros_like(inputs)
+            
         return grads
 
 
 def _loss_channel(channels, grads, labels, is_high=True):
-    grads = torch.abs(grads)
+    # grads = torch.abs(grads)  # 这边是否需要跟grad_sift的sum_channel保持一致
+    flag = 1
+    if flag == 1:
+        grads = torch.abs(grads)
+    elif flag == 2:
+        grads = torch.nn.ReLU()(grads)  # 只用正梯度
+        
     channel_grads = torch.sum(grads, dim=(2, 3))  # [batch_size, channels] 梯度加和后得到 [Batch_size，Channel]
 
     loss = 0
@@ -67,7 +78,7 @@ class GradConstraint:
 
     def loss_channel(self, outputs, labels):
         """
-        channel loss
+        channel lossxs
         :param outputs: 输出结果
         :param labels: 真实标签
         :return:
@@ -88,9 +99,15 @@ class GradConstraint:
         loss = 0
         for i, module in enumerate(self.modules):
             # high response channel loss
+            # 12月12日晚，使用正激活计算梯度
+            activations = torch.nn.ReLU()(module.activations)
+            # activations = module.activations
             loss += _loss_channel(
                 channels=self.channels[i],
-                grads=module.grads(outputs=-nll_loss_, inputs=module.activations),
+                grads=module.grads(
+                    outputs=-nll_loss_, 
+                    inputs= activations
+                ),
                 labels=labels_,
                 is_high=True
             )
@@ -98,7 +115,10 @@ class GradConstraint:
             # low response channel loss
             loss += _loss_channel(
                 channels=self.channels[i],
-                grads=module.grads(outputs=-nll_loss, inputs=module.activations),
+                grads=module.grads(
+                    outputs=-nll_loss, 
+                    inputs=activations
+                ),
                 labels=labels,
                 is_high=False
             )
