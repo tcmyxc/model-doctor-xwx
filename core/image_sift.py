@@ -58,8 +58,8 @@ class ImageSift:
                         self.nums[label] += 1
 
     def save_image(self, result_path):
-        print(self.scores)
-        print(self.nums)
+        # print(self.scores)
+        # print(self.nums)
 
         image_dir = os.path.join(config.data_cifar10, 'test')
 
@@ -77,7 +77,7 @@ class ImageSift:
 def sift_image(data_name, model_name, model_path, result_path):
     # device
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-    device = torch.device('cuda:1')
+    device = torch.device('cuda:0')
 
     # config
     cfg = json.load(open('configs/config_trainer.json'))[data_name]
@@ -121,7 +121,9 @@ def main():
         'checkpoint.pth')
     result_path = os.path.join(
         config.output_result, 
-        model_name + '-20211208-101731')
+        model_name + '-' + data_name, "low")
+    print("\n==> result_path", result_path)
+   
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
