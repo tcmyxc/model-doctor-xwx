@@ -69,6 +69,7 @@ class GradSift:
 
 
 def view_channel(grads, result_path, model_layer):
+    """保存梯度并可视化"""
     # grads numpy
     # （1， 3， 4） = 一个类别中对应不同通道的grads求和, 保留 (Class, channel)
     grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
@@ -88,6 +89,7 @@ def view_channel(grads, result_path, model_layer):
 
 
 def sift_channel(result_path, model_layer, threshold=None):  # high response channel
+    """根据梯度生成 channel mask，同时保存到文件"""
     grads_path = os.path.join(result_path, 'channel_grads_{}.npy'.format(model_layer))
     channels_grads = np.load(grads_path)   # (Class, channel)
 
@@ -145,16 +147,38 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
         outputs = model(inputs)
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
-        # 12月12日晚，只使用正激活
-        activations = torch.nn.ReLU()(module.activations) # 计算出来的梯度可能为0
-        # activations = module.activations
+        
+        activations = module.activations
+        # 取正激活部分的索引
+        act_idx = torch.ge(activations, torch.zeros_like(activations))
+        # print("=" * 42)
+        # print("\n==> activations\n", activations)
         grads = module.grads(
             outputs=-nll_loss, 
             inputs=activations, # 预测结果对于特定feature map计算梯度
             retain_graph=True, 
             create_graph=False)   # grads : [B, C, H, W]
+
+        # print("\n==> grads\n", grads)
+        # print("\n==> nll_loss\n", nll_loss)
+        # print("=" * 42)
         nll_loss.backward()  # to release graph
 
+        # 计算梯度
+        # print("\n==> grads\n", grads)
+        flag = 2
+        if flag == 2:
+            # 正激活部分对应的梯度
+            grads = grads * act_idx
+        elif flag == 3:
+            # 直接用激活代替梯度
+            grads = activations
+        elif flag == 4:
+            # 用正激活代替梯度
+            grads = torch.nn.ReLU()(activations)
+        # print("\n==> grads\n", grads)
+        
+        # 调用 call 函数
         grad_sift(outputs=outputs, labels=labels, grads=grads)
 
     # 全部筛选完后对每个类别留下grad_nums的样本（针对某一层求的grads）
@@ -165,6 +189,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 def main(model_name):
     model_layers = [-1]  # 模型导数第一层，一般是全连接层
 
+    # 预训练模型
     model_path = os.path.join(
         config.model_pretrained, 
         "resnet50-20211208-101731", 

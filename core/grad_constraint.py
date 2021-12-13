@@ -23,13 +23,9 @@ class HookModule:
         grads = torch.autograd.grad(outputs=outputs,
                                     inputs=inputs,
                                     retain_graph=retain_graph,
-                                    create_graph=create_graph,
-                                    allow_unused=True)[0]
+                                    create_graph=create_graph)[0]
         self.model.zero_grad()
 
-        if grads is None:
-            grads = torch.zeros_like(inputs)
-            
         return grads
 
 
@@ -100,14 +96,16 @@ class GradConstraint:
         for i, module in enumerate(self.modules):
             # high response channel loss
             # 12月12日晚，使用正激活计算梯度
-            activations = torch.nn.ReLU()(module.activations)
-            # activations = module.activations
+            # activations = torch.nn.ReLU()(module.activations)
+            activations = module.activations
+            # 取大于0的索引
+            act_idx = torch.ge(activations, torch.zeros_like(activations))
             loss += _loss_channel(
                 channels=self.channels[i],
                 grads=module.grads(
                     outputs=-nll_loss_, 
                     inputs= activations
-                ),
+                ) * act_idx,
                 labels=labels_,
                 is_high=True
             )
@@ -118,7 +116,7 @@ class GradConstraint:
                 grads=module.grads(
                     outputs=-nll_loss, 
                     inputs=activations
-                ),
+                ) * act_idx,
                 labels=labels,
                 is_high=False
             )
