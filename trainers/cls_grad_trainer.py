@@ -90,8 +90,7 @@ class ClsGradTrainer:
                             # loss_spatial = self.gc.loss_spatial(outputs=outputs, labels=labels, masks=masks)
                             pass
 
-                        loss_channel = loss_channel * 10
-                        loss_gc = loss_channel + loss_spatial * 10
+                        loss_gc = loss_channel *10 + loss_spatial * 10
                         loss = loss_cls + loss_gc
                         if i % 10 == 0:
                             print('\r[{}/{}] loss_cls:{:.4f} loss_spatial:{:.4f} loss_channel:{:.4f}'
@@ -154,7 +153,7 @@ class ClsGradTrainer:
         time_hour = time_elapsed // 3600
         time_minite = (time_elapsed % 3600) // 60
         time_second = time_elapsed % 60
-        print(f"\nTraining complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s'")
+        print(f"\nTraining complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
         # print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
     def check(self):
