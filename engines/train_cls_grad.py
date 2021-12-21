@@ -30,7 +30,7 @@ def main():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('TRAIN ON DEVICE:', device)
     # data
-    data_loaders, dataset_sizes = loaders.load_data(data_name=args.data_name, with_mask=True)
+    data_loaders, dataset_sizes = loaders.load_data(data_name=args.data_name, with_mask=False)
     # model
     model = models.load_model(
         model_name=args.model_name,

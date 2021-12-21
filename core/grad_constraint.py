@@ -30,7 +30,6 @@ class HookModule:
 
 
 def _loss_channel(channels, grads, labels, is_high=True):
-    # grads = torch.abs(grads)  # 这边是否需要跟grad_sift的sum_channel保持一致
     flag = 1
     if flag == 1:
         grads = torch.abs(grads)
@@ -40,6 +39,16 @@ def _loss_channel(channels, grads, labels, is_high=True):
     channel_grads = torch.sum(grads, dim=(2, 3))  # [batch_size, channels] 梯度加和后得到 [Batch_size，Channel]
 
     loss = 0
+    # # 正梯度按生成的channel mask约束, 负梯度全部约束(the result is not good)
+    # grads_pos = torch.nn.ReLU()(grads)
+    # grads_neg = torch.nn.ReLU()(-grads)
+    # pos_channel_grads = torch.sum(grads_pos, dim=(2, 3))
+    # neg_channel_grads = torch.sum(grads_neg)
+    # # 负梯度直接约束
+    # loss += neg_channel_grads
+    # # 正梯度按生成的channel mask约束
+    # channel_grads = pos_channel_grads
+    
     if is_high:
         for i, l in enumerate(labels):  # b代表batch中不同的样本， l代表labels中的类别
             loss += (channel_grads[i] * channels[l]).sum()  # 错误类别的高响应
@@ -102,10 +111,7 @@ class GradConstraint:
             act_idx = torch.ge(activations, torch.zeros_like(activations))
             loss += _loss_channel(
                 channels=self.channels[i],
-                grads=module.grads(
-                    outputs=-nll_loss_, 
-                    inputs= activations
-                ) * act_idx,
+                grads=module.grads(outputs=-nll_loss_, inputs= activations),
                 labels=labels_,
                 is_high=True
             )
@@ -113,10 +119,7 @@ class GradConstraint:
             # low response channel loss
             loss += _loss_channel(
                 channels=self.channels[i],
-                grads=module.grads(
-                    outputs=-nll_loss, 
-                    inputs=activations
-                ) * act_idx,
+                grads=module.grads(outputs=-nll_loss, inputs=activations),
                 labels=labels,
                 is_high=False
             )

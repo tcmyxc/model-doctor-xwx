@@ -166,8 +166,11 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
         # 计算梯度
         # print("\n==> grads\n", grads)
-        flag = 2
-        if flag == 2:
+        flag = 1
+        if flag == 1:
+            # 原有的激活值
+            pass
+        elif flag == 2:
             # 正激活部分对应的梯度
             grads = grads * act_idx
         elif flag == 3:
@@ -186,18 +189,21 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
     grad_sift.sum_channel(result_path, model_layers[0]) # 加和
 
 
-def main(model_name):
+def main(model_name, data_name):
     model_layers = [-1]  # 模型导数第一层，一般是全连接层
 
     # 预训练模型
     model_path = os.path.join(
         config.model_pretrained, 
         "resnet50-20211208-101731", 
-        'checkpoint.pth')
+        'checkpoint.pth'
+    )
+    print("model_path", model_path)
     
     result_path = os.path.join(
         config.result_channels, 
-        "resnet50-20211208-101731")
+        "resnet50-20211208-101731"
+    )
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -228,5 +234,5 @@ if __name__ == '__main__':
         # 'mnasnet'
     ]
     for model_name in model_list:
-        main(model_name)
+        main(model_name, data_name)
 # python core/grad_sift.py
