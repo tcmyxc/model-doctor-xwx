@@ -4,14 +4,22 @@ channels_path = "/home/xwx/model-doctor-xwx/output/result/channels/resnet50-cifa
 grads_path = os.path.join(channels_path, 'channels_-1-pos-grad.npy')
 channels_grads = np.load(grads_path)   # (Class, channel)
 
-print(channels_grads)
+# print(channels_grads)
 act_path = os.path.join(channels_path, 'channels_-1-pos-act.npy')
 channels_act = np.load(act_path)
 
 # 并集
 channel_u = channels_grads + channels_act
-np.save(channels_path + "channels_-1-u.npy", channel_u)
+print("=" * 42)
+print(channel_u)
+
+channel_u[channel_u == 2] = 1
+
+print("=" * 42)
+print(channel_u)
+# np.save(channels_path + "/channels_-1-u.npy", channel_u)
 
 # 交集
 channel_n = channels_grads * channels_act
-np.save(channels_path + "channels_-1-n.npy", channel_n)
+# print(channel_n)
+# np.save(channels_path + "/channels_-1-n.npy", channel_n)

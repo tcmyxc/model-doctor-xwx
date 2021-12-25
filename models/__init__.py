@@ -73,7 +73,59 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'resnet50':
         module_modules = {
-            -1: model.conv5_x[2].residual_function[6]  # 2048,4,4
+            0: model.conv1[0],  # 64
+
+            1: model.conv2_x[0].residual_function[0],
+            2: model.conv2_x[0].residual_function[3],
+            3: model.conv2_x[0].residual_function[6],
+            4: model.conv2_x[1].residual_function[0],
+            5: model.conv2_x[1].residual_function[3],
+            6: model.conv2_x[1].residual_function[6],
+            7: model.conv2_x[2].residual_function[0],
+            8: model.conv2_x[2].residual_function[3],
+            9: model.conv2_x[2].residual_function[6],
+
+            10: model.conv3_x[0].residual_function[0],
+            11: model.conv3_x[0].residual_function[3],
+            12: model.conv3_x[0].residual_function[6],
+            13: model.conv3_x[1].residual_function[0],
+            14: model.conv3_x[1].residual_function[3],
+            15: model.conv3_x[1].residual_function[6],
+            16: model.conv3_x[2].residual_function[0],
+            17: model.conv3_x[2].residual_function[3],
+            18: model.conv3_x[2].residual_function[6],
+            19: model.conv3_x[3].residual_function[0],
+            20: model.conv3_x[3].residual_function[3],
+            21: model.conv3_x[3].residual_function[6],
+
+            22: model.conv4_x[0].residual_function[0],
+            23: model.conv4_x[0].residual_function[3],
+            24: model.conv4_x[0].residual_function[6],
+            25: model.conv4_x[1].residual_function[0],
+            26: model.conv4_x[1].residual_function[3],
+            27: model.conv4_x[1].residual_function[6],
+            28: model.conv4_x[2].residual_function[0],
+            29: model.conv4_x[2].residual_function[3],
+            30: model.conv4_x[2].residual_function[6],
+            31: model.conv4_x[3].residual_function[0],
+            32: model.conv4_x[3].residual_function[3],
+            33: model.conv4_x[3].residual_function[6],
+            34: model.conv4_x[4].residual_function[0],
+            35: model.conv4_x[4].residual_function[3],
+            36: model.conv4_x[4].residual_function[6],
+            37: model.conv4_x[5].residual_function[0],
+            38: model.conv4_x[5].residual_function[3],
+            39: model.conv4_x[5].residual_function[6],
+
+            40: model.conv5_x[0].residual_function[0],
+            41: model.conv5_x[0].residual_function[3],
+            42: model.conv5_x[0].residual_function[6],
+            43: model.conv5_x[1].residual_function[0],
+            44: model.conv5_x[1].residual_function[3],
+            45: model.conv5_x[1].residual_function[6],
+            46: model.conv5_x[2].residual_function[0],
+            47: model.conv5_x[2].residual_function[3],
+            -1: model.conv5_x[2].residual_function[6],
         }
     elif model_name == 'senet34':
         module_modules = {
@@ -132,7 +184,10 @@ def load_modules(model, model_name, model_layers):
             -1: model.features[18][0]  # 1280, 1, 1
         }
 
-    modules = [module_modules[layer] for layer in model_layers]
+    if model_layers is not None:
+        modules = [module_modules[layer] for layer in model_layers]
+    else:
+        modules = list(module_modules.values())
 
     print('-' * 40)
     print('Model Layer:', model_layers)
