@@ -53,7 +53,7 @@ def view_grads(grads, fig_w, fig_h, fig_path):
     f, ax = plt.subplots(figsize=(fig_w, fig_h), ncols=1)
     ax.set_xlabel('convolutional kernel')
     ax.set_ylabel('category')
-    sns.heatmap(grads, annot=False, ax=ax, square=True)
+    sns.heatmap(grads, annot=False, ax=ax)
     plt.savefig(fig_path, bbox_inches='tight')
     # plt.show()
     plt.clf()

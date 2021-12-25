@@ -18,8 +18,8 @@ export model_name='resnet50' #3d
 #export model_name='shufflenetv2' #15p
 #export model_name='squeezenet' #16q
 #export model_name='mnasnet' #17r
-export result_name='gc/'${model_name}'-20211208-101731-pos-activation'
-export pretrained_name=${model_name}'-20211208-101731'
+export result_name='gc/'${model_name}'-'${data_name}'-prune'
+export pretrained_name=${model_name}'-'${data_name}'-prune'
 export model_layers='-1'
 export device_index='0'
 # 导出自己的代码路径到python环境变量

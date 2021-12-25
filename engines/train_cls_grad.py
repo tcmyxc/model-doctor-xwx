@@ -37,6 +37,7 @@ def main():
         in_channels=cfg["model"]["in_channels"],
         num_classes=cfg["model"]["num_classes"]
     )
+    # modules
     modules = models.load_modules(
         model=model,
         model_name=args.model_name,
@@ -60,42 +61,52 @@ def main():
     # ----------------------------------------
     # train
     # ----------------------------------------
-    result_path = os.path.join(config.output_model, args.result_name)
-    print('=' * 42)
-    print('CHECK RESULT PATH:', result_path)
+    for epoch in range(5, 201, 5):
+        # 2021-12-25 modify
+        # pretrained model path
+        model_path = os.path.join(
+            config.model_pretrained, 
+            args.pretrained_name, 
+            f'checkpoint-{epoch}.pth'
+        )
+        if not os.path.exists(model_path):
+            print("\nERROR pretrained model_path does not exist")
+            return
+        else:
+            print("\n==> pretrained model path:", model_path)
+        
+        # channel path
+        channel_paths = [os.path.join(config.result_channels,
+                                    args.pretrained_name,
+                                    'channels_{}_epoch{}.npy'.format(layer, epoch)) for layer in args.model_layers]
+        if not os.path.exists(channel_paths[0]):
+            print("\nERROR result_channels path does not exist")
+            return
+        else:
+            print("\n==> channel_paths:", channel_paths)
 
-    model_path = os.path.join(config.model_pretrained, args.pretrained_name, 'checkpoint.pth')
-    print("\n==> pretrained model path", model_path)
-    if not os.path.exists(model_path):
-        print("\n==> pretrained model_path 路径不存在")
-        return
+        # result path
+        result_path = os.path.join(config.output_model, args.result_name, str(epoch))
+        print("\n==> result_path:", result_path)
+        
+        trainer = ClsGradTrainer(
+            model=model,
+            modules=modules,
+            device=device,
+            criterion=criterion,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            data_loaders=data_loaders,
+            dataset_sizes=dataset_sizes,
+            num_classes=cfg['model']['num_classes'],
+            num_epochs=cfg['trainer']['num_epochs'],
+            result_path=result_path,
+            model_path=model_path,
+            channel_paths=channel_paths
+        )
 
-    if not os.path.exists(config.result_channels):
-        print("\n==> result_channels 路径不存在")
-        return
-    channel_paths = [os.path.join(config.result_channels,
-                                  args.pretrained_name,
-                                  'channels_{}.npy'.format(layer)) for layer in args.model_layers]
-    print("\n==> channel_paths", channel_paths)
-
-    trainer = ClsGradTrainer(
-        model=model,
-        modules=modules,
-        device=device,
-        criterion=criterion,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        data_loaders=data_loaders,
-        dataset_sizes=dataset_sizes,
-        num_classes=cfg['model']['num_classes'],
-        num_epochs=cfg['trainer']['num_epochs'],
-        result_path=result_path,
-        model_path=model_path,
-        channel_paths=channel_paths
-    )
-
-    trainer.train()
-    # trainer.check()
+        trainer.train()
+        # trainer.check()
 
 
 if __name__ == '__main__':

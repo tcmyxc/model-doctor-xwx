@@ -5,3 +5,5 @@
 data/
 img/
 img1/
+nohup.out
+**/nohup.out

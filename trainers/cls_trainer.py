@@ -45,7 +45,7 @@ class ClsTrainer:
         begin = time.time()  # the start time
 
         for epoch in range(self.num_epochs):
-            print(f"\nepoch {epoch}/{self.num_epochs - 1}")  # log
+            print(f"\nepoch {epoch+1}/{self.num_epochs}")  # log
 
             for phase in [PHASE_TRAIN, PHASE_EVAL]:
                 if phase == PHASE_TRAIN:
@@ -102,13 +102,16 @@ class ClsTrainer:
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)
                 if is_best:
                     print("==> update best weights")
+                # 5 epoch 保存一下模型参数
+                if (epoch+1) % 5 == 0:
+                    print(f"epoch is {epoch+1}, save model weights")
                     state = {
                         "model": self.model.state_dict(),
                         "optimizer": self.optimizer,
-                        "epoch": epoch,  # 第几个 epoch
+                        "epoch": f"{epoch+1}",  # 第几个 epoch
                         "best": self.history
                     }
-                    cp_path = os.path.join(self.result_path, CHECKPOINT_MODEL_NAME)
+                    cp_path = os.path.join(self.result_path, f"checkpoint-{epoch+1}.pth")
                     torch.save(state, cp_path)
 
                 if phase == PHASE_EVAL:

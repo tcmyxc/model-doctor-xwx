@@ -54,7 +54,7 @@ class GradSift:
                     self.grads[label][self.nums[label]] = grads[i]
                     self.nums[label] += 1  # 第i类的数量加1
 
-    def sum_channel(self, result_path, model_layer):
+    def sum_channel(self, result_path, model_layer, epoch):
         # print(self.scores)
         # print(self.nums)
         flag = 1
@@ -63,21 +63,27 @@ class GradSift:
         elif flag == 2:
             grads = torch.nn.ReLU()(self.grads)  # 只用正梯度
 
-        view_channel(grads, result_path, model_layer)
+        view_channel(grads, result_path, model_layer, epoch)
         # grads_pos = torch.nn.ReLU()(self.grads)
         # grads_neg = torch.nn.ReLU()(-self.grads)
 
 
-def view_channel(grads, result_path, model_layer):
+def view_channel(grads, result_path, model_layer, epoch):
     """保存梯度并可视化"""
     # grads numpy
     # （1， 3， 4） = 一个类别中对应不同通道的grads求和, 保留 (Class, channel)
     grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
-    grads_path = os.path.join(result_path, 'channel_grads_{}.npy'.format(model_layer))
+    grads_path = os.path.join(
+        result_path, 
+        'channel_grads_{}_epoch{}.npy'.format(model_layer, epoch)
+    )
     np.save(grads_path, grads_sum)
 
     # grads numpy view
-    grads_path = os.path.join(result_path, 'channel_grads_{}.png'.format(model_layer))
+    grads_path = os.path.join(
+        result_path, 
+        'channel_grads_{}_epoch{}.png'.format(model_layer, epoch)
+    )
     image_util.view_grads(grads_sum, 512, 10, grads_path)
 
     # # grads numpy sort view
@@ -85,12 +91,15 @@ def view_channel(grads, result_path, model_layer):
     # grads_path = os.path.join(result_path, 'channel_grads_{}_sort.png'.format(model_layer))
     # image_util.view_grads(grads_sum_sort, 512, 10, grads_path)
     #
-    sift_channel(result_path, model_layer)
+    sift_channel(result_path, model_layer, epoch)
 
 
-def sift_channel(result_path, model_layer, threshold=None):  # high response channel
+def sift_channel(result_path, model_layer, epoch, threshold=None):  # high response channel
     """根据梯度生成 channel mask，同时保存到文件"""
-    grads_path = os.path.join(result_path, 'channel_grads_{}.npy'.format(model_layer))
+    grads_path = os.path.join(
+        result_path, 
+        'channel_grads_{}_epoch{}.npy'.format(model_layer, epoch)
+    )
     channels_grads = np.load(grads_path)   # (Class, channel)
 
     if threshold is None:
@@ -104,8 +113,17 @@ def sift_channel(result_path, model_layer, threshold=None):  # high response cha
         # 如果大于均值，则为1
         channels[c] = np.where(channels_grads[c] >= t, 1, 0)  # channels : [Class, channels]
 
-    channel_path = os.path.join(result_path, 'channels_{}.npy'.format(model_layer))
+    channel_path = os.path.join(
+        result_path, 
+        'channels_{}_epoch{}.npy'.format(model_layer, epoch)
+    )
     np.save(channel_path, channels)  # 相当于将预测正确类 对信道响应大于平均值的信道置1，其余置0
+
+    png_channel_path = os.path.join(
+        result_path, 
+        'channels_{}_epoch{}.png'.format(model_layer, epoch)
+    )
+    image_util.view_grads(channels, 512, 10, png_channel_path)
 
     # print(channels)
     # print(channels_threshold)
@@ -114,7 +132,7 @@ def sift_channel(result_path, model_layer, threshold=None):  # high response cha
 # ----------------------------------------
 # test
 # ----------------------------------------
-def sift_grad(data_name, model_name, model_layers, model_path, result_path):
+def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch):
     # device
     device = torch.device('cuda:0')
 
@@ -186,30 +204,31 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path):
 
     # 全部筛选完后对每个类别留下grad_nums的样本（针对某一层求的grads）
     print('\n', end='', flush=True)
-    grad_sift.sum_channel(result_path, model_layers[0]) # 加和
+    grad_sift.sum_channel(result_path, model_layers[0], epoch) # 加和
 
 
 def main(model_name, data_name):
     model_layers = [-1]  # 模型导数第一层，一般是全连接层
 
-    # 预训练模型
-    model_path = os.path.join(
-        config.model_pretrained, 
-        "resnet50-20211208-101731", 
-        'checkpoint.pth'
-    )
-    print("model_path", model_path)
+    for epoch in range(5, 201, 5):
+        # 2021-12-25 modify
+        # 预训练模型
+        model_path = os.path.join(
+            config.model_pretrained, 
+            "resnet50-cifar-10-prune",
+            f'checkpoint-{epoch}.pth'
+        )
+        print("model_path:", model_path)
     
-    result_path = os.path.join(
-        config.result_channels, 
-        "resnet50-20211208-101731"
-    )
+        result_path = os.path.join(
+            config.result_channels, 
+            "resnet50-cifar-10-prune"
+        )
 
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
+        if not os.path.exists(result_path):
+            os.makedirs(result_path)
 
-    sift_grad(data_name, model_name, model_layers, model_path, result_path)
-
+        sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
 
 if __name__ == '__main__':
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'

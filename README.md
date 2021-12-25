@@ -49,3 +49,13 @@ vgg16+mini-imagenet
 alexnet+stl10
 - 从头训练：0.6584
 - 1倍channel loss：0.6185
+
+
+
+==> result path: /home/xwx/model-doctor-xwx/output/model/gc/resnet50-20211208-101731-pos-activation
+
+==> pretrained model path /home/xwx/model-doctor-xwx/output/model/pretrained/resnet50-20211208-101731/checkpoint.pth
+
+==> channel_paths: ['/home/xwx/model-doctor-xwx/output/result/channels/resnet50-20211208-101731/channels_-1_epoch5.npy']
+
+result_path: /home/xwx/model-doctor-xwx/output/model/gc/resnet50-20211208-101731-pos-activation/5
