@@ -44,3 +44,7 @@ vgg16+stl10
 
 vgg16+mini-imagenet
 - 从头训练：0.7703
+
+alexnet+stl10
+- 从头训练：0.6584
+- 1倍channel loss：0.6185
