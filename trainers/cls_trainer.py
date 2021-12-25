@@ -98,10 +98,19 @@ class ClsTrainer:
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"[{phase}] loss is {epoch_loss:4f}, acc is {epoch_acc:4f}")
 
-                # save epoch data
+                # save best epoch
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)
                 if is_best:
                     print("==> update best weights")
+                    state = {
+                        "model": self.model.state_dict(),
+                        "optimizer": self.optimizer,
+                        "epoch": f"{epoch+1}",  # 第几个 epoch
+                        "acc": f"{epoch_acc}"
+                    }
+                    cp_path = os.path.join(self.result_path, f"checkpoint-best.pth")
+                    torch.save(state, cp_path)
+                
                 # 5 epoch 保存一下模型参数
                 if (epoch+1) % 5 == 0:
                     print(f"epoch is {epoch+1}, save model weights")
@@ -109,7 +118,8 @@ class ClsTrainer:
                         "model": self.model.state_dict(),
                         "optimizer": self.optimizer,
                         "epoch": f"{epoch+1}",  # 第几个 epoch
-                        "best": self.history
+                        "best": self.history,
+                        "acc": f"{epoch_acc}"
                     }
                     cp_path = os.path.join(self.result_path, f"checkpoint-{epoch+1}.pth")
                     torch.save(state, cp_path)
