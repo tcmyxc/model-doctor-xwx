@@ -36,7 +36,8 @@ resnet50+cifar10
 14. 同上，lr=1e-4: 0.9482, + -0.0700%
 15. 原始md，lr=1e-4: 0.9484, + -0.0500%
 
-- 从头训练: acc is 0.948300(prune)
+16. 2021年12月26日
+    - 从头训练: acc is 0.9484(最优的val acc)
 
 
 vgg16+stl10
@@ -49,13 +50,3 @@ vgg16+mini-imagenet
 alexnet+stl10
 - 从头训练：0.6584
 - 1倍channel loss：0.6185
-
-
-
-==> result path: /home/xwx/model-doctor-xwx/output/model/gc/resnet50-20211208-101731-pos-activation
-
-==> pretrained model path /home/xwx/model-doctor-xwx/output/model/pretrained/resnet50-20211208-101731/checkpoint.pth
-
-==> channel_paths: ['/home/xwx/model-doctor-xwx/output/result/channels/resnet50-20211208-101731/channels_-1_epoch5.npy']
-
-result_path: /home/xwx/model-doctor-xwx/output/model/gc/resnet50-20211208-101731-pos-activation/5
