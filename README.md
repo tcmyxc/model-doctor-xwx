@@ -38,6 +38,7 @@ resnet50+cifar10
 
 16. 2021年12月26日
     - 从头训练: acc is 0.9484(最优的val acc)
+    - md: 0.9550
 
 
 vgg16+stl10
