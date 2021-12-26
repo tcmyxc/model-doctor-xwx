@@ -112,7 +112,8 @@ class ClsTrainer:
                     torch.save(state, cp_path)
                 
                 # 5 epoch 保存一下模型参数
-                if (epoch+1) % 5 == 0:
+                # and 后面的判断可以不要，但是同一个模型参数会保存两次
+                if (epoch+1) % 5 == 0 and phase == PHASE_EVAL:
                     print(f"epoch is {epoch+1}, save model weights")
                     state = {
                         "model": self.model.state_dict(),
