@@ -210,7 +210,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 def main(model_name, data_name):
     model_layers = [-1]  # 模型导数第一层，一般是全连接层
 
-    for epoch in range(5, 201, 5):
+    for epoch in range(0, 201, 5):
         # 2021-12-25 modify
         # 预训练模型
         model_path = os.path.join(

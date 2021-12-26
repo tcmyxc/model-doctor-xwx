@@ -7,24 +7,32 @@ import json
 
 import models
 
+import pandas as pd
+
 
 # config
 cfg = json.load(open('configs/config_trainer.json'))["cifar-10"]
-model_path = os.path.join(
-    "/home/xwx/model-doctor-xwx/output/model/gc/resnet50-20211208-101731-posgrad", 
-    'checkpoint.pth')
 
-model = models.load_model(model_name="resnet50",
-                              in_channels=cfg['model']['in_channels'], # 输入图像的通道数
-                              num_classes=cfg['model']['num_classes']) # 类别数
+model = models.load_model(
+    model_name="resnet50",
+    in_channels=cfg['model']['in_channels'], # 输入图像的通道数
+    num_classes=cfg['model']['num_classes'] # 类别数
+)
 
 model = model.cuda()
-state= torch.load(model_path)
-epoch = state["epoch"] + 1
-history = state['history']
-train_loss_cls = history['train_loss_cls']
-train_loss_gc = history["train_loss_gc"]
-val_acc = history["val_acc"]
-best_val_acc = sorted(val_acc, reverse=True)[0]
-pretrained_acc = 0.9489
-print(f"pretrained acc is {pretrained_acc}, current val acc is {best_val_acc:.4f}, increase {((best_val_acc-pretrained_acc)*100):.4f}%, epoch is {epoch}")
+
+acc_list = []
+for epoch in range(0, 201, 5):
+    # pretrained model path
+    model_path = os.path.join(
+        "/home/xwx/model-doctor-xwx/output/model/pretrained/",
+        "resnet50-cifar-10-prune", 
+        f'checkpoint-{epoch}.pth')
+    state= torch.load(model_path)
+    val_acc = float(state["acc"])
+    acc_list.append((epoch, val_acc))
+    print(f"epoch {epoch}, val acc is {val_acc:.4f}")
+    
+dataframe = pd.DataFrame(acc_list)
+dataframe.to_excel('epoch-prune.xls')
+

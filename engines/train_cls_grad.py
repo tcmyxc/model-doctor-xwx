@@ -61,7 +61,7 @@ def main():
     # ----------------------------------------
     # train
     # ----------------------------------------
-    for epoch in range(5, 201, 5):
+    for epoch in range(0, 201, 5):
         # 2021-12-25 modify
         # pretrained model path
         model_path = os.path.join(

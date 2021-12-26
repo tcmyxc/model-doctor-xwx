@@ -139,7 +139,8 @@ class ClsGradTrainer:
                         'optimizer': self.optimizer.state_dict(),
                         'epoch': epoch,
                         'best': self.history.best,
-                        'history': self.history.history
+                        'history': self.history.history,
+                        "acc": f"{epoch_acc}"
                     }
                     path = os.path.join(self.result_path, 'checkpoint.pth')
                     torch.save(state, path)
