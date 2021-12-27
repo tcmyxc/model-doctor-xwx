@@ -44,24 +44,27 @@ def main():
         model_layers=args.model_layers
     )
 
-    # train
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(
-        params=model.parameters(),
-        lr=cfg['optimizer']['lr'],
-        momentum=cfg['optimizer']['momentum'],
-        weight_decay=cfg['optimizer']['weight_decay']
-    )
-    # 使用余弦退火方案设置每个参数组的学习率
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=cfg['scheduler']['T_max']
-    )
-
     # ----------------------------------------
     # train
     # ----------------------------------------
-    for epoch in range(0, 201, 5):
+    for epoch in range(5, 201, 5):
+        # 2021-12-27，修改学习率没有在训练开始的时候重置的问题
+        optimizer = optim.SGD(
+            params=model.parameters(),
+            lr=cfg['optimizer']['lr'],
+            momentum=cfg['optimizer']['momentum'],
+            weight_decay=cfg['optimizer']['weight_decay']
+        )
+        # 使用余弦退火方案设置每个参数组的学习率
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=cfg['scheduler']['T_max']
+        )
+        # 检查学习率
+        cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
+        print("\n==> lr:", cur_lr)
+
         # 2021-12-25 modify
         # pretrained model path
         model_path = os.path.join(

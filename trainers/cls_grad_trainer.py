@@ -41,6 +41,7 @@ class ClsGradTrainer:
         self.history = TrainerHistory(best='acc', save_path=self.result_path)
 
     def train(self):
+        lr_list = []  # 记录学习率变化
         since = time.time()
 
         # ----------------------------------------
@@ -114,9 +115,10 @@ class ClsGradTrainer:
                         class_correct[label] += correct_flag[j].item()
                         class_total[label] += 1
                 
+                print("\n")
                 for i in range(self.num_classes):
                     class_acc = 100 * class_correct[i] / class_total[i]
-                    print('\rAccuracy of %2d : %2d %%' % (i, class_acc))
+                    print('Accuracy of %2d : %2d %%' % (i, class_acc))
                 epoch_loss_cls = running_loss_cls / self.dataset_sizes[phase]
                 epoch_loss_gc = running_loss_gc / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
@@ -148,6 +150,9 @@ class ClsGradTrainer:
                 if phase == 'val':
                     self.history.draw()
                     self.scheduler.step()
+                    cur_lr = float(self.optimizer.state_dict()['param_groups'][0]['lr'])
+                    lr_list.append(cur_lr)
+                    draw_lr(lr_list, self.result_path)  # 绘图
                     print('- lr:', self.optimizer.state_dict()['param_groups'][0]['lr'])
 
         time_elapsed = time.time() - since
@@ -272,3 +277,14 @@ class TrainerHistory(object):
         plt.legend()
         plt.savefig(os.path.join(self.save_path, 'model.jpg'))
         plt.clf()
+
+
+def draw_lr(lr_list, save_path):
+    plt.plot(range(1, len(lr_list) + 1), lr_list)
+
+    plt.title("Learning rate of each epoch")
+    plt.xlabel("Training Epochs")
+    plt.ylabel("Learning rate")
+    plt.grid(True)
+    plt.savefig(os.path.join(save_path, 'lr.jpg'))
+    plt.clf()
