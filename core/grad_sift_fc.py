@@ -28,9 +28,10 @@ class GradSift:
             self.grads = torch.zeros((self.class_nums,
                                       self.grad_nums,
                                       grads.shape[1],  # C
-                                      grads.shape[2],  # H
-                                      grads.shape[3])) # W
-            print(self.grads.shape)
+                                    #   grads.shape[2],  # H
+                                    #   grads.shape[3])) # W
+            ))
+            print("\n grads shape:", self.grads.shape)
 
         softmax = torch.softmax(outputs, dim=1)
         scores, predicts = torch.max(softmax, dim=1) # 通道维度上的最大值以及索引（也就是正确的标签）
@@ -74,7 +75,8 @@ def view_channel(grads, result_path, model_layer, epoch):
     """保存梯度并可视化"""
     # grads numpy
     # （1， 3， 4） = 一个类别中对应不同通道的grads求和, 保留 (Class, channel)
-    grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
+    # grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
+    grads_sum = torch.sum(grads, dim=1).detach().numpy()  # FC 
     grads_path = os.path.join(
         result_path, 
         'channel_grads_{}_epoch{}.npy'.format(model_layer, epoch)
@@ -213,10 +215,6 @@ def main(model_name, data_name):
     epoch = 0  # best weight
     model_path = os.path.join(
         config.model_pretrained, 
-            config.model_pretrained, 
-        config.model_pretrained, 
-            config.model_pretrained, 
-        config.model_pretrained, 
         "vgg16-stl-10",
         "checkpoint.pth"
     )
@@ -228,11 +226,7 @@ def main(model_name, data_name):
 
     result_path = os.path.join(
         config.result_channels, 
-            config.result_channels, 
-        config.result_channels, 
-            config.result_channels, 
-        config.result_channels, 
-        "vgg16-stl-10-conv-1"
+        "vgg16-stl-10-fc"
     )
 
     if not os.path.exists(result_path):

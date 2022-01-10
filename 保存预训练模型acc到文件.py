@@ -20,7 +20,7 @@ model = models.load_model(
 model = model.cuda()
 
 acc_list = []
-for epoch in range(0, 201, 5):
+for epoch in range(0, 201, 10):
     # pretrained model path
     model_path = os.path.join(
         "/home/xwx/model-doctor-xwx/output/model/pretrained/",
@@ -32,4 +32,4 @@ for epoch in range(0, 201, 5):
     print(f"epoch {epoch}, val acc is {val_acc:.4f}")
     
 dataframe = pd.DataFrame(acc_list)
-dataframe.to_excel('epoch-prune.xls')
+dataframe.to_excel('epoch-prune-10.xls')
