@@ -48,7 +48,7 @@ def main():
     # ----------------------------------------
     # train
     # ----------------------------------------
-    for epoch in range(5, 201, 5):
+    for epoch in range(0, 1):
         # 2021-12-27，修改学习率没有在训练开始的时候重置的问题
         optimizer = optim.SGD(
             params=model.parameters(),
@@ -70,7 +70,7 @@ def main():
         model_path = os.path.join(
             config.model_pretrained, 
             args.pretrained_name, 
-            f'checkpoint-{epoch}.pth'
+            'checkpoint.pth'
         )
         if not os.path.exists(model_path):
             print("\nERROR pretrained model_path does not exist")

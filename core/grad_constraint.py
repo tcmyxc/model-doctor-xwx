@@ -37,6 +37,7 @@ def _loss_channel(channels, grads, labels, is_high=True):
         grads = torch.nn.ReLU()(grads)  # 只用正梯度
         
     channel_grads = torch.sum(grads, dim=(2, 3))  # [batch_size, channels] 梯度加和后得到 [Batch_size，Channel]
+    # channel_grads = grads # for FC layer
 
     loss = 0
     # # 正梯度按生成的channel mask约束, 负梯度全部约束(the result is not good)

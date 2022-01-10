@@ -66,6 +66,7 @@ def load_modules(model, model_name, model_layers):
             -3: model.features[34],  # 512, 14, 14
             -2: model.features[37],  # 512, 14, 14
             -1: model.features[40],  # 512, 14, 14
+            # -1: model.classifier[3],
         }
     elif model_name == 'resnet34':
         module_modules = {
@@ -126,6 +127,11 @@ def load_modules(model, model_name, model_layers):
             46: model.conv5_x[2].residual_function[0],
             47: model.conv5_x[2].residual_function[3],
             -1: model.conv5_x[2].residual_function[6],
+            # 48: model.conv5_x[2].residual_function[6],
+            
+            # -1: model.avg_pool,
+
+            # -1: model.fc,
         }
     elif model_name == 'senet34':
         module_modules = {
