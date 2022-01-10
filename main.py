@@ -22,7 +22,7 @@ model = models.load_model(
 model = model.cuda()
 
 acc_list = []
-for epoch in range(0, 10, 5):
+for epoch in range(0, 201, 10):
     # pretrained+md model path
     model_path = os.path.join(
         "/home/xwx/model-doctor-xwx/output/model",
@@ -31,16 +31,16 @@ for epoch in range(0, 10, 5):
         f"{epoch}",
         'checkpoint.pth')
     if not os.path.exists(model_path):
-        print("-" * 79, "\nERROR, the model path does not exist")
+        print("-" * 79, f"\nERROR, epoch {epoch}, the model path does not exist")
         break
     else:
         print("-" * 79, "\nmodel path:", model_path)
-    state= torch.load(model_path)
-    val_acc = float(state["acc"])
-    best_epoch = int(state["epoch"]) + 1  # 保存模型参数时忘记+1了（预训练模型里面的参数没有这个问题）
-    acc_list.append((epoch, val_acc))
-    print(f"epoch-{epoch} model, val acc is {val_acc:.4f}, best epoch is {best_epoch}")
+        state= torch.load(model_path)
+        val_acc = float(state["acc"])
+        best_epoch = int(state["epoch"]) + 1  # 保存模型参数时忘记+1了（预训练模型里面的参数没有这个问题）
+        acc_list.append((epoch, val_acc))  # 第几个模型，准确率
+        print(f"\nepoch-{epoch} model, val acc is {val_acc:.4f}, best epoch is {best_epoch}")
     
-# dataframe = pd.DataFrame(acc_list)
-# dataframe.to_excel('epoch-prune.xls')
+dataframe = pd.DataFrame(acc_list, columns=["epoch", "acc"])
+dataframe.to_excel('epoch-prune-md.xls')
 
