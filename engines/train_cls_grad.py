@@ -6,6 +6,7 @@ from torch import optim
 from torch import nn
 import json
 import logging
+import datetime
 
 import models
 import loaders
@@ -28,7 +29,8 @@ def main():
     # device
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device_index
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print('TRAIN ON DEVICE:', device)
+    print("-" * 79, "\n[Info]: TRAIN ON DEVICE:", device)
+    # logging.info(f"\nTRAIN ON DEVICE: {device}")
     # data
     data_loaders, dataset_sizes = loaders.load_data(data_name=args.data_name, with_mask=False)
     # model
@@ -73,24 +75,25 @@ def main():
             'checkpoint.pth'
         )
         if not os.path.exists(model_path):
-            print("\nERROR pretrained model_path does not exist")
+            print("\n[ERROR]: pretrained model_path does not exist")
             return
         else:
-            print("\n==> pretrained model path:", model_path)
+            print("\n[Info]: pretrained model path:", model_path)
         
         # channel path
         channel_paths = [os.path.join(config.result_channels,
                                     args.pretrained_name,
                                     'channels_{}_epoch{}.npy'.format(layer, epoch)) for layer in args.model_layers]
         if not os.path.exists(channel_paths[0]):
-            print("\nERROR result_channels path does not exist")
+            print("\n[ERROR]: result_channels path does not exist")
             return
         else:
-            print("\n==> channel_paths:", channel_paths)
+            print("\n[Info]: channel_paths:", channel_paths)
 
         # result path
         result_path = os.path.join(config.output_model, args.result_name, str(epoch))
-        print("\n==> result_path:", result_path)
+        print("\n[Info]: result_path:", result_path)
+        # return
         
         trainer = ClsGradTrainer(
             model=model,
@@ -111,6 +114,20 @@ def main():
         trainer.train()
         # trainer.check()
 
+def beijing(sec, what):
+    beijing_time = datetime.datetime.now() + datetime.timedelta(hours=8)
+    return beijing_time.timetuple()
 
 if __name__ == '__main__':
+    
+
+    logging.Formatter.converter = beijing
+
+    logging.basicConfig(
+        format="%(asctime)s | %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level="INFO", # "DEBUG" "WARNING" "ERROR"
+        stream=sys.stdout,
+    )
+
     main()

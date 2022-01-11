@@ -1,6 +1,6 @@
 #!/bin/bash
 export data_name='stl-10'
-export model_name='alexnet' #0a
+export model_name='alexnetv2' #0a
 # export model_name='vgg16' #1b
 #export model_name='resnet34' #2c
 # export model_name='resnet50' #3d

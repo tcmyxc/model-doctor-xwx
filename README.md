@@ -57,3 +57,4 @@ alexnet+stl10
 - 从头训练：0.6584
 - 1倍channel loss：78轮loss开始变成nan
 - 0.1倍loss：116轮开始分类的loss开始变成恒定2左右
+- 使用pytorch官方给的模型结构从头训练：0.6985
