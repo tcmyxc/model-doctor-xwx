@@ -27,7 +27,7 @@ def main():
     # device
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device_index
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print('TRAIN ON DEVICE:', device)
+    print('-' * 79, '\n[Info]: TRAIN ON DEVICE:', device)
     # data
     data_loaders, dataset_sizes = loaders.load_data(data_name=args.data_name)
     # model
@@ -53,9 +53,7 @@ def main():
     # train
     # ----------------------------------------
     result_path = os.path.join(config.output_model, args.result_name)
-    print('-' * 40)
-    print('CHECK RESULT PATH:', result_path)
-    print('-' * 40)
+    print('-' * 79, f'\n[Info]: CHECK RESULT PATH: {result_path}')
 
     trainer = ClsTrainer(
         model=model,
@@ -71,8 +69,8 @@ def main():
         model_path=None
     )
 
-    # trainer.train()
-    trainer.check()
+    trainer.train()
+    # trainer.check()
 
 
 if __name__ == '__main__':

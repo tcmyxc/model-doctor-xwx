@@ -101,29 +101,29 @@ class ClsTrainer:
                 # save best epoch
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)
                 if is_best:
-                    print("==> update best weights")
+                    print("[Feat]: update best weights")
                     state = {
                         "model": self.model.state_dict(),
                         "optimizer": self.optimizer,
                         "epoch": f"{epoch+1}",  # 第几个 epoch
                         "acc": f"{epoch_acc}"
                     }
-                    cp_path = os.path.join(self.result_path, f"checkpoint-best.pth")
+                    cp_path = os.path.join(self.result_path, "checkpoint.pth")
                     torch.save(state, cp_path)
                 
                 # 5 epoch 保存一下模型参数
                 # and 后面的判断可以不要，但是同一个模型参数会保存两次
-                if (epoch+1) % 5 == 0 and phase == PHASE_EVAL:
-                    print(f"epoch is {epoch+1}, save model weights")
-                    state = {
-                        "model": self.model.state_dict(),
-                        "optimizer": self.optimizer,
-                        "epoch": f"{epoch+1}",  # 第几个 epoch
-                        "best": self.history,
-                        "acc": f"{epoch_acc}"
-                    }
-                    cp_path = os.path.join(self.result_path, f"checkpoint-{epoch+1}.pth")
-                    torch.save(state, cp_path)
+                # if (epoch+1) % 5 == 0 and phase == PHASE_EVAL:
+                #     print(f"epoch is {epoch+1}, save model weights")
+                #     state = {
+                #         "model": self.model.state_dict(),
+                #         "optimizer": self.optimizer,
+                #         "epoch": f"{epoch+1}",  # 第几个 epoch
+                #         "best": self.history,
+                #         "acc": f"{epoch_acc}"
+                #     }
+                #     cp_path = os.path.join(self.result_path, f"checkpoint-{epoch+1}.pth")
+                #     torch.save(state, cp_path)
 
                 if phase == PHASE_EVAL:
                     self.history.draw()

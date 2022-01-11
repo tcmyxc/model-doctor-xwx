@@ -1,4 +1,4 @@
-from models import simnet, alexnet, vgg, resnet, \
+from models import simnet, alexnet, alexnetv2, vgg, resnet, \
     senet, resnext, densenet, simplenetv1, \
     efficientnetv2, googlenet, xception, mobilenetv2, \
     inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet
@@ -14,6 +14,8 @@ def load_model(model_name, in_channels=3, num_classes=10):
         model = simnet.simnet()
     elif model_name == 'alexnet':
         model = alexnet.alexnet(in_channels, num_classes)
+    elif model_name == 'alexnetv2':
+        model = alexnetv2.alexnet(in_channels, num_classes)
     elif model_name == 'vgg16':
         model = vgg.vgg16_bn(in_channels, num_classes)
     elif model_name == 'resnet34':
@@ -57,6 +59,10 @@ def load_modules(model, model_name, model_layers):
         module_modules = {
             -1: model.features[10],
             # -1: model.classifier[4],
+        }
+    elif model_name == 'alexnetv2':
+        module_modules = {
+            -1: model.features[10],
         }
     elif model_name == 'vgg16':
         module_modules = {
