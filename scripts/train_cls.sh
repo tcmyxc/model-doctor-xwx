@@ -1,8 +1,8 @@
 #!/bin/bash
-export data_name='cifar-10'
-#export model_name='alexnet' #0
-#export model_name='vgg16' #1
-export model_name='resnet50' #2
+export data_name='stl-10'
+export model_name='alexnet' #0
+# export model_name='vgg16' #1
+# export model_name='resnet50' #2
 #export model_name='senet34' #3
 #export model_name='wideresnet28' #4
 #export model_name='resnext50' #5
@@ -18,7 +18,7 @@ export model_name='resnet50' #2
 #export model_name='mnasnet' #15
 #$(date "+%Y%m%d-%H%M%S")
 # -20211208-101731，训练好的模型
-export result_name='pretrained/'${model_name}'-'${data_name}'-prune'
+export result_name='pretrained/'${model_name}'-'${data_name}
 export device_index='0'
 # 导出自己的代码路径到python环境变量
 export PYTHONPATH=${PYTHONPATH}:/home/xwx/model-doctor-xwx

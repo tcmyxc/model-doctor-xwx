@@ -210,29 +210,63 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
     grad_sift.sum_channel(result_path, model_layers[0], epoch) # 加和
 
 
-def main(model_name, data_name):
+def main():
+    # 数据集(dataset name)
+    data_name = 'stl-10'
+    # 模型名(model name)
+    model_list = [
+        'alexnet',
+        # 'vgg16',
+        # 'resnet50',
+        # 'senet34',
+        # 'wideresnet28',
+        # 'resnext50',
+        # 'densenet121',
+        # 'simplenetv1',
+        # 'efficientnetv2s',
+        # 'googlenet',
+        # 'xception',
+        # 'mobilenetv2',
+        # 'inceptionv3',
+        # 'shufflenetv2',
+        # 'squeezenet',
+        # 'mnasnet'
+    ]
+    model_name = model_list[0]
     model_layers = [-1]  # 模型导数第一层
     epoch = 0  # best weight
+
+    # 模型路径(model path)
     model_path = os.path.join(
         config.model_pretrained, 
-        "vgg16-stl-10",
+            config.model_pretrained, 
+        config.model_pretrained, 
+            config.model_pretrained, 
+        config.model_pretrained, 
+        f"{model_name}-{data_name}",
         "checkpoint.pth"
     )
     if not os.path.exists(model_path):
-        print("ERROR, the model path does not exist")
+        print("-" * 79, "\n ERROR, the model path does not exist")
         return
   
-    print("model_path:", model_path)
+    print("-" * 79, "\n model_path:", model_path)
 
+    # 保存结果路径(the channel mask path)
     result_path = os.path.join(
         config.result_channels, 
-        "vgg16-stl-10-fc"
+            config.result_channels, 
+        config.result_channels, 
+            config.result_channels, 
+        config.result_channels, 
+        f"{model_name}-{data_name}-fc"
     )
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
     
-    print("result_path:", result_path)
+    print("-" * 79, "\n result_path:", result_path)
+    # return  # for test
     
 
     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
@@ -261,25 +295,5 @@ def main(model_name, data_name):
 if __name__ == '__main__':
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     np.set_printoptions(threshold=np.inf)
-    data_name = 'stl-10'
-    model_list = [
-        # 'alexnet',
-        'vgg16',
-        # 'resnet50',
-        # 'senet34',
-        # 'wideresnet28',
-        # 'resnext50',
-        # 'densenet121',
-        # 'simplenetv1',
-        # 'efficientnetv2s',
-        # 'googlenet',
-        # 'xception',
-        # 'mobilenetv2',
-        # 'inceptionv3',
-        # 'shufflenetv2',
-        # 'squeezenet',
-        # 'mnasnet'
-    ]
-    for model_name in model_list:
-        main(model_name, data_name)
+    main()
 # python core/grad_sift.py

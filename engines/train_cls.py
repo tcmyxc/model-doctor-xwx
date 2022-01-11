@@ -71,8 +71,8 @@ def main():
         model_path=None
     )
 
-    trainer.train()
-    # trainer.check()
+    # trainer.train()
+    trainer.check()
 
 
 if __name__ == '__main__':

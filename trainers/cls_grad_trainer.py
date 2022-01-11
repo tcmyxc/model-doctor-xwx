@@ -90,7 +90,8 @@ class ClsGradTrainer:
                         if phase == 'train':
                             # loss_spatial = self.gc.loss_spatial(outputs=outputs, labels=labels, masks=masks)
                             pass
-
+                        
+                        loss_channel = loss_channel * 0.1
                         loss_gc = loss_channel + loss_spatial * 10
                         loss = loss_cls + loss_gc
                         if i % 10 == 0:

@@ -41,11 +41,12 @@ resnet50+cifar10
     - md: 0.9550
 
 
-如果使用模型医生, loss_channel 的放缩比应该是1，res50应该是10
+如果使用模型医生, vgg16 的 loss_channel 的放缩比应该是1，res50应该是10
 
 vgg16+stl10
 - 从头训练: 0.7094
 - 使用模型医生调整倒数第二层 FC: 0.7374
+- 倒数第一层卷积层: 0.7375
 
 
 
@@ -54,4 +55,5 @@ vgg16+mini-imagenet
 
 alexnet+stl10
 - 从头训练：0.6584
-- 1倍channel loss：0.6185
+- 1倍channel loss：78轮loss开始变成nan
+- 0.1倍loss：

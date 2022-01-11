@@ -55,7 +55,8 @@ def load_modules(model, model_name, model_layers):
     module_modules = None
     if model_name == 'alexnet':
         module_modules = {
-            -1: model.features[3]  # 256, 4, 4
+            -1: model.features[10],
+            # -1: model.classifier[4],
         }
     elif model_name == 'vgg16':
         module_modules = {
