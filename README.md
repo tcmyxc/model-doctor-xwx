@@ -58,3 +58,15 @@ alexnet+stl10
 - 1倍channel loss：78轮loss开始变成nan
 - 0.1倍loss：116轮开始分类的loss开始变成恒定2左右
 - 使用pytorch官方给的模型结构从头训练：0.6985
+- 原始的模型医生：0.7258
+- 倒数第二层 FC 层：
+
+
+# 使用模型医生微调FC层步骤
+ 1. 修改 `models` 文件夹下 `__init__.py` 文件 `load_modules` 函数
+    - `module_modules` 字典，`-1`这个 key 对应层数修改成倒数第二层 FC 层
+ 2. 使用 `core` 文件夹下 `grad_sift_fc.py` 文件生成对应的 `channel mask`
+ 3. 修改 `core` 文件夹下 `grad_constraint.py` 文件
+    - 注释第 39 行
+    - 取消第 40 行的注释
+4. 使用以前的逻辑微调模型

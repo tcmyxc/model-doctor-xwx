@@ -1,6 +1,6 @@
 #!/bin/bash
 export data_name='stl-10'
-export model_name='alexnet' #0a
+export model_name='alexnetv2' #0a
 # export model_name='vgg16' #1b
 #export model_name='resnet34' #2c
 # export model_name='resnet50' #3d
@@ -18,7 +18,7 @@ export model_name='alexnet' #0a
 #export model_name='shufflenetv2' #15p
 #export model_name='squeezenet' #16q
 #export model_name='mnasnet' #17r
-export result_name='gc/'${model_name}'-'${data_name}'-conv'
+export result_name='gc/'${model_name}'-'${data_name}'-fc'
 export pretrained_name=${model_name}'-'${data_name}
 export model_layers='-1'
 export device_index='0'

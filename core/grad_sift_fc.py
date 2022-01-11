@@ -215,7 +215,7 @@ def main():
     data_name = 'stl-10'
     # 模型名(model name)
     model_list = [
-        'alexnet',
+        'alexnetv2',
         # 'vgg16',
         # 'resnet50',
         # 'senet34',
