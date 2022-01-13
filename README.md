@@ -58,8 +58,12 @@ alexnet+stl10
 - 1倍channel loss：78轮loss开始变成nan
 - 0.1倍loss：116轮开始分类的loss开始变成恒定2左右
 - 使用pytorch官方给的模型结构从头训练：0.6985
-- 原始的模型医生：0.7258
-- 倒数第二层 FC 层：0.7061
+- 1倍channel loss, 原始的模型医生：0.7258
+- 1倍channel loss, 倒数第二层 FC 层：0.7061
+
+alexnet+cifar10
+- 预训练模型：0.8389
+- 10倍channel loss, 倒数第二层 FC 层：
 
 senet34+stl10
 - 预训练模型：0.8200
