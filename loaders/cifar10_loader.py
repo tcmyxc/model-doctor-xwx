@@ -16,7 +16,9 @@ def load_images(data_type):
     if data_type == 'train':
         data_set = ImageDataset(image_dir=image_dir,
                                 transform=transforms.Compose([
-                                    transforms.RandomCrop(32, padding=4),
+                                    # transforms.RandomCrop(32, padding=4),
+                                    transforms.Resize((64, 64)),
+                                    transforms.RandomCrop(64, padding=4),
                                     transforms.RandomHorizontalFlip(),
                                     transforms.ToTensor(),
                                     transforms.Normalize((0.4914, 0.4822, 0.4465),
@@ -27,6 +29,7 @@ def load_images(data_type):
     else:
         data_set = ImageDataset(image_dir=image_dir,
                                 transform=transforms.Compose([
+                                    transforms.Resize((64, 64)),
                                     transforms.ToTensor(),
                                     transforms.Normalize((0.4914, 0.4822, 0.4465),
                                                          (0.2023, 0.1994, 0.2010)),
