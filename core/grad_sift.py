@@ -266,6 +266,10 @@ def main():
     
     print("-" * 79, "\n result_path:", result_path)
     # return  # for test
+
+    readme_file_path = os.path.join(result_path, "README.MD")
+    with open(readme_file_path, 'w') as readme_file:
+        readme_file.write("倒数第一层卷积层")
     
 
     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)

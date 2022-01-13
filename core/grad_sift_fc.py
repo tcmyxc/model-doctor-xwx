@@ -215,10 +215,10 @@ def main():
     data_name = 'stl-10'
     # 模型名(model name)
     model_list = [
-        'alexnetv2',
+        # 'alexnetv2',
         # 'vgg16',
         # 'resnet50',
-        # 'senet34',
+        'senet34',
         # 'wideresnet28',
         # 'resnext50',
         # 'densenet121',
@@ -267,6 +267,10 @@ def main():
     
     print("-" * 79, "\n result_path:", result_path)
     # return  # for test
+
+    readme_file_path = os.path.join(result_path, "README.MD")
+    with open(readme_file_path, 'w') as readme_file:
+        readme_file.write("倒数第二层全连接层")
     
 
     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
