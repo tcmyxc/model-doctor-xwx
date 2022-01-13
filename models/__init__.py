@@ -57,13 +57,13 @@ def load_modules(model, model_name, model_layers):
     module_modules = None
     if model_name == 'alexnet':
         module_modules = {
-            -1: model.features[10],
-            # -1: model.classifier[4],
+            -2: model.features[10], # CONV
+            -1: model.classifier[4], # FC
         }
     elif model_name == 'alexnetv2':
         module_modules = {
-            # -1: model.features[10],
-            -1: model.classifier[4],
+            -2: model.features[10], # CONV
+            -1: model.classifier[4], # FC
         }
     elif model_name == 'vgg16':
         module_modules = {
@@ -71,10 +71,10 @@ def load_modules(model, model_name, model_layers):
             1: model.features[10],  # 128, 112, 112
             2: model.features[20],  # 256, 56, 56
             3: model.features[30],  # 512, 28, 28
-            -3: model.features[34],  # 512, 14, 14
-            -2: model.features[37],  # 512, 14, 14
-            -1: model.features[40],  # 512, 14, 14
-            # -1: model.classifier[3],
+            4: model.features[34],  # 512, 14, 14
+            5: model.features[37],  # 512, 14, 14
+            -2: model.features[40],  # 512, 14, 14, CONV
+            -1: model.classifier[3], # FC
         }
     elif model_name == 'resnet34':
         module_modules = {
@@ -136,14 +136,11 @@ def load_modules(model, model_name, model_layers):
             47: model.conv5_x[2].residual_function[3],
             -1: model.conv5_x[2].residual_function[6],
             # 48: model.conv5_x[2].residual_function[6],
-            
-            # -1: model.avg_pool,
-
-            # -1: model.fc,
         }
     elif model_name == 'senet34':
         module_modules = {
-            -1: model.stage4[2].residual[3]  # 512,4,4
+            -2: model.stage4[2].residual[3],  # CONV, 512,4,4
+            -1: model.stage4[2].excitation[2],  # FC, 512, 32
         }
     elif model_name == 'wideresnet28':
         module_modules = {

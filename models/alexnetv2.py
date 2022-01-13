@@ -41,12 +41,16 @@ class AlexNet(nn.Module):
 
 
 def alexnet(in_channels: int = 3, num_classes: int = 10) -> AlexNet:
+    r"""AlexNet model architecture from the
+    `"One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    The required minimum input size of the model is 63x63.
+    """
     return AlexNet(in_channels=in_channels, num_classes=num_classes)
 
 
 if __name__ == '__main__':
     from torchsummary import summary
     alexnet = alexnet().cuda()
-    print(alexnet)
-    # summary(model=alexnet, input_size=(3, 224, 224))
+    # print(alexnet)
+    summary(model=alexnet, input_size=(3, 64, 64))
     

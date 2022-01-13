@@ -29,13 +29,13 @@ class ClsTrainer:
 
         self.result_path = result_path
         if not os.path.exists(self.result_path):
-            print("the path does not exist, I will make it")
+            print("-" * 79, "\n[Info] the path does not exist, I will make it")
             os.makedirs(self.result_path)
 
         self.model.to(device)
         # 如果有预训练的模型，则直接加载预训练模型
         if model_path is not None:
-            print("load checkpoint ==> ", model_path)
+            print("-" * 79, "\n[Info] load checkpoint:", model_path)
             checkpoint = torch.load(model_path)
             self.model.load_state_dict(checkpoint["model"])
 
@@ -91,17 +91,18 @@ class ClsTrainer:
                         class_total[label] += 1  # 该标签的总个数+1
 
                 # print each class acc and loss
+                print("\n")
                 for i in range(self.num_classes):
                     class_acc = class_correct[i] / class_total[i] * 100
-                    print(f"\racc of {i:2d} : {class_acc:.4f}%")
+                    print(f"acc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss = running_loss / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
-                print(f"[{phase}] loss is {epoch_loss:4f}, acc is {epoch_acc:4f}")
+                print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")
 
                 # save best epoch
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)
                 if is_best:
-                    print("[Feat]: update best weights")
+                    print("\n[Feat] update best weights")
                     state = {
                         "model": self.model.state_dict(),
                         "optimizer": self.optimizer,
@@ -128,7 +129,7 @@ class ClsTrainer:
                 if phase == PHASE_EVAL:
                     self.history.draw()
                     self.scheduler.step()
-                    print("==> lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
+                    print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
 
         time_elapse = time.time() - begin
         print(f"Training complete in {time_elapse // 60:.0f}m {time_elapse % 60:.0f}s")
