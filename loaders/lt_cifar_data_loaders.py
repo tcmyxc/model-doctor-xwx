@@ -420,7 +420,6 @@ def load_cifar100_lt_images(data_type):
                              num_workers=4,
                              shuffle=True)
 
-    data_loader = (data_loader, None)
     return data_loader, len(data_set)
 
 def load_cifar10_lt_images(data_type):
@@ -460,7 +459,7 @@ def load_cifar10_lt_images(data_type):
                              num_workers=4,
                              shuffle=True)
 
-    return data_loader, len(data_set), None
+    return data_loader, len(data_set)
 
 
 if __name__ == '__main__':

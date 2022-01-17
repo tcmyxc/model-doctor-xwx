@@ -23,7 +23,7 @@ export pretrained_name=${model_name}'-'${data_name}
 export model_layers='-2'
 export device_index='0'
 # 导出自己的代码路径到python环境变量
-export PYTHONPATH=${PYTHONPATH}:/home/xwx/model-doctor-xwx
+export PYTHONPATH=${PYTHONPATH}:/nfs/xwx/model-doctor-xwx
 python3 engines/train_cls_grad.py --data_name ${data_name} --model_name ${model_name} --result_name ${result_name}  --pretrained_name ${pretrained_name}  --model_layers ${model_layers}  --device_index ${device_index}
 # dos2unix scripts/train_cls_grad.sh
 # nohup bash scripts/train_cls_grad.sh

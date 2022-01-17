@@ -64,7 +64,7 @@ class ClsTrainer:
                     if idx % 10 == 0:
                         print(f"\r[{idx}/{len(self.data_loaders[phase])}]", end="", flush=True)
 
-                    inputs, labels, _ = samples
+                    inputs, labels = samples
                     inputs = inputs.to(self.device)
                     labels = labels.to(self.device)
 

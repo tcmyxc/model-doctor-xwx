@@ -89,36 +89,37 @@ if __name__ == '__main__':
     import os
     from torchvision import datasets
     trainset = IMBALANCECIFAR100(
-        root='/home/xwx/model-doctor-xwx/data', 
-        train=True, download=True, imb_factor=0.02
+        root='/nfs/xwx/model-doctor-xwx/data', 
+        train=True, download=True, imb_factor=0.01
     )
-    trainloader = iter(trainset)
-    root_dir = "/home/xwx/model-doctor-xwx/data/cifar100_lt/images/train"
-    for i, (data, label) in enumerate(trainloader):
-        # print(i)
-        # print(data)  # PIL.Image.Image
-        # data.save("test.png")
-        img_path = root_dir + "/" + str(label)
-        if not os.path.exists(img_path):
-            os.makedirs(img_path)
-        filename = img_path + '/' + str(i) + '.png'
-        print(filename)
-        data.save(filename)
+    print(len(trainset)/128)
+    # trainloader = iter(trainset)
+    # root_dir = "/nfs/xwx/model-doctor-xwx/data/cifar100_lt/images/train"
+    # for i, (data, label) in enumerate(trainloader):
+    #     # print(i)
+    #     # print(data)  # PIL.Image.Image
+    #     # data.save("test.png")
+    #     img_path = root_dir + "/" + str(label)
+    #     if not os.path.exists(img_path):
+    #         os.makedirs(img_path)
+    #     filename = img_path + '/' + str(i) + '.png'
+    #     print(filename)
+    #     data.save(filename)
 
-    # 测试集是平衡的
-    testset = datasets.CIFAR100(
-        root='/home/xwx/model-doctor-xwx/data', 
-        train=False, download=True
-    )
-    testloader = iter(testset)
-    root_dir = "/home/xwx/model-doctor-xwx/data/cifar100_lt/images/test"
-    for i, (data, label) in enumerate(testloader):
-        # print(i)
-        # print(data)  # PIL.Image.Image
-        # data.save("test.png")
-        img_path = root_dir + "/" + str(label)
-        if not os.path.exists(img_path):
-            os.makedirs(img_path)
-        filename = img_path + '/' + str(i) + '.png'
-        print(filename)
-        data.save(filename)
+    # # 测试集是平衡的
+    # testset = datasets.CIFAR100(
+    #     root='/nfs/xwx/model-doctor-xwx/data', 
+    #     train=False, download=True
+    # )
+    # testloader = iter(testset)
+    # root_dir = "/nfs/xwx/model-doctor-xwx/data/cifar100_lt/images/test"
+    # for i, (data, label) in enumerate(testloader):
+    #     # print(i)
+    #     # print(data)  # PIL.Image.Image
+    #     # data.save("test.png")
+    #     img_path = root_dir + "/" + str(label)
+    #     if not os.path.exists(img_path):
+    #         os.makedirs(img_path)
+    #     filename = img_path + '/' + str(i) + '.png'
+    #     print(filename)
+    #     data.save(filename)

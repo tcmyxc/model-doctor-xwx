@@ -15,6 +15,7 @@ Parameter Group 0
 导出依赖包
 ```bash
 conda env export >  model-doctor-conf.yml
+conda env create -f model-doctor-conf.yml
 ```
 
 # 使用模型医生微调FC层步骤
