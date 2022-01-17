@@ -212,13 +212,13 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'stl-10'
+    data_name = 'cifar-10'
     # 模型名(model name)
     model_list = [
-        # 'alexnetv2',
+        'alexnetv2',
         # 'vgg16',
         # 'resnet50',
-        'senet34',
+        # 'senet34',
         # 'wideresnet28',
         # 'resnext50',
         # 'densenet121',
@@ -259,7 +259,7 @@ def main():
         config.result_channels, 
             config.result_channels, 
         config.result_channels, 
-        f"{model_name}-{data_name}-fc"
+        f"{model_name}-{data_name}-224x224-fc"
     )
 
     if not os.path.exists(result_path):
@@ -270,7 +270,7 @@ def main():
 
     readme_file_path = os.path.join(result_path, "README.MD")
     with open(readme_file_path, 'w') as readme_file:
-        readme_file.write("倒数第二层全连接层")
+        readme_file.write("倒数第二层全连接层，训练时图片大小resize成224x224")
     
 
     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)

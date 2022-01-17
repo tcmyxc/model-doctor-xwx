@@ -14,11 +14,11 @@ from torchsummary import summary
 cfg = json.load(open('configs/config_trainer.json'))["cifar-10"]
 
 model = models.load_model(
-    model_name="alexnetv2",
+    model_name="senet34",
     in_channels=cfg['model']['in_channels'], # 输入图像的通道数
     num_classes=cfg['model']['num_classes'] # 类别数
 )
 
 print(model)
-model = model.cuda()
-summary(model=model, input_size=(3, 224, 224))
+# model = model.cuda()
+# summary(model=model, input_size=(3, 256, 256))

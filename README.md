@@ -17,6 +17,16 @@ Parameter Group 0
 conda env export >  model-doctor-conf.yml
 ```
 
+# 使用模型医生微调FC层步骤
+ 1. 修改 `models` 文件夹下 `__init__.py` 文件 `load_modules` 函数
+    - `module_modules` 字典，`-1`这个 key 对应层数修改成倒数第二层 FC 层
+ 2. 使用 `core` 文件夹下 `grad_sift_fc.py` 文件生成对应的 `channel mask`
+ 3. 修改 `core` 文件夹下 `grad_constraint.py` 文件
+    - 注释第 39 行
+    - 取消第 40 行的注释
+4. 使用以前的逻辑微调模型
+
+
 resnet50+cifar10
 1. 从头训练一个模型: 0.9489
 2. 原有的模型医生调整: 0.9548, + 0.5900%
@@ -42,6 +52,8 @@ resnet50+cifar10
 
 
 如果使用模型医生, vgg16 的 loss_channel 的放缩比应该是1，res50应该是10
+alexnet 只有5层卷积
+验证模型医生对卷积层有效，可用的模型：alexnet，vgg16，senet34
 
 vgg16+stl10
 - 从头训练: 0.7094
@@ -49,32 +61,54 @@ vgg16+stl10
 - 倒数第一层卷积层: 0.7375
 
 
-
 vgg16+mini-imagenet
 - 从头训练：0.7703
 
+
+senet34+stl10
+- 预训练模型：0.8200
+
+
 alexnet+stl10
+- 师兄用的正数第二层卷积，我这里用的倒数第一层卷积
 - 从头训练：0.6584
 - 1倍channel loss：78轮loss开始变成nan
 - 0.1倍loss：116轮开始分类的loss开始变成恒定2左右
+
+
+alexnetv2+stl10
 - 使用pytorch官方给的模型结构从头训练：0.6985
 - 1倍channel loss, 原始的模型医生：0.7258
 - 1倍channel loss, 倒数第二层 FC 层：0.7061
 
-alexnet+cifar10
+
+alexnetv2+cifar10(图片resize成224x224)
+- 模型结果从pytorch官方直接拷贝得到的
+- 预训练模型：0.9036
+- 10倍channel loss，模型医生：0.9052
+- 10倍channel loss，FC+模型医生：0.9014
+
+
+alexnetv3+cifar10（图片大小32x32）
+- 这个模型改了alexnetv2第一层卷积层的参数，最后一层池化使用自适应池化代替
+- 预训练模型：0.8513
+- 10倍channel loss，准确率在 10%，一直上不去，原始分类的loss在 2 左右不变，如果去除添加的噪声，分类的loss变成0.25左右
+猜想师兄用的 torch.randn 对特征图改变较大（猜想正确，去除噪声能正常训练起来了），但是我没跑最终的实验
+- 1倍channel loss: 0.8555
+
+
+alexnetv2+cifar10(图片resize成64x64)
 - 预训练模型：0.8389
-- 10倍channel loss, 倒数第二层 FC 层：
 
-senet34+stl10
-- 预训练模型：0.8200
-- 倒数第二层 FC 层：
+- 10倍channel loss, 倒数第二层 FC 层：0.8408
+- 1倍channel loss, 倒数第二层 FC 层：0.8326
+
+- 1倍channel loss, 倒数第一层卷积, 原始模型医生: 训练不起来
+- 1倍channel loss, 倒数第一层卷积, 模型医生不加噪音，可以训练起来：0.8347
+
+- 10倍channel loss, 倒数第一层卷积, 原始模型医生：0.8111(训练了400轮，train还没到100%)
+    - 有时候一开始训练loss就nan了，可以kill掉重新开始
+- 10倍channel loss, 倒数第一层卷积, 模型医生不加噪音：
 
 
-# 使用模型医生微调FC层步骤
- 1. 修改 `models` 文件夹下 `__init__.py` 文件 `load_modules` 函数
-    - `module_modules` 字典，`-1`这个 key 对应层数修改成倒数第二层 FC 层
- 2. 使用 `core` 文件夹下 `grad_sift_fc.py` 文件生成对应的 `channel mask`
- 3. 修改 `core` 文件夹下 `grad_constraint.py` 文件
-    - 注释第 39 行
-    - 取消第 40 行的注释
-4. 使用以前的逻辑微调模型
+

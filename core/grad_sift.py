@@ -210,10 +210,10 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'stl-10'
+    data_name = 'cifar-10'
     # 模型名(model name)
     model_list = [
-        'alexnetv2',
+        'alexnetv3',
         # 'alexnet',
         # 'vgg16',
         # 'resnet50',
@@ -232,7 +232,7 @@ def main():
         # 'mnasnet'
     ]
     model_name = model_list[0]
-    model_layers = [-1]  # 模型导数第一层
+    model_layers = [-2]
     epoch = 0  # best weight
 
     # 模型路径(model path)
@@ -258,7 +258,7 @@ def main():
         config.result_channels, 
             config.result_channels, 
         config.result_channels, 
-        f"{model_name}-{data_name}-conv"
+        f"{model_name}-{data_name}"
     )
 
     if not os.path.exists(result_path):

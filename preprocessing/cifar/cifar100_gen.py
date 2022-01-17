@@ -3,7 +3,7 @@ import os
 import pickle
 import cv2
 import numpy as np
-
+sys.path.append('/home/xwx/model-doctor-xwx')
 from configs import config
 from utils import image_util
 from PIL import Image

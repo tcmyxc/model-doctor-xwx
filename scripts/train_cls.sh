@@ -1,9 +1,9 @@
 #!/bin/bash
-export data_name='stl-10'
-export model_name='alexnet' #0
+export data_name='cifar-100-lt'
+# export model_name='alexnetv3' #0
 # export model_name='vgg16' #1
-# export model_name='resnet50' #2
-#export model_name='senet34' #3
+export model_name='resnet50' #2
+# export model_name='senet34' #3
 #export model_name='wideresnet28' #4
 #export model_name='resnext50' #5
 #export model_name='densenet121' #6

@@ -11,6 +11,9 @@ from loaders.mnin_loader import load_images_masks as load_mnin_images_masks
 from loaders.coco_loader import load_images as load_coco_images
 from loaders.coco_loader import load_images_masks as load_coco_images_masks
 
+# for long-tailed dataset
+from .lt_cifar_data_loaders import load_cifar100_lt_images, load_cifar10_lt_images
+
 
 def load_data(data_name, data_type=None, with_mask=False):
     print('-' * 40)
@@ -22,9 +25,15 @@ def load_data(data_name, data_type=None, with_mask=False):
         if data_name == 'cifar-10':
             train_loader, train_size = load_cifar10_images('train')
             test_loader, test_size = load_cifar10_images('test')
+        elif data_name == 'cifar-10-lt':
+            train_loader, train_size = load_cifar10_lt_images("train")
+            test_loader, test_size = load_cifar10_lt_images("test")
         elif data_name == 'cifar-100':
             train_loader, train_size = load_cifar100_images('train')
             test_loader, test_size = load_cifar100_images('test')
+        elif data_name == 'cifar-100-lt':
+            train_loader, train_size = load_cifar100_lt_images("train")
+            test_loader, test_size = load_cifar100_lt_images("test")
         elif data_name == 'mnist':
             train_loader, train_size = load_mnist_images('train')
             test_loader, test_size = load_mnist_images('test')
