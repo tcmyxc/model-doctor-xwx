@@ -5,7 +5,7 @@ import torch
 import json
 
 
-sys.path.append('/home/xwx/model-doctor-xwx')
+sys.path.append('/nfs/xwx/model-doctor-xwx')
 import loaders
 import models
 from configs import config
@@ -161,7 +161,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
         print('\r[{}/{}]'.format(i, len(train_loader)), end='', flush=True)
-        inputs, labels, _ = samples
+        inputs, labels = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
 
@@ -210,13 +210,13 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'cifar-10'
+    data_name = 'cifar-10-lt-ir10'
     # 模型名(model name)
     model_list = [
-        'alexnetv3',
+        # 'alexnetv3',
         # 'alexnet',
         # 'vgg16',
-        # 'resnet50',
+        'resnet50',
         # 'senet34',
         # 'wideresnet28',
         # 'resnext50',
@@ -232,7 +232,7 @@ def main():
         # 'mnasnet'
     ]
     model_name = model_list[0]
-    model_layers = [-2]
+    model_layers = [-1]
     epoch = 0  # best weight
 
     # 模型路径(model path)

@@ -68,7 +68,7 @@ class ClsGradTrainer:
                 # Iterate over data.
                 # ----------------------------------------
                 for i, samples in enumerate(self.data_loaders[phase]):
-                    inputs, labels, masks = samples
+                    inputs, labels = samples
                     inputs = inputs.to(self.device)
                     labels = labels.to(self.device)
                     if phase == 'train':
@@ -119,7 +119,8 @@ class ClsGradTrainer:
                 print("\n")
                 for i in range(self.num_classes):
                     class_acc = 100 * class_correct[i] / class_total[i]
-                    print('Accuracy of %2d : %2d %%' % (i, class_acc))
+                    # print('Accuracy of %2d : %2d %%' % (i, class_acc))
+                    print(f"acc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss_cls = running_loss_cls / self.dataset_sizes[phase]
                 epoch_loss_gc = running_loss_gc / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]

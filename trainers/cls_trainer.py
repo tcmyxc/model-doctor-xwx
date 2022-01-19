@@ -166,7 +166,7 @@ class ClsTrainer:
             if i % 10 == 0:
                 print('\r[{}/{}]'.format(i, len(self.data_loaders[phase])), end='', flush=True)
 
-            inputs, labels, _ = samples
+            inputs, labels = samples
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 

@@ -383,7 +383,7 @@ class ImbalanceCIFAR10DataLoader(DataLoader):
         return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
 
 
-def load_cifar100_lt_images(data_type):
+def load_cifar100_lt_images(data_type, imb_factor):
     assert data_type in ['train', 'test']
     normalize = transforms.Normalize(
         mean=[0.4914, 0.4822, 0.4465],
@@ -395,6 +395,7 @@ def load_cifar100_lt_images(data_type):
             root=config.output_data,
             train=True,
             download=True,
+            imb_factor=imb_factor,
             transform=transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
                 transforms.RandomHorizontalFlip(),
@@ -422,7 +423,7 @@ def load_cifar100_lt_images(data_type):
 
     return data_loader, len(data_set)
 
-def load_cifar10_lt_images(data_type):
+def load_cifar10_lt_images(data_type, imb_factor=0.01):
     assert data_type in ['train', 'test']
     normalize = transforms.Normalize(
         mean=[0.4914, 0.4822, 0.4465],
@@ -434,6 +435,7 @@ def load_cifar10_lt_images(data_type):
             root=config.output_data,
             train=True,
             download=True,
+            imb_factor=imb_factor,
             transform=transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
                 transforms.RandomHorizontalFlip(),
