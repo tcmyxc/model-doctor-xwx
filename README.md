@@ -1,17 +1,4 @@
-# 从头训练一个模型，resnet50+cifar-10
-
-```tex
-bets res is 194 epoch, optimizer is SGD (
-Parameter Group 0
-    dampening: 0
-    initial_lr: 0.01
-    lr: 2.2190176984600013e-05
-    momentum: 0.9
-    nesterov: False
-    weight_decay: 0.0005
-)
-```
-
+# 环境相关
 ```bash
 # 导出依赖包
 conda env export >  model-doctor-conf.yml
@@ -30,7 +17,24 @@ conda env create -f model-doctor-conf.yml
 4. 使用以前的逻辑微调模型
 
 
-resnet50+cifar10
+# 常规数据集
+## 从头训练一个模型，resnet50+cifar-10
+
+```tex
+bets res is 194 epoch, optimizer is SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.01
+    lr: 2.2190176984600013e-05
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0005
+)
+```
+
+
+
+## resnet50+cifar10
 1. 从头训练一个模型: 0.9489
 2. 原有的模型医生调整: 0.9548, + 0.5900%
 3. 只使用正梯度(grad_sift文件用的正梯度，grad_constraint用的绝对值): 0.9562, + 0.7300%
@@ -53,46 +57,47 @@ resnet50+cifar10
     - 从头训练: acc is 0.9484(最优的val acc)
     - md: 0.9550
 
+# 验证模型医生应用到FC层是否有效
 
 如果使用模型医生, vgg16 的 loss_channel 的放缩比应该是1，res50应该是10
 alexnet 只有5层卷积
 验证模型医生对卷积层有效，可用的模型：alexnet，vgg16，senet34
 
-vgg16+stl10
+## vgg16+stl10
 - 从头训练: 0.7094
 - 使用模型医生调整倒数第二层 FC: 0.7374
 - 倒数第一层卷积层: 0.7375
 
 
-vgg16+mini-imagenet
+## vgg16+mini-imagenet
 - 从头训练：0.7703
 
 
-senet34+stl10
+## senet34+stl10
 - 预训练模型：0.8200
 
 
-alexnet+stl10
+## alexnet+stl10
 - 师兄用的正数第二层卷积，我这里用的倒数第一层卷积
 - 从头训练：0.6584
 - 1倍channel loss：78轮loss开始变成nan
 - 0.1倍loss：116轮开始分类的loss开始变成恒定2左右
 
 
-alexnetv2+stl10
+## alexnetv2+stl10
 - 使用pytorch官方给的模型结构从头训练：0.6985
 - 1倍channel loss, 原始的模型医生：0.7258
 - 1倍channel loss, 倒数第二层 FC 层：0.7061
 
 
-alexnetv2+cifar10(图片resize成224x224)
+## alexnetv2+cifar10(图片resize成224x224)
 - 模型结果从pytorch官方直接拷贝得到的
 - 预训练模型：0.9036
 - 10倍channel loss，模型医生：0.9052
 - 10倍channel loss，FC+模型医生：0.9014
 
 
-alexnetv3+cifar10（图片大小32x32）
+## alexnetv3+cifar10（图片大小32x32）
 - 这个模型改了alexnetv2第一层卷积层的参数，最后一层池化使用自适应池化代替
 - 预训练模型：0.8513
 - 10倍channel loss，准确率在 10%，一直上不去，原始分类的loss在 2 左右不变，如果去除添加的噪声，分类的loss变成0.25左右
@@ -100,7 +105,7 @@ alexnetv3+cifar10（图片大小32x32）
 - 1倍channel loss: 0.8555
 
 
-alexnetv2+cifar10(图片resize成64x64)
+## alexnetv2+cifar10(图片resize成64x64)
 - 预训练模型：0.8389
 
 - 10倍channel loss, 倒数第二层 FC 层：0.8408
@@ -113,7 +118,8 @@ alexnetv2+cifar10(图片resize成64x64)
     - 有时候一开始训练loss就nan了，可以kill掉重新开始
 - 10倍channel loss, 倒数第一层卷积, 模型医生不加噪音：
 
-cifar-10(ρ=100)
+# 长尾数据集+模型医生
+## cifar-10(ρ=100)类别分布
 | 类别 | 数量 |
 | ---  | --- |
 | 0 | 5000 |
@@ -129,10 +135,10 @@ cifar-10(ρ=100)
 
 
 
-resnet50+cifar-100(ρ=100)
+## resnet50+cifar-100(ρ=100)
 - 预训练：0.3770
 
-resnet50+cifar-10(ρ=100)
+## resnet50+cifar-10(ρ=100)
 - 预训练：0.7091
     ```tex
     acc of  0 : 94.60%
@@ -161,7 +167,7 @@ resnet50+cifar-10(ρ=100)
     ```
 
 
-resnet50+cifar-10(ρ=10)
+## resnet50+cifar-10(ρ=10)
 - 预训练：0.8848
     ```tex
         acc of  0 : 96.70%
@@ -176,8 +182,12 @@ resnet50+cifar-10(ρ=10)
         acc of  9 : 86.20%
     ```
 - 模型医生：
+```tex
+占位，待填空
 
-resnet50+cifar-10(ρ=50)
+```
+
+## resnet50+cifar-10(ρ=50)
 - 预训练：0.7744
     ```tex
         acc of  0 : 92.40%
@@ -192,3 +202,7 @@ resnet50+cifar-10(ρ=50)
         acc of  9 : 58.90%
     ```
 - 模型医生：
+```tex
+占位，待填空
+
+```
