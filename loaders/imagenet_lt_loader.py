@@ -155,15 +155,18 @@ def get_imagenet_lt_image(src_root, dst_root, mode, txt):
     assert mode in ["train", "test"]
 
     not_exist_cnt = 0
+    exist_cnt = 0
     with open(txt) as f:
         for line in tqdm(f):
             src_img_path = os.path.join(src_root, line.split()[0])
             label = int(line.split()[1])
+            # print(src_img_path)
+            # break
             if not os.path.isfile(src_img_path):
                 not_exist_cnt += 1
                 print("\n[Error] the image does not exist")
             else:
-                # print(src_img_path)
+                exist_cnt += 1
                 dst_img_path = os.path.join(dst_root, line.split()[0])
                 dst_path, dst_name = os.path.split(dst_img_path)
                 if not os.path.exists(dst_path):
@@ -171,7 +174,7 @@ def get_imagenet_lt_image(src_root, dst_root, mode, txt):
                 # print(dst_path)
                 shutil.copyfile(src_img_path, dst_img_path)
 
-    print(f"[phase {mode}] 缺失图片数:", not_exist_cnt)
+    print(f"[phase {mode}] 缺失图片数:", not_exist_cnt, f"搬运图片数: {exist_cnt}")
 
 
 if __name__ == "__main__":
@@ -186,17 +189,17 @@ if __name__ == "__main__":
 
     # 测试集
     get_imagenet_lt_image(
-        src_root=src_root,
+        src_root="/nfs/xwx/dataset/ImageNet-1k",
         dst_root=dst_root,
         mode="test", txt=test_txt
     )
 
-    # 训练集
-    get_imagenet_lt_image(
-        src_root=src_root,
-        dst_root=dst_root,
-        mode="train", txt=train_txt
-    )
+    # # 训练集
+    # get_imagenet_lt_image(
+    #     src_root=src_root,
+    #     dst_root=dst_root,
+    #     mode="train", txt=train_txt
+    # )
 
     # dataset = LT_Dataset("/datasets/ILSVRC2012",  train_txt)
     # print(next(iter(dataset)))
