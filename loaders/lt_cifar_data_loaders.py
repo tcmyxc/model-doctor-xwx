@@ -10,7 +10,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from PIL import Image
 from .imbalance_cifar import IMBALANCECIFAR10, IMBALANCECIFAR100
 
-sys.path.append('/home/xwx/model-doctor-xwx')
+sys.path.append('/nfs/xwx/model-doctor-xwx')
 from configs import config
 
 
@@ -383,7 +383,7 @@ class ImbalanceCIFAR10DataLoader(DataLoader):
         return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
 
 
-def load_cifar100_lt_images(data_type, imb_factor):
+def load_cifar100_lt_images(data_type, imb_factor=0.01):
     assert data_type in ['train', 'test']
     normalize = transforms.Normalize(
         mean=[0.4914, 0.4822, 0.4465],

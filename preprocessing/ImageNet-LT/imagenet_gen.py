@@ -193,7 +193,7 @@ def parse_val_archive(
 
 
 imagenet_data = ImageNet(
-    root="/datasets/ILSVRC2012", split="val"
+    root="/nfs/xwx/dataset/ImageNet-1k", split="train"
 )
 img_iter = iter(imagenet_data)
 print(next(img_iter))

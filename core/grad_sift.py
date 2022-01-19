@@ -210,7 +210,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'cifar-10-lt-ir10'
+    data_name = 'cifar-100-lt-ir100'
     # 模型名(model name)
     model_list = [
         # 'alexnetv3',

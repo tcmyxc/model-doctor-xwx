@@ -152,7 +152,7 @@ class ImageNetLTDataLoader(DataLoader):
 
 
 def get_imagenet_lt_image(src_root, dst_root, mode, txt):
-    assert mode in ["train", "val"]
+    assert mode in ["train", "test"]
 
     not_exist_cnt = 0
     with open(txt) as f:
@@ -171,16 +171,30 @@ def get_imagenet_lt_image(src_root, dst_root, mode, txt):
                 # print(dst_path)
                 shutil.copyfile(src_img_path, dst_img_path)
 
-    print("缺失图片数:", not_exist_cnt)
+    print(f"[phase {mode}] 缺失图片数:", not_exist_cnt)
 
 
 if __name__ == "__main__":
     train_txt="/nfs/xwx/model-doctor-xwx/data/OpenLongTailedDatasets" + \
         "/ImageNet_LT/ImageNet_LT_train.txt"
+
+    test_txt="/nfs/xwx/model-doctor-xwx/data/OpenLongTailedDatasets" + \
+        "/ImageNet_LT/ImageNet_LT_test.txt"
     
+    src_root="/datasets/ILSVRC2012"
+    dst_root="/nfs/xwx/dataset/ImageNet_LT"
+
+    # 测试集
     get_imagenet_lt_image(
-        src_root="/datasets/ILSVRC2012",
-        dst_root="/nfs/xwx/dataset/ImageNet_LT",
+        src_root=src_root,
+        dst_root=dst_root,
+        mode="test", txt=test_txt
+    )
+
+    # 训练集
+    get_imagenet_lt_image(
+        src_root=src_root,
+        dst_root=dst_root,
         mode="train", txt=train_txt
     )
 

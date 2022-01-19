@@ -1,5 +1,5 @@
 #!/bin/bash
-export data_name='cifar-10-lt-ir10'
+export data_name='cifar-100-lt-ir100'
 # export model_name='alexnetv2' #0a
 # export model_name='vgg16' #1b
 #export model_name='resnet34' #2c
