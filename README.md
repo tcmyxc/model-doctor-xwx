@@ -12,9 +12,11 @@ Parameter Group 0
 )
 ```
 
-导出依赖包
 ```bash
+# 导出依赖包
 conda env export >  model-doctor-conf.yml
+
+# 从依赖文件重建环境
 conda env create -f model-doctor-conf.yml
 ```
 

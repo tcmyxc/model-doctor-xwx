@@ -1,6 +1,7 @@
 name: modelDoctor
 channels:
   - pytorch
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
@@ -44,19 +45,19 @@ dependencies:
   - olefile=0.46=py36_0
   - openh264=2.1.0=hd408876_0
   - openjpeg=2.4.0=h3ad879b_0
-  - openssl=1.1.1l=h7f8727e_0
+  - openssl=1.1.1m=h7f8727e_0
   - pillow=8.3.1=py36h2c7a002_0
   - pip=21.2.2=py36h06a4308_0
   - python=3.6.13=h12debd9_1
-  - pytorch=1.10.0=py3.6_cuda11.3_cudnn8.2.0_0
+  - pytorch=1.10.1=py3.6_cuda11.3_cudnn8.2.0_0
   - pytorch-mutex=1.0=cuda
   - readline=8.1=h27cfd23_0
   - setuptools=58.0.4=py36h06a4308_0
   - six=1.16.0=pyhd3eb1b0_0
   - sqlite=3.36.0=hc218d9a_0
   - tk=8.6.11=h1ccaba5_0
-  - torchaudio=0.10.0=py36_cu113
-  - torchvision=0.11.1=py36_cu113
+  - torchaudio=0.10.1=py36_cu113
+  - torchvision=0.11.2=py36_cu113
   - typing_extensions=3.10.0.2=pyh06a4308_0
   - wheel=0.37.0=pyhd3eb1b0_1
   - xz=5.2.5=h7b6447c_0
@@ -64,13 +65,8 @@ dependencies:
   - zstd=1.4.9=haebb681_0
   - pip:
     - cycler==0.11.0
-    - kiwisolver==1.3.1
-    - matplotlib==3.3.4
     - opencv-python==4.5.4.60
-    - pandas==1.1.5
     - pyparsing==3.0.6
-    - python-dateutil==2.8.2
     - pytz==2021.3
-    - scipy==1.5.4
     - seaborn==0.11.2
-prefix: /home/xwx/miniconda3/envs/modelDoctor
+prefix: /new_disk_1/xwx/miniconda3/envs/modelDoctor
