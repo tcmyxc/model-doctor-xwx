@@ -24,4 +24,4 @@ export device_index='0'
 export PYTHONPATH=${PYTHONPATH}:/nfs/xwx/model-doctor-xwx
 python3 engines/train_cls.py --data_name ${data_name} --model_name ${model_name} --result_name ${result_name}  --device_index ${device_index}
 # dos2unix scripts/train_cls.sh
-# bash scripts/train_cls.sh
+# nohup bash scripts/train_cls.sh
