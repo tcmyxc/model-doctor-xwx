@@ -13,6 +13,7 @@ from loaders.coco_loader import load_images_masks as load_coco_images_masks
 
 # for long-tailed dataset
 from loaders.lt_cifar_data_loaders import load_cifar100_lt_images, load_cifar10_lt_images
+from loaders.imagenet_lt_loader import load_images as load_imagenet_lt_images
 
 
 def load_data(data_name, data_type=None, with_mask=False):
@@ -25,6 +26,9 @@ def load_data(data_name, data_type=None, with_mask=False):
         if data_name == 'cifar-10':
             train_loader, train_size = load_cifar10_images('train')
             test_loader, test_size = load_cifar10_images('test')
+        elif data_name == 'imagenet-lt':
+            train_loader, train_size = load_imagenet_lt_images('train')
+            test_loader, test_size = load_imagenet_lt_images('test')
         elif data_name == 'cifar-10-lt-ir10':
             train_loader, train_size = load_cifar10_lt_images("train", 0.1)
             test_loader, test_size = load_cifar10_lt_images("test")
@@ -79,6 +83,8 @@ def load_data(data_name, data_type=None, with_mask=False):
     else:
         if data_name == 'cifar-10':
             return load_cifar10_images(data_type)
+        elif data_name == 'imagenet-lt':
+            return load_imagenet_lt_images(data_type)
         elif data_name == 'cifar-10-lt-ir10':
             return load_cifar10_lt_images(data_type, 0.1)
         elif data_name == 'cifar-10-lt-ir50':

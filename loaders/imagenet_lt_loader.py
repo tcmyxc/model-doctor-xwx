@@ -2,11 +2,16 @@ import random
 import numpy as np
 import os
 import shutil
+import sys
 from tqdm import tqdm
 
 from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset, Sampler
 from PIL import Image
+
+
+sys.path.append('/nfs/xwx/model-doctor-xwx')
+from configs import config
 
 
 class BalancedSampler(Sampler):
@@ -74,6 +79,7 @@ class LT_Dataset(Dataset):
         return sample, label
 
 
+# 加载数据参考的这个类
 class ImageNetLTDataLoader(DataLoader):
     """
     ImageNetLT Data Loader
@@ -150,8 +156,45 @@ class ImageNetLTDataLoader(DataLoader):
         return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
 
 
+def load_images(data_type):
+    assert data_type in ['train', 'test']
 
-def get_imagenet_lt_image(src_root, dst_root, mode, txt):
+    data_dir = config.data_imagenet_lt
+    train_txt= config.data_imagenet_lt + "/ImageNet_LT_train.txt"
+    test_txt= config.data_imagenet_lt + "/ImageNet_LT_test.txt"
+
+    train_trsfm = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+    test_trsfm = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    if data_type == 'train':
+        data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
+    else:
+        data_set = LT_Dataset(data_dir, test_txt, test_trsfm)
+
+    num_classes = len(np.unique(data_set.targets))
+    assert num_classes == 1000
+
+    data_loader = DataLoader(dataset=data_set,
+                             batch_size=256,
+                             num_workers=4,
+                             shuffle=True)
+
+    return data_loader, len(data_set)
+
+
+
+def extract_imagenet_lt_image(src_root, dst_root, mode, txt):
     assert mode in ["train", "test"]
 
     not_exist_cnt = 0
@@ -184,22 +227,30 @@ if __name__ == "__main__":
     test_txt="/nfs/xwx/model-doctor-xwx/data/OpenLongTailedDatasets" + \
         "/ImageNet_LT/ImageNet_LT_test.txt"
     
-    src_root="/datasets/ILSVRC2012"
+    # src_root="/datasets/ILSVRC2012"
     dst_root="/nfs/xwx/dataset/ImageNet_LT"
 
-    # 测试集
-    get_imagenet_lt_image(
-        src_root="/nfs/xwx/dataset/ImageNet-1k",
-        dst_root=dst_root,
-        mode="test", txt=test_txt
-    )
+    # # 测试集
+    # extract_imagenet_lt_image(
+    #     src_root="/nfs/xwx/dataset/ImageNet-1k",
+    #     dst_root=dst_root,
+    #     mode="test", txt=test_txt
+    # )
 
     # # 训练集
-    # get_imagenet_lt_image(
+    # extract_imagenet_lt_image(
     #     src_root=src_root,
     #     dst_root=dst_root,
     #     mode="train", txt=train_txt
     # )
 
-    # dataset = LT_Dataset("/datasets/ILSVRC2012",  train_txt)
+    loader, size = load_images("test")
+    print("dataset size:", size)
+    for idx, samples in enumerate(loader):
+        inputs, labels = samples
+        print(inputs, labels)
+        break
+    
+    # dataset = LT_Dataset(dst_root,  test_txt)
+    # print("dataset size:", len(dataset))
     # print(next(iter(dataset)))

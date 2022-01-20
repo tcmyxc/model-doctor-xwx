@@ -25,6 +25,7 @@ data_stl10 = output_data + '/stl10/images'
 data_mini_imagenet = output_data + '/mini_imagenet/images'
 data_mini_imagenet_temp = output_data + '/mini_imagenet/temp'
 data_mini_imagenet_10 = output_data + '/mini_imagenet_10/images'
+data_imagenet_lt = "/nfs/xwx/dataset/ImageNet_LT"
 # # data coco
 # coco_images = output_data + '/coco/images'
 # coco_images_1 = output_data + '/coco_6x2/images1'
