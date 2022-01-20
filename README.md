@@ -216,8 +216,19 @@ alexnet 只有5层卷积
         acc of  8 : 69.70%
         acc of  9 : 58.90%
     ```
-- 模型医生：
-```tex
-占位，待填空
+- 模型医生：0.7753
+    ```tex
+    acc of  0 : 96.50%
+    acc of  1 : 99.00%
+    acc of  2 : 86.90%
+    acc of  3 : 79.10%
+    acc of  4 : 82.40%
+    acc of  5 : 70.00%
+    acc of  6 : 79.70%
+    acc of  7 : 68.10%
+    acc of  8 : 60.90%
+    acc of  9 : 52.70%
+    ```
 
-```
+# 验证 iNaturalist 2018 数据集
+- `md5sum 2018.tar.gz` should produce `b1c6952ce38f31868cc50ea72d066cc3`

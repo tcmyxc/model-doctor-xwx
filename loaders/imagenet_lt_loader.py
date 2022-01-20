@@ -166,7 +166,6 @@ def load_images(data_type):
     train_trsfm = transforms.Compose([
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])

@@ -1,9 +1,10 @@
-from ensurepip import version
-import torch
 import torchvision
 
-imagenet_data = torchvision.datasets.INaturalist(
-    root="/nfs/xwx/model-doctor-xwx/data/iNaturalist",
+dataset = torchvision.datasets.INaturalist(
+    root="/nfs/xwx/dataset/iNaturalist2018",
     version="2018",
     download=True,
 )
+
+img_iter = iter(dataset)
+print(next(img_iter))
