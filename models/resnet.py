@@ -148,8 +148,8 @@ def resnet101():
     return ResNet(BottleNeck, [3, 4, 23, 3])
 
 
-def resnet152():
+def resnet152(in_channels=3, num_classes=10):
     """ return a ResNet 152 object
     """
-    return ResNet(BottleNeck, [3, 8, 36, 3])
+    return ResNet(BottleNeck, [3, 8, 36, 3], in_channels=in_channels, num_classes=num_classes)
 

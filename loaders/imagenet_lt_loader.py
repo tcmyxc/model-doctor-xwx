@@ -185,7 +185,7 @@ def load_images(data_type):
     assert num_classes == 1000
 
     data_loader = DataLoader(dataset=data_set,
-                             batch_size=256,
+                             batch_size=8,
                              num_workers=4,
                              shuffle=True)
 

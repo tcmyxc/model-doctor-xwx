@@ -1,7 +1,7 @@
 from models import simnet, alexnet, alexnetv2, alexnetv3, vgg, resnet, \
     senet, resnext, densenet, simplenetv1, \
     efficientnetv2, googlenet, xception, mobilenetv2, \
-    inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet
+    inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet, resnetv2
 
 
 def load_model(model_name, in_channels=3, num_classes=10):
@@ -20,10 +20,14 @@ def load_model(model_name, in_channels=3, num_classes=10):
         model = alexnetv3.alexnet(in_channels, num_classes)
     elif model_name == 'vgg16':
         model = vgg.vgg16_bn(in_channels, num_classes)
+    elif model_name == 'resnet32':
+        model = resnetv2.resnet32(in_channels, num_classes)
     elif model_name == 'resnet34':
         model = resnet.resnet34(in_channels, num_classes)
     elif model_name == 'resnet50':
         model = resnet.resnet50(in_channels, num_classes)
+    elif model_name == 'resnet152':
+        model = resnet.resnet152(in_channels, num_classes)
     elif model_name == 'senet34':
         model = senet.seresnet34(in_channels, num_classes)
     elif model_name == 'wideresnet28':
@@ -82,6 +86,10 @@ def load_modules(model, model_name, model_layers):
             5: model.features[37],  # 512, 14, 14
             -2: model.features[40],  # 512, 14, 14, CONV
             -1: model.classifier[3], # FC
+        }
+    elif model_name == 'resnet32':
+        module_modules = {
+            -1: model.layer3[4].conv2,
         }
     elif model_name == 'resnet34':
         module_modules = {
@@ -143,6 +151,10 @@ def load_modules(model, model_name, model_layers):
             47: model.conv5_x[2].residual_function[3],
             -1: model.conv5_x[2].residual_function[6],
             # 48: model.conv5_x[2].residual_function[6],
+        }
+    elif model_name == 'resnet152':
+        module_modules = {
+            -1: model.conv5_x[2].residual_function[6],
         }
     elif model_name == 'senet34':
         module_modules = {
