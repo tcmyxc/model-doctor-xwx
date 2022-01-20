@@ -160,7 +160,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
-        print('\r[{}/{}]'.format(i, len(train_loader)), end='', flush=True)
+        print('\r[{}/{}]'.format(i+1, len(train_loader)), end='', flush=True)
         inputs, labels = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
@@ -210,7 +210,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'cifar-100-lt-ir100'
+    data_name = 'cifar-10-lt-ir50'
     # 模型名(model name)
     model_list = [
         # 'alexnetv3',
