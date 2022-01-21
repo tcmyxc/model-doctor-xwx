@@ -1,7 +1,7 @@
 import torchvision
 
 dataset = torchvision.datasets.INaturalist(
-    root="/nfs/xwx/dataset/iNaturalist2018",
+    root="/mnt/hangzhou_116_homes/xwx/dataset/iNaturalist2018",
     version="2018",
     download=True,
 )

@@ -88,5 +88,5 @@ def vgg19_bn():
 if __name__ == '__main__':
     from torchsummary import summary
     model = vgg16_bn().cuda()
-    # print(model)
-    summary(model=model, input_size=(3, 32, 32))
+    print(model)
+    # summary(model=model, input_size=(3, 32, 32))

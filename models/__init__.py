@@ -1,7 +1,8 @@
 from models import simnet, alexnet, alexnetv2, alexnetv3, vgg, resnet, \
     senet, resnext, densenet, simplenetv1, \
     efficientnetv2, googlenet, xception, mobilenetv2, \
-    inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet, resnetv2
+    inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet, resnetv2,\
+    vggv2
 
 
 def load_model(model_name, in_channels=3, num_classes=10):
@@ -19,7 +20,7 @@ def load_model(model_name, in_channels=3, num_classes=10):
     elif model_name == 'alexnetv3':
         model = alexnetv3.alexnet(in_channels, num_classes)
     elif model_name == 'vgg16':
-        model = vgg.vgg16_bn(in_channels, num_classes)
+        model = vggv2.vgg16_bn(in_channels, num_classes)
     elif model_name == 'resnet32':
         model = resnetv2.resnet32(in_channels, num_classes)
     elif model_name == 'resnet34':
