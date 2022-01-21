@@ -7,13 +7,11 @@ from loaders.stl10_loader import load_images as load_stl10_images
 from loaders.stl10_loader import load_images_masks as load_stl10_images_masks
 from loaders.mnin_loader import load_images as load_mnin_images
 from loaders.mnin_loader import load_images_masks as load_mnin_images_masks
-# ----
-from loaders.coco_loader import load_images as load_coco_images
-from loaders.coco_loader import load_images_masks as load_coco_images_masks
 
 # for long-tailed dataset
-from loaders.lt_cifar_data_loaders import load_cifar100_lt_images, load_cifar10_lt_images
 from loaders.imagenet_lt_loader import load_images as load_imagenet_lt_images
+
+from loaders.cifar_lt_loader import load_cifar_lt_images
 
 
 def load_data(data_name, data_type=None, with_mask=False):
@@ -30,26 +28,26 @@ def load_data(data_name, data_type=None, with_mask=False):
             train_loader, train_size = load_imagenet_lt_images('train')
             test_loader, test_size = load_imagenet_lt_images('test')
         elif data_name == 'cifar-10-lt-ir10':
-            train_loader, train_size = load_cifar10_lt_images("train", 0.1)
-            test_loader, test_size = load_cifar10_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'cifar-10-lt-ir50':
-            train_loader, train_size = load_cifar10_lt_images("train", 0.02)
-            test_loader, test_size = load_cifar10_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'cifar-10-lt-ir100':
-            train_loader, train_size = load_cifar10_lt_images("train", 0.01)
-            test_loader, test_size = load_cifar10_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'cifar-100':
             train_loader, train_size = load_cifar100_images('train')
             test_loader, test_size = load_cifar100_images('test')
         elif data_name == 'cifar-100-lt-ir10':
-            train_loader, train_size = load_cifar100_lt_images("train", 0.1)
-            test_loader, test_size = load_cifar100_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'cifar-100-lt-ir50':
-            train_loader, train_size = load_cifar100_lt_images("train", 0.02)
-            test_loader, test_size = load_cifar100_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'cifar-100-lt-ir100':
-            train_loader, train_size = load_cifar100_lt_images("train", 0.01)
-            test_loader, test_size = load_cifar100_lt_images("test")
+            train_loader, train_size = load_cifar_lt_images("train", data_name)
+            test_loader, test_size = load_cifar_lt_images("test", data_name)
         elif data_name == 'mnist':
             train_loader, train_size = load_mnist_images('train')
             test_loader, test_size = load_mnist_images('test')
@@ -86,19 +84,19 @@ def load_data(data_name, data_type=None, with_mask=False):
         elif data_name == 'imagenet-lt':
             return load_imagenet_lt_images(data_type)
         elif data_name == 'cifar-10-lt-ir10':
-            return load_cifar10_lt_images(data_type, 0.1)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-10-lt-ir50':
-            return load_cifar10_lt_images(data_type, 0.02)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-10-lt-ir100':
-            return load_cifar10_lt_images(data_type, 0.01)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-100':
             return load_cifar100_images(data_type)
         elif data_name == 'cifar-100-lt-ir10':
-            return load_cifar100_lt_images(data_type, 0.1)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-100-lt-ir50':
-            return load_cifar100_lt_images(data_type, 0.02)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-100-lt-ir100':
-            return load_cifar100_lt_images(data_type, 0.01)
+            return load_cifar_lt_images(data_type, data_name)
         elif data_name == 'mnist':
             return load_mnist_images(data_type)
         elif data_name == 'fashion-mnist':

@@ -1,20 +1,10 @@
-root = r'/nfs3-p1/hjc/classification'
+root = r"/mnt/hangzhou_116_homes/xwx/model-doctor-xwx"
 
-
-# ----------------------------------------
-# original datasets
-# ----------------------------------------
-datasets_dir = root + '/datasets'
-
-datasets_coco = datasets_dir + '/COCO'
-datasets_CIFAR_10 = "/nfs/xwx/model-doctor-xwx/data/cifar-10-batches-py"
-datasets_CIFAR_100 = "/nfs/xwx/model-doctor-xwx/data/cifar-100-python"
-datasets_STL_10 = datasets_dir + '/stl10_binary'
-datasets_MNIST = '/workspace/classification/output/data/mnist/images/MNIST/raw'
-datasets_FASHION_MNIST = '/workspace/classification/output/data/fashion_mnist/images/FashionMNIST/raw'
+output_dir = root + '/output'
+output_data = root + "/data"
 
 # image data
-output_data = "/nfs/xwx/model-doctor-xwx/data"
+output_data = root + "/data"
 data_cifar10 = output_data + '/cifar10/images'
 data_cifar100 = output_data + '/cifar100/images'
 data_cifar100_lt = output_data + '/cifar-100-python'
@@ -25,7 +15,14 @@ data_stl10 = output_data + '/stl10/images'
 data_mini_imagenet = output_data + '/mini_imagenet/images'
 data_mini_imagenet_temp = output_data + '/mini_imagenet/temp'
 data_mini_imagenet_10 = output_data + '/mini_imagenet_10/images'
-data_imagenet_lt = "/nfs/xwx/dataset/ImageNet_LT"
+# data_imagenet_lt = "/nfs/xwx/dataset/ImageNet_LT"
+
+data_cifar10_lt_ir10  = output_data + "/cifar10_lt_ir10/images"
+data_cifar10_lt_ir100 = output_data + "/cifar10_lt_ir100/images"
+
+data_cifar100_lt_ir10  = output_data + "/cifar100_lt_ir10/images"
+data_cifar100_lt_ir50  = output_data + "/cifar100_lt_ir50/images"
+data_cifar100_lt_ir100 = output_data + "/cifar100_lt_ir100/images"
 # # data coco
 # coco_images = output_data + '/coco/images'
 # coco_images_1 = output_data + '/coco_6x2/images1'
@@ -37,7 +34,6 @@ data_imagenet_lt = "/nfs/xwx/dataset/ImageNet_LT"
 # ----------------------------------------
 # output，放在自己的目录下面
 # ----------------------------------------
-output_dir = '/nfs/xwx/model-doctor-xwx/output'
 
 # result
 output_result = output_dir + '/result'

@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import pickle
 import os
-sys.path.append('/home/xwx/model-doctor-xwx')
+sys.path.append('/mnt/hangzhou_116_homes/xwx/model-doctor-xwx')
 from configs import config
 
 

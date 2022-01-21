@@ -53,7 +53,8 @@ class ImageDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image, target, name
+        # return image, target, name
+        return image, target
 
     def __len__(self):
         return len(self.samples)
