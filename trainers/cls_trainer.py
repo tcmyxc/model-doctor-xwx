@@ -102,9 +102,8 @@ class ClsTrainer:
                 # print each class acc and loss
                 print("\n")
                 for i in range(self.num_classes):
-                    if i % 100 == 0:
-                        class_acc = class_correct[i] / class_total[i] * 100
-                        print(f"acc of {i:2d} : {class_acc:.2f}%")
+                    class_acc = class_correct[i] / class_total[i] * 100
+                    print(f"acc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss = running_loss / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")

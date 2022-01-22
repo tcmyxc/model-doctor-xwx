@@ -11,15 +11,15 @@ from loaders.datasets.image_mask_dataset import ImageMaskDataset
 def load_cifar_lt_images(data_type, dataset_name):
     assert data_type in ['train', 'test']
 
-    if dataset_name == "cifar10_lt_ir10":
+    if dataset_name == "cifar-10-lt-ir10":
         image_dir = os.path.join(config.data_cifar10_lt_ir10, data_type)
-    elif dataset_name == "cifar10_lt_ir100":
+    elif dataset_name == "cifar-10-lt-ir100":
         image_dir = os.path.join(config.data_cifar10_lt_ir100, data_type)
-    elif dataset_name == "cifar100_lt_ir10":
+    elif dataset_name == "cifar-100-lt-ir10":
         image_dir = os.path.join(config.data_cifar100_lt_ir10, data_type)
-    elif dataset_name == "cifar100_lt_ir50":
+    elif dataset_name == "cifar-100-lt-ir50":
         image_dir = os.path.join(config.data_cifar100_lt_ir50, data_type)
-    elif dataset_name == "cifar100_lt_ir100":
+    elif dataset_name == "cifar-100-lt-ir100":
         image_dir = os.path.join(config.data_cifar100_lt_ir100, data_type)
     
     if data_type == 'train':
@@ -50,7 +50,7 @@ def load_cifar_lt_images(data_type, dataset_name):
 
 
 if __name__ == '__main__':
-    train_loader, train_size = load_cifar_lt_images("train", "cifar100_lt_ir50")
+    train_loader, train_size = load_cifar_lt_images("train", "cifar-100-lt-ir50")
     print(train_size)
     for idx, (image, label) in enumerate(train_loader):
         print("image:", image.size(), "\nlabel:", label.size())
