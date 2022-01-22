@@ -88,38 +88,58 @@ class IMBALANCECIFAR100(IMBALANCECIFAR10):
 if __name__ == '__main__':
     import os
     from torchvision import datasets
-    trainset = IMBALANCECIFAR10(
-        root='/nfs/xwx/model-doctor-xwx/data', 
-        train=True, download=True, imb_factor=0.1
-    )
-    # print(len(trainset)/128)
-    trainloader = iter(trainset)
-    root_dir = "/nfs/xwx/model-doctor-xwx/data/cifar10_lt/images/train"
-    for i, (data, label) in enumerate(trainloader):
-        # print(i)
-        # print(data)  # PIL.Image.Image
-        # data.save("test.png")
-        img_path = root_dir + "/" + str(label)
-        if not os.path.exists(img_path):
-            os.makedirs(img_path)
-        filename = img_path + '/' + str(i) + '.png'
-        print(filename)
-        data.save(filename)
+    imb_factors = [0.01, 0.02, 0.1]
+    dataset_names = ["cifar10_lt_ir", "cifar100_lt_ir"]
+    for dataset_name in dataset_names:
+        for imb_factor in imb_factors:
+            if dataset_name == "cifar10_lt_ir":
+                trainset = IMBALANCECIFAR10(
+                    root='/nfs/xwx/dataset', 
+                    train=True, download=True, imb_factor=imb_factor
+                )
+            elif dataset_name == "cifar100_lt_ir":
+                trainset = IMBALANCECIFAR100(
+                    root='/nfs/xwx/dataset', 
+                    train=True, download=True, imb_factor=imb_factor
+                )
+            print("train dataset size:", len(trainset))
+            trainloader = iter(trainset)
+            root_dir = f"/nfs/xwx/dataset/{dataset_name}{int(1/imb_factor)}/images/train"
+            print(root_dir)
+            # for i, (data, label) in enumerate(trainloader):
+            #     # print(i)
+            #     # print(data)  # PIL.Image.Image
+            #     # data.save("test.png")
+            #     img_path = root_dir + "/" + str(label)
+            #     if not os.path.exists(img_path):
+            #         os.makedirs(img_path)
+            #     filename = img_path + '/' + str(i) + '.png'
+            #     print(filename)
+            #     data.save(filename)
 
-    # 测试集是平衡的
-    testset = datasets.CIFAR10(
-        root='/nfs/xwx/model-doctor-xwx/data', 
-        train=False, download=True
-    )
-    testloader = iter(testset)
-    root_dir = "/nfs/xwx/model-doctor-xwx/data/cifar10_lt/images/test"
-    for i, (data, label) in enumerate(testloader):
-        # print(i)
-        # print(data)  # PIL.Image.Image
-        # data.save("test.png")
-        img_path = root_dir + "/" + str(label)
-        if not os.path.exists(img_path):
-            os.makedirs(img_path)
-        filename = img_path + '/' + str(i) + '.png'
-        print(filename)
-        data.save(filename)
+            if dataset_name == "cifar10_lt_ir":
+                # 测试集是平衡的
+                testset = datasets.CIFAR10(
+                    root='/nfs/xwx/dataset', 
+                    train=False, download=True
+                )
+            elif dataset_name == "cifar100_lt_ir":
+                # 测试集是平衡的
+                testset = datasets.CIFAR100(
+                    root='/nfs/xwx/dataset', 
+                    train=False, download=True
+                )
+            print("test dataset size:", len(testset))
+            testloader = iter(testset)
+            root_dir = f"/nfs/xwx/dataset/{dataset_name}{int(1/imb_factor)}/images/test"
+            print(root_dir)
+            # for i, (data, label) in enumerate(testloader):
+            #     # print(i)
+            #     # print(data)  # PIL.Image.Image
+            #     # data.save("test.png")
+            #     img_path = root_dir + "/" + str(label)
+            #     if not os.path.exists(img_path):
+            #         os.makedirs(img_path)
+            #     filename = img_path + '/' + str(i) + '.png'
+            #     print(filename)
+            #     data.save(filename)
