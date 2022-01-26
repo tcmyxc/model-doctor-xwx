@@ -7,9 +7,12 @@ import torch
 import time
 import os
 import numpy as np
+from enum import Enum
 
 from core.grad_constraint import GradConstraint
 from core.noise_augment import GradIntegral
+from core.facalloss import focal_loss
+from core.efl import equalized_focal_loss
 
 
 class ClsGradTrainer:
@@ -48,6 +51,7 @@ class ClsGradTrainer:
         # Each epochs.
         # ----------------------------------------
         for epoch in range(self.num_epochs):
+            batch_begin_time = time.time()
             print('\nEpoch {}/{}'.format(epoch+1, self.num_epochs))
 
             for phase in ['train', 'val']:
@@ -57,6 +61,9 @@ class ClsGradTrainer:
                 else:
                     self.model.eval()
                     self.gi.remove_noise()
+
+                top1 = AverageMeter('Acc@1', ':6.2f', Summary.AVERAGE)
+                top5 = AverageMeter('Acc@5', ':6.2f', Summary.AVERAGE)
 
                 running_loss_cls = 1e-5
                 running_loss_gc = 1e-5
@@ -82,7 +89,13 @@ class ClsGradTrainer:
                         outputs = self.model(inputs)
                         _, preds = torch.max(outputs, 1)
 
-                        loss_cls = self.criterion(outputs, labels)
+                        # measure accuracy and record loss
+                        acc1, acc5 = accuracy(outputs, labels, topk=(1, 5))
+                        top1.update(acc1[0], inputs.size(0))
+                        top5.update(acc5[0], inputs.size(0))
+
+                        # loss_cls = self.criterion(outputs, labels)
+                        loss_cls = focal_loss(outputs, labels)  # focal loss
                         loss_spatial = torch.tensor(0)
                         loss_channel = torch.tensor(0)
 
@@ -126,6 +139,7 @@ class ClsGradTrainer:
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print('\n[{}] Loss CLS: {:.4f} Loss GC: {:.4f} Acc: {:.4f}'
                       .format(phase, epoch_loss_cls, epoch_loss_gc, epoch_acc))
+                print(f"\n[{phase}] acc1 is {top1.avg:.2f}%, acc5 is {top5.avg:.2f}%")
 
                 # ----------------------------------------
                 # Save epoch data
@@ -144,7 +158,8 @@ class ClsGradTrainer:
                         'epoch': epoch,
                         'best': self.history.best,
                         'history': self.history.history,
-                        "acc": f"{epoch_acc}"
+                        "acc": f"{epoch_acc}",
+                        "acc5": f"{top5.avg}",
                     }
                     path = os.path.join(self.result_path, 'checkpoint.pth')
                     torch.save(state, path)
@@ -157,12 +172,11 @@ class ClsGradTrainer:
                     draw_lr(lr_list, self.result_path)  # 绘图
                     print('- lr:', self.optimizer.state_dict()['param_groups'][0]['lr'])
 
+            # 打印一个完整的训练加测试花费多少时间
+            print_time(time.time()-batch_begin_time, epoch=True)
+
         time_elapsed = time.time() - since
-        time_hour = time_elapsed // 3600
-        time_minite = (time_elapsed % 3600) // 60
-        time_second = time_elapsed % 60
-        print(f"\nTraining complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
-        # print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+        print_time(time_elapsed)
 
     def check(self):
         phase = 'val'
@@ -215,11 +229,7 @@ class ClsGradTrainer:
         for i in range(self.num_classes):
             print('\rAccuracy of {:2d} : {:.2f}%'.format(i, 100 * class_correct[i] / class_total[i]))
         time_elapsed = time.time() - since
-        time_hour = time_elapsed // 3600
-        time_minite = (time_elapsed % 3600) // 60
-        time_second = time_elapsed % 60
-        print(f"\rPhase:{phase} complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s'")
-        # print('\rPhase:{} complete in {:.0f}m {:.0f}s'.format(phase, time_elapsed // 60, time_elapsed % 60))
+        print_time(time_elapsed)
 
 
 class TrainerHistory(object):
@@ -290,3 +300,78 @@ def draw_lr(lr_list, save_path):
     plt.grid(True)
     plt.savefig(os.path.join(save_path, 'lr.jpg'))
     plt.clf()
+
+
+class Summary(Enum):
+    NONE = 0
+    AVERAGE = 1
+    SUM = 2
+    COUNT = 3
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+
+    def __init__(self, name, fmt=':f', summary_type=Summary.AVERAGE):
+        self.name = name
+        self.fmt = fmt
+        self.summary_type = summary_type
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+    def __str__(self):
+        fmtstr = '{name} {val' + self.fmt + '} ({avg' + self.fmt + '})'
+        return fmtstr.format(**self.__dict__)
+
+    def summary(self):
+        fmtstr = ''
+        if self.summary_type is Summary.NONE:
+            fmtstr = ''
+        elif self.summary_type is Summary.AVERAGE:
+            fmtstr = '{name} {avg:.3f}'
+        elif self.summary_type is Summary.SUM:
+            fmtstr = '{name} {sum:.3f}'
+        elif self.summary_type is Summary.COUNT:
+            fmtstr = '{name} {count:.3f}'
+        else:
+            raise ValueError('invalid summary type %r' % self.summary_type)
+
+        return fmtstr.format(**self.__dict__)
+
+
+def accuracy(output, target, topk=(1,)):
+    """Computes the accuracy over the k top predictions for the specified values of k"""
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+
+def print_time(time_elapsed, epoch=False):
+    time_hour = time_elapsed // 3600
+    time_minite = (time_elapsed % 3600) // 60
+    time_second = time_elapsed % 60
+    if epoch:
+        print(f"\nCurrent epoch take time: {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
+    else:
+        print(f"\nAll complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
