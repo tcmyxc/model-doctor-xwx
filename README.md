@@ -7,6 +7,8 @@ conda env export >  model-doctor-conf.yml
 conda env create -f model-doctor-conf.yml
 ```
 
+# 记得每次训练修改保存结果目录
+
 # 使用模型医生微调FC层步骤
  1. 修改 `models` 文件夹下 `__init__.py` 文件 `load_modules` 函数
     - `module_modules` 字典，`-1`这个 key 对应层数修改成倒数第二层 FC 层
@@ -232,3 +234,41 @@ alexnet 只有5层卷积
 
 # 验证 iNaturalist 2018 数据集
 - `md5sum 2018.tar.gz` should produce `b1c6952ce38f31868cc50ea72d066cc3`
+
+# ResNext50+ImageNet-lt
+- 预训练：acc1 is 40.45%, acc5 is 65.85%
+
+# ResNet32+Cifar-10-lt-ir100
+- 预训练：acc1 is 69.34%, acc5 is 97.72%
+    ```tex
+    acc of  0 : 96.00%
+    acc of  1 : 96.40%
+    acc of  2 : 80.00%
+    acc of  3 : 68.10%
+    acc of  4 : 73.70%
+    acc of  5 : 54.10%
+    acc of  6 : 67.70%
+    acc of  7 : 65.50%
+    acc of  8 : 35.50%
+    acc of  9 : 56.40%
+    ```
+
+
+
+
+# resnet50 + cifar-10-lt-ir100
+- 微调阶段只使用FL
+acc of  0 : 89.50%
+acc of  1 : 96.20%
+acc of  2 : 76.20%
+acc of  3 : 75.70%
+acc of  4 : 85.50%
+acc of  5 : 61.80%
+acc of  6 : 75.10%
+acc of  7 : 62.00%
+acc of  8 : 52.50%
+acc of  9 : 61.50%
+
+[val] Loss CLS: 0.9257 Loss GC: 0.0000 Acc: 0.7360
+
+[val] acc1 is 73.60%, acc5 is 97.94%

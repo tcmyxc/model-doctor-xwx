@@ -94,8 +94,8 @@ class ClsGradTrainer:
                         top1.update(acc1[0], inputs.size(0))
                         top5.update(acc5[0], inputs.size(0))
 
-                        # loss_cls = self.criterion(outputs, labels)
-                        loss_cls = focal_loss(outputs, labels)  # focal loss
+                        loss_cls = self.criterion(outputs, labels)
+                        # loss_cls = focal_loss(outputs, labels)  # focal loss
                         loss_spatial = torch.tensor(0)
                         loss_channel = torch.tensor(0)
 

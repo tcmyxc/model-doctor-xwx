@@ -1,5 +1,6 @@
 #!/bin/bash
-export data_name='cifar-10-lt-ir50'
+# 记得修改 数据集名称、模型名称、结果路径
+export data_name='cifar-10-lt-ir100'
 # export model_name='alexnetv2' #0a
 # export model_name='vgg16' #1b
 #export model_name='resnet34' #2c
@@ -18,7 +19,7 @@ export model_name='resnet50' #3d
 #export model_name='shufflenetv2' #15p
 #export model_name='squeezenet' #16q
 #export model_name='mnasnet' #17r
-export result_name='gc/'${model_name}'-'${data_name}
+export result_name='gc/'${model_name}'-'${data_name}'-md'
 export pretrained_name=${model_name}'-'${data_name}
 export model_layers='-1'
 export device_index='0'

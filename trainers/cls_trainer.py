@@ -65,8 +65,8 @@ class ClsTrainer:
 
                 # model + data
                 for idx, samples in enumerate(self.data_loaders[phase]):
-                    if idx % 10 == 0:
-                        print(f"\r[{idx}/{len(self.data_loaders[phase])}]", end="", flush=True)
+                    # if idx % 100 == 0:
+                    print(f"\r[{idx}/{len(self.data_loaders[phase])}]", end="", flush=True)
 
                     inputs, labels = samples
                     inputs = inputs.to(self.device)
@@ -102,8 +102,9 @@ class ClsTrainer:
                 # print each class acc and loss
                 print("\n")
                 for i in range(self.num_classes):
-                    class_acc = class_correct[i] / class_total[i] * 100
-                    print(f"acc of {i:2d} : {class_acc:.2f}%")
+                    if i % 100 == 0:
+                        class_acc = class_correct[i] / class_total[i] * 100
+                        print(f"acc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss = running_loss / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")
@@ -140,9 +141,12 @@ class ClsTrainer:
                     self.history.draw()
                     self.scheduler.step()
                     print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
+            
+            # 打印一个完整的训练加测试花费多少时间
+            print_time(time.time()-begin, batch=True)
 
-        time_elapse = time.time() - begin
-        print(f"Training complete in {time_elapse // 60:.0f}m {time_elapse % 60:.0f}s")
+        # 打印训练总共花费时间
+        print_time(time.time() - begin)
 
     def check(self):
         phase = PHASE_EVAL
@@ -202,13 +206,7 @@ class ClsTrainer:
         for i in range(self.num_classes):
             print('Accuracy of {:2d} : {:.2f}%'.format(i, 100 * class_correct[i] / class_total[i]))
         
-        time_elapsed = time.time() - since
-        time_hour = time_elapsed // 3600
-        time_minite = (time_elapsed % 3600) // 60
-        time_second = time_elapsed % 60
-        print(f"\nTraining complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
-        # print('\rPhase:{} complete in {:.0f}m {:.0f}s'.format(phase, time_elapsed // 60, time_elapsed % 60))
-
+        print_time(time.time() - since)
 
 class TrainerHistory(object):
     def __init__(self, best, save_path):
@@ -328,3 +326,13 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+
+
+def print_time(time_elapsed, batch=False):
+    time_hour = time_elapsed // 3600
+    time_minite = (time_elapsed % 3600) // 60
+    time_second = time_elapsed % 60
+    if batch:
+        print(f"\nCurrent batch take time: {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
+    else:
+        print(f"\nAll complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
