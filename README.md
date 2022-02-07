@@ -161,18 +161,18 @@ alexnet 只有5层卷积
     acc of  8 : 40.50%
     acc of  9 : 58.90%
     ```
-- 模型医生：0.7145 （只有第一轮有用)
+- 模型医生：0.7198
     ```tex
-    acc of  0 : 95.50%
-    acc of  1 : 96.50%
-    acc of  2 : 81.00%
-    acc of  3 : 78.80%
-    acc of  4 : 76.30%
-    acc of  5 : 52.50%
-    acc of  6 : 67.90%
-    acc of  7 : 57.10%
-    acc of  8 : 48.60%
-    acc of  9 : 60.30%
+    acc of  0 : 97.10%
+    acc of  1 : 98.50%
+    acc of  2 : 79.90%
+    acc of  3 : 78.30%
+    acc of  4 : 81.20%
+    acc of  5 : 63.80%
+    acc of  6 : 72.00%
+    acc of  7 : 57.50%
+    acc of  8 : 33.90%
+    acc of  9 : 57.60%
     ```
 
 
