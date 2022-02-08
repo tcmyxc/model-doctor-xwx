@@ -238,37 +238,41 @@ alexnet 只有5层卷积
 # ResNext50+ImageNet-lt
 - 预训练：acc1 is 40.45%, acc5 is 65.85%
 
-# ResNet32+Cifar-10-lt-ir100
-- CE loss：acc1 is 69.34%, acc5 is 97.72%
-    ```tex
-    acc of  0 : 96.00%
-    acc of  1 : 96.40%
-    acc of  2 : 80.00%
-    acc of  3 : 68.10%
-    acc of  4 : 73.70%
-    acc of  5 : 54.10%
-    acc of  6 : 67.70%
-    acc of  7 : 65.50%
-    acc of  8 : 35.50%
-    acc of  9 : 56.40%
-    ```
-
-
-
 
 # resnet50 + cifar-10-lt-ir100
 - 微调阶段只使用FL
-acc of  0 : 89.50%
-acc of  1 : 96.20%
-acc of  2 : 76.20%
-acc of  3 : 75.70%
-acc of  4 : 85.50%
-acc of  5 : 61.80%
-acc of  6 : 75.10%
-acc of  7 : 62.00%
-acc of  8 : 52.50%
-acc of  9 : 61.50%
+    ```tex
+    acc of  0 : 89.50%
+    acc of  1 : 96.20%
+    acc of  2 : 76.20%
+    acc of  3 : 75.70%
+    acc of  4 : 85.50%
+    acc of  5 : 61.80%
+    acc of  6 : 75.10%
+    acc of  7 : 62.00%
+    acc of  8 : 52.50%
+    acc of  9 : 61.50%
 
-[val] Loss CLS: 0.9257 Loss GC: 0.0000 Acc: 0.7360
+    [val] Loss CLS: 0.9257 Loss GC: 0.0000 Acc: 0.7360
 
-[val] acc1 is 73.60%, acc5 is 97.94%
+    [val] acc1 is 73.60%, acc5 is 97.94%
+    ```
+
+
+# ResNet32+Cifar-10-lt-ir100（直接训练）
+- CE loss：acc1 is `69.34%`, err rate is `30.66%`, CB论文可以做到 err `29.64%`
+- REFL
+    - th=0.5: acc1 is 68.69%
+    - th=0.4: acc1 is **70.72%**, err rate is **29.28%**
+    - th=0.3: acc1 is 70.25%
+    - th=0.25: acc1 is 66.55%
+- REFL V2
+    - th=0.5: acc1 is 65.66%
+    - th=0.4: 
+- FL: 
+- EFL: 
+- DFL:
+- RFL: 
+
+
+    
