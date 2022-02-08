@@ -11,8 +11,10 @@ from enum import Enum
 
 from core.grad_constraint import GradConstraint
 from core.noise_augment import GradIntegral
-from core.facalloss import focal_loss
-from core.efl import equalized_focal_loss
+
+from loss.fl import focal_loss
+from loss.efl import equalized_focal_loss
+from loss.refl import reduce_equalized_focal_loss
 
 
 class ClsGradTrainer:
@@ -94,12 +96,15 @@ class ClsGradTrainer:
                         top1.update(acc1[0], inputs.size(0))
                         top5.update(acc5[0], inputs.size(0))
 
-                        loss_cls = self.criterion(outputs, labels)
+                        # loss_cls = self.criterion(outputs, labels)
                         # loss_cls = focal_loss(outputs, labels)  # focal loss
+                        # loss_cls = equalized_focal_loss(outputs, labels)  # efl
+                        loss_cls = reduce_equalized_focal_loss(outputs, labels)  # refl
                         loss_spatial = torch.tensor(0)
                         loss_channel = torch.tensor(0)
 
                         loss_channel = self.gc.loss_channel(outputs=outputs, labels=labels)
+                            
                         if phase == 'train':
                             # loss_spatial = self.gc.loss_spatial(outputs=outputs, labels=labels, masks=masks)
                             pass

@@ -239,7 +239,7 @@ alexnet 只有5层卷积
 - 预训练：acc1 is 40.45%, acc5 is 65.85%
 
 # ResNet32+Cifar-10-lt-ir100
-- 预训练：acc1 is 69.34%, acc5 is 97.72%
+- CE loss：acc1 is 69.34%, acc5 is 97.72%
     ```tex
     acc of  0 : 96.00%
     acc of  1 : 96.40%

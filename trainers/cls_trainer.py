@@ -9,6 +9,10 @@ import os
 import numpy as np
 from enum import Enum
 
+from loss.fl import focal_loss
+from loss.efl import equalized_focal_loss
+from loss.refl import reduce_equalized_focal_loss
+
 CHECKPOINT_MODEL_NAME = "checkpoint.pth"
 PHASE_TRAIN = "train"
 PHASE_EVAL = "val"
@@ -46,6 +50,7 @@ class ClsTrainer:
         begin = time.time()  # the start time
 
         for epoch in range(self.num_epochs):
+            epoch_begin_time = time.time()
             print(f"\nepoch {epoch+1}/{self.num_epochs}")  # log
 
             for phase in [PHASE_TRAIN, PHASE_EVAL]:
@@ -65,8 +70,8 @@ class ClsTrainer:
 
                 # model + data
                 for idx, samples in enumerate(self.data_loaders[phase]):
-                    # if idx % 100 == 0:
-                    print(f"\r[{idx}/{len(self.data_loaders[phase])}]", end="", flush=True)
+                    if idx % 10 == 0:
+                        print(f"\r[{idx}/{len(self.data_loaders[phase])}]", end="", flush=True)
 
                     inputs, labels = samples
                     inputs = inputs.to(self.device)
@@ -75,10 +80,11 @@ class ClsTrainer:
                     self.optimizer.zero_grad()
 
                     # forward
-                    with torch.set_grad_enabled(phase == "train"):
+                    with torch.set_grad_enabled(True):
                         outputs = self.model(inputs)
                         _, preds = torch.max(outputs, dim=1)
-                        loss = self.criterion(outputs, labels)
+                        # loss = self.criterion(outputs, labels)  # ce loss
+                        loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.25)  # refl
 
                         # measure accuracy and record loss
                         acc1, acc5 = accuracy(outputs, labels, topk=(1, 5))
@@ -102,9 +108,9 @@ class ClsTrainer:
                 # print each class acc and loss
                 print("\n")
                 for i in range(self.num_classes):
-                    if i % 100 == 0:
-                        class_acc = class_correct[i] / class_total[i] * 100
-                        print(f"acc of {i:2d} : {class_acc:.2f}%")
+                    class_acc = class_correct[i] / class_total[i] * 100
+                    print(f"acc of {i:2d} : {class_acc:.2f}%")
+                
                 epoch_loss = running_loss / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")
@@ -123,27 +129,13 @@ class ClsTrainer:
                     cp_path = os.path.join(self.result_path, "checkpoint.pth")
                     torch.save(state, cp_path)
                 
-                # 5 epoch 保存一下模型参数
-                # and 后面的判断可以不要，但是同一个模型参数会保存两次
-                # if (epoch+1) % 5 == 0 and phase == PHASE_EVAL:
-                #     print(f"epoch is {epoch+1}, save model weights")
-                #     state = {
-                #         "model": self.model.state_dict(),
-                #         "optimizer": self.optimizer,
-                #         "epoch": f"{epoch+1}",  # 第几个 epoch
-                #         "best": self.history,
-                #         "acc": f"{epoch_acc}"
-                #     }
-                #     cp_path = os.path.join(self.result_path, f"checkpoint-{epoch+1}.pth")
-                #     torch.save(state, cp_path)
-
                 if phase == PHASE_EVAL:
                     self.history.draw()
                     self.scheduler.step()
                     print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
             
             # 打印一个完整的训练加测试花费多少时间
-            print_time(time.time()-begin, batch=True)
+            print_time(time.time()-epoch_begin_time, epoch=True)
 
         # 打印训练总共花费时间
         print_time(time.time() - begin)
@@ -328,11 +320,11 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
-def print_time(time_elapsed, batch=False):
+def print_time(time_elapsed, epoch=False):
     time_hour = time_elapsed // 3600
     time_minite = (time_elapsed % 3600) // 60
     time_second = time_elapsed % 60
-    if batch:
-        print(f"\nCurrent batch take time: {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
+    if epoch:
+        print(f"\nCurrent epoch take time: {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
     else:
         print(f"\nAll complete in {time_hour:.0f}h {time_minite:.0f}m {time_second:.0f}s")
