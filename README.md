@@ -269,7 +269,7 @@ alexnet 只有5层卷积
 - REFL V2
     - th=0.5: acc1 is 65.66%
     - th=0.4: acc1 is 67.53%
-- FL: 
+- FL: acc1 is 69.20%
 - EFL: 
 - DFL:
 - RFL: 
