@@ -84,7 +84,8 @@ class ClsTrainer:
                         outputs = self.model(inputs)
                         _, preds = torch.max(outputs, dim=1)
                         # loss = self.criterion(outputs, labels)  # ce loss
-                        loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
+                        # loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
+                        loss = focal_loss(outputs, labels)
 
                         # measure accuracy and record loss
                         acc1, acc5 = accuracy(outputs, labels, topk=(1, 5))
