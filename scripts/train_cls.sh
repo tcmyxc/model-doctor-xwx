@@ -18,7 +18,7 @@ export model_name='resnet32' #2
 #export model_name='mnasnet' #15
 #$(date "+%Y%m%d-%H%M%S")
 # -20211208-101731，训练好的模型
-export loss_name='reflv3'
+export loss_name='reflv4'
 export result_name='pretrained/'${model_name}'-'${data_name}'-'${loss_name}
 export device_index='0'
 # 导出自己的代码路径到python环境变量
