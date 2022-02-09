@@ -1,4 +1,5 @@
-root = r"/mnt/hangzhou_116_homes/xwx"
+# root = r"/mnt/hangzhou_116_homes/xwx"  # 204
+root = r"/nfs/xwx"  # 205
 
 # the result root dir
 output_dir = root + '/model-doctor-xwx/output'

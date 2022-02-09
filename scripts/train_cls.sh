@@ -18,11 +18,11 @@ export model_name='resnet32' #2
 #export model_name='mnasnet' #15
 #$(date "+%Y%m%d-%H%M%S")
 # -20211208-101731，训练好的模型
-export loss_name='efl'
+export loss_name='rfl'
 export result_name='pretrained/'${model_name}'-'${data_name}'-'${loss_name}
 export device_index='0'
 # 导出自己的代码路径到python环境变量
-export PYTHONPATH=${PYTHONPATH}:/mnt/hangzhou_116_homes/xwx/model-doctor-xwx
+export PYTHONPATH=${PYTHONPATH}:/nfs/xwx/model-doctor-xwx
 python3 engines/train_cls.py --data_name ${data_name} --model_name ${model_name} --result_name ${result_name}  --device_index ${device_index}
 # dos2unix scripts/train_cls.sh
 # nohup bash scripts/train_cls.sh
