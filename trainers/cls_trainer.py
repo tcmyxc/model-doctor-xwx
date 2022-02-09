@@ -13,6 +13,7 @@ from loss.fl import focal_loss
 from loss.efl import equalized_focal_loss
 from loss.refl import reduce_equalized_focal_loss
 from loss.rfl import reduced_focal_loss
+from loss.dfl import dual_focal_loss
 
 CHECKPOINT_MODEL_NAME = "checkpoint.pth"
 PHASE_TRAIN = "train"
@@ -88,7 +89,8 @@ class ClsTrainer:
                         # loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
                         # loss = focal_loss(outputs, labels) # fl
                         # loss = equalized_focal_loss(outputs, labels)  # efl
-                        loss = reduced_focal_loss(outputs, labels)  # rfl
+                        # loss = reduced_focal_loss(outputs, labels)  # rfl
+                        loss = dual_focal_loss(outputs, labels)  # dfl
 
                         # measure accuracy and record loss
                         acc1, acc5 = accuracy(outputs, labels, topk=(1, 5))
