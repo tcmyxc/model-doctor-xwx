@@ -138,8 +138,8 @@ class ClsTrainer:
                 
                 if phase == PHASE_EVAL:
                     self.history.draw()
-                    self.scheduler.step()
                     print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
+                    self.scheduler.step()
             
             # 打印一个完整的训练加测试花费多少时间
             print_time(time.time()-epoch_begin_time, epoch=True)
