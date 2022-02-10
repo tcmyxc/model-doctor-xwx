@@ -6,9 +6,9 @@ def adjust_learning_rate(epoch):
     """Sets the learning rate"""
     if epoch < 5:
         decay = epoch / 4
-    elif epoch < 16:
+    elif epoch < 160:
         decay = 1
-    elif epoch < 18:
+    elif epoch < 180:
         decay = 0.01
     else:
         decay = 0.01**2
