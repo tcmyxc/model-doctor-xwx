@@ -47,7 +47,7 @@ def main():
         momentum=cfg['optimizer']['momentum'],
         weight_decay=cfg['optimizer']['weight_decay']
     )
-    scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = get_lr_scheduler(optimizer)
     # scheduler = optim.lr_scheduler.CosineAnnealingLR(
     #     optimizer=optimizer,
     #     T_max=cfg['scheduler']['T_max']
