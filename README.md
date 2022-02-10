@@ -271,10 +271,14 @@ alexnet 只有5层卷积
     - th=0.4: acc1 is 67.53%
 - REFL V3
     - th=0.4: acc1 is 69.61%
+- REFL V4:
+    - th=0.4: acc1 is 68.55%
 - FL: acc1 is 69.20%
 - EFL: acc1 is 67.79%
 - DFL: acc1 is **70.71%**
 - RFL: acc1 is 68.66%
 
 
-    
+# ResNet32+Cifar-10-lt-ir100（直接训练）
+- REFL
+   - th=0.4: acc1 is 36.97%, acc5 is 67.70%

@@ -121,6 +121,7 @@ class ClsTrainer:
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")
                 print(f"\n[{phase}] acc1 is {top1.avg:.2f}%, acc5 is {top5.avg:.2f}%")
+                print(f"\n[{phase}] err1 is {(1-top1.avg):.2f}%, err5 is {(1-top5.avg):.2f}%")
 
                 # save best epoch
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)

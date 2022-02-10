@@ -1,5 +1,5 @@
 #!/bin/bash
-export data_name='cifar-10-lt-ir100'
+export data_name='cifar-100-lt-ir100'
 # export model_name='alexnetv2' #0
 # export model_name='vgg16' #1
 export model_name='resnet32' #2
@@ -18,7 +18,7 @@ export model_name='resnet32' #2
 #export model_name='mnasnet' #15
 #$(date "+%Y%m%d-%H%M%S")
 # -20211208-101731，训练好的模型
-export loss_name='reflv4'
+export loss_name='refl-th-0.4'
 export result_name='pretrained/'${model_name}'-'${data_name}'-'${loss_name}
 export device_index='0'
 # 导出自己的代码路径到python环境变量

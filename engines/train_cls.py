@@ -12,6 +12,8 @@ import loaders
 from configs import config
 from trainers.cls_trainer import ClsTrainer
 
+from utils.lr_util import get_lr_scheduler
+
 
 def main():
     parser = argparse.ArgumentParser(description='CLASSIFICATION MODEL TEST')
@@ -40,14 +42,16 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
         params=model.parameters(),
-        lr=cfg['optimizer']['lr'],
+        # lr=cfg['optimizer']['lr'],
+        lr=0.1,
         momentum=cfg['optimizer']['momentum'],
         weight_decay=cfg['optimizer']['weight_decay']
     )
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=cfg['scheduler']['T_max']
-    )
+    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=cfg['scheduler']['T_max']
+    # )
 
     # ----------------------------------------
     # train

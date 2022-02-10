@@ -33,9 +33,9 @@ def reduce_equalized_focal_loss(logits,
     # high_th_weight = (1 - pt) ** gamma  # v2
     weights = torch.where(pt < threshold, low_th_weight, high_th_weight)
 
-    # rfl = wf * weights * ce_loss  # v1, v2
+    rfl = wf * weights * ce_loss  # v1, v2
     # rfl = wf * weights * ce_loss + (1-pt)  # v3
-    rfl = wf * weights * ce_loss + (1-pt)**gamma  # v4
+    # rfl = wf * weights * ce_loss + (1-pt)**gamma  # v4
 
     if reduction == "sum":
         rfl = rfl.sum()
