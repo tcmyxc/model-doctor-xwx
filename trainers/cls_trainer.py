@@ -15,6 +15,8 @@ from loss.refl import reduce_equalized_focal_loss
 from loss.rfl import reduced_focal_loss
 from loss.dfl import dual_focal_loss
 
+from trainers.cls_grad_trainer import draw_lr
+
 CHECKPOINT_MODEL_NAME = "checkpoint.pth"
 PHASE_TRAIN = "train"
 PHASE_EVAL = "val"
@@ -49,6 +51,7 @@ class ClsTrainer:
         self.history = TrainerHistory(best="acc", save_path=self.result_path)
 
     def train(self):
+        lr_list = []  # 记录学习率变化
         begin = time.time()  # the start time
 
         for epoch in range(self.num_epochs):
@@ -85,8 +88,8 @@ class ClsTrainer:
                     with torch.set_grad_enabled(True):
                         outputs = self.model(inputs)
                         _, preds = torch.max(outputs, dim=1)
-                        # loss = self.criterion(outputs, labels)  # ce loss
-                        loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
+                        loss = self.criterion(outputs, labels)  # ce loss
+                        # loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
                         # loss = focal_loss(outputs, labels) # fl
                         # loss = equalized_focal_loss(outputs, labels)  # efl
                         # loss = reduced_focal_loss(outputs, labels)  # rfl
@@ -138,6 +141,9 @@ class ClsTrainer:
                 
                 if phase == PHASE_EVAL:
                     self.history.draw()
+                    cur_lr = float(self.optimizer.state_dict()['param_groups'][0]['lr'])
+                    lr_list.append(cur_lr)
+                    draw_lr(lr_list, self.result_path)  # 绘图
                     print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
                     self.scheduler.step()
             
