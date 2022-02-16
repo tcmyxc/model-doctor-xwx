@@ -210,13 +210,13 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 def main():
     # 数据集(dataset name)
-    data_name = 'cifar-10-lt-ir50'
+    data_name = 'cifar-10-lt-ir100'
     # 模型名(model name)
     model_list = [
         # 'alexnetv3',
         # 'alexnet',
         # 'vgg16',
-        'resnet50',
+        'resnet32',
         # 'senet34',
         # 'wideresnet28',
         # 'resnext50',
@@ -238,11 +238,7 @@ def main():
     # 模型路径(model path)
     model_path = os.path.join(
         config.model_pretrained, 
-            config.model_pretrained, 
-        config.model_pretrained, 
-            config.model_pretrained, 
-        config.model_pretrained, 
-        f"{model_name}-{data_name}",
+        f"{model_name}-{data_name}-refl-th-0.4-wr",
         "checkpoint.pth"
     )
     if not os.path.exists(model_path):

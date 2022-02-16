@@ -149,114 +149,23 @@ alexnet 只有5层卷积
 
 ## resnet50+cifar-10(ρ=100)
 - 预训练：0.7091
-    ```tex
-    acc of  0 : 94.60%
-    acc of  1 : 94.20%
-    acc of  2 : 74.50%
-    acc of  3 : 65.40%
-    acc of  4 : 81.00%
-    acc of  5 : 60.30%
-    acc of  6 : 84.20%
-    acc of  7 : 55.50%
-    acc of  8 : 40.50%
-    acc of  9 : 58.90%
-    ```
 - 模型医生：0.7198
-    ```tex
-    acc of  0 : 97.10%
-    acc of  1 : 98.50%
-    acc of  2 : 79.90%
-    acc of  3 : 78.30%
-    acc of  4 : 81.20%
-    acc of  5 : 63.80%
-    acc of  6 : 72.00%
-    acc of  7 : 57.50%
-    acc of  8 : 33.90%
-    acc of  9 : 57.60%
-    ```
+- 微调阶段只使用FL: acc1 is 73.60%, acc5 is 97.94%
+
 
 
 ## resnet50+cifar-10(ρ=10)
 - 预训练：0.8848
-    ```tex
-        acc of  0 : 96.70%
-        acc of  1 : 98.10%
-        acc of  2 : 89.30%
-        acc of  3 : 82.10%
-        acc of  4 : 90.20%
-        acc of  5 : 79.70%
-        acc of  6 : 90.60%
-        acc of  7 : 85.80%
-        acc of  8 : 86.10%
-        acc of  9 : 86.20%
-    ```
 - 模型医生：0.8958
-    ```tex
-    acc of  0 : 97.00%
-    acc of  1 : 98.50%
-    acc of  2 : 91.50%
-    acc of  3 : 85.10%
-    acc of  4 : 90.50%
-    acc of  5 : 82.50%
-    acc of  6 : 89.70%
-    acc of  7 : 85.80%
-    acc of  8 : 88.70%
-    acc of  9 : 86.50%
-    ```
+
 
 ## resnet50+cifar-10(ρ=50)
 - 预训练：0.7744
-    ```tex
-        acc of  0 : 92.40%
-        acc of  1 : 96.90%
-        acc of  2 : 76.20%
-        acc of  3 : 71.70%
-        acc of  4 : 82.80%
-        acc of  5 : 70.10%
-        acc of  6 : 77.70%
-        acc of  7 : 78.00%
-        acc of  8 : 69.70%
-        acc of  9 : 58.90%
-    ```
 - 模型医生：0.7753
-    ```tex
-    acc of  0 : 96.50%
-    acc of  1 : 99.00%
-    acc of  2 : 86.90%
-    acc of  3 : 79.10%
-    acc of  4 : 82.40%
-    acc of  5 : 70.00%
-    acc of  6 : 79.70%
-    acc of  7 : 68.10%
-    acc of  8 : 60.90%
-    acc of  9 : 52.70%
-    ```
 
-# 验证 iNaturalist 2018 数据集
-- `md5sum 2018.tar.gz` should produce `b1c6952ce38f31868cc50ea72d066cc3`
 
 # ResNext50+ImageNet-lt
 - 预训练：acc1 is 40.45%, acc5 is 65.85%
-
-
-# resnet50 + cifar-10-lt-ir100
-- 微调阶段只使用FL
-    ```tex
-    acc of  0 : 89.50%
-    acc of  1 : 96.20%
-    acc of  2 : 76.20%
-    acc of  3 : 75.70%
-    acc of  4 : 85.50%
-    acc of  5 : 61.80%
-    acc of  6 : 75.10%
-    acc of  7 : 62.00%
-    acc of  8 : 52.50%
-    acc of  9 : 61.50%
-
-    [val] Loss CLS: 0.9257 Loss GC: 0.0000 Acc: 0.7360
-
-    [val] acc1 is 73.60%, acc5 is 97.94%
-    ```
 
 
 # ResNet32+Cifar-10-lt-ir100（直接训练）
@@ -284,4 +193,7 @@ alexnet 只有5层卷积
 - FL: acc1 is 39.11%, acc5 is 69.10%, err1 is **60.89%**, err5 is 30.90%
 - REFL
    - th=0.4: acc1 is 36.97%, acc5 is 67.70%
-   - 同上，自定义学习率：acc1 is 39.73%, acc5 is 68.50%, err1 is **60.27%**, err5 is 31.50%
+   - th=0.4（自定义学习率）: acc1 is 39.73%, acc5 is 68.50%, err1 is **60.27%**, err5 is 31.50%
+   - th=0.3: acc1 is 36.65%, acc5 is 61.91%
+
+- EFL: acc1 is 38.94%, acc5 is 68.23%, err1 is 61.06%, err5 is 31.77%
