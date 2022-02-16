@@ -192,8 +192,7 @@ alexnet 只有5层卷积
 - CE loss: acc1 is 40.58%, acc5 is 69.95%, err1 is **59.42%**, err5 is 30.05%
 - FL: acc1 is 39.11%, acc5 is 69.10%, err1 is **60.89%**, err5 is 30.90%
 - REFL
-   - th=0.4: acc1 is 36.97%, acc5 is 67.70%
-   - th=0.4（自定义学习率）: acc1 is 39.73%, acc5 is 68.50%, err1 is **60.27%**, err5 is 31.50%
+   - th=0.5: acc1 is 41.77%, acc5 is 71.12%, err1 is **58.23%**,
+   - th=0.4: acc1 is 36.97%, acc5 is 67.70%;（自定义学习率）: acc1 is 39.73%, acc5 is 68.50%, err1 is 60.27%, err5 is 31.50%
    - th=0.3: acc1 is 36.65%, acc5 is 61.91%
-
 - EFL: acc1 is 38.94%, acc5 is 68.23%, err1 is 61.06%, err5 is 31.77%

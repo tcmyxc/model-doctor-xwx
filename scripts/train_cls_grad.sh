@@ -4,7 +4,7 @@ export data_name='cifar-10-lt-ir100'
 # export model_name='alexnetv2' #0a
 # export model_name='vgg16' #1b
 #export model_name='resnet34' #2c
-export model_name='resnet50' #3d
+export model_name='resnet32' #3d
 # export model_name='senet34' #4e
 #export model_name='wideresnet28' #5f
 #export model_name='resnext50' #6g
@@ -20,7 +20,7 @@ export model_name='resnet50' #3d
 #export model_name='squeezenet' #16q
 #export model_name='mnasnet' #17r
 export result_name='gc/'${model_name}'-'${data_name}'-refl+md'
-export pretrained_name=${model_name}'-'${data_name}
+export pretrained_name=${model_name}'-'${data_name}'-refl-th-0.4-wr'
 export model_layers='-1'
 export device_index='0'
 # 导出自己的代码路径到python环境变量

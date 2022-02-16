@@ -99,7 +99,7 @@ class ClsGradTrainer:
                         # loss_cls = self.criterion(outputs, labels)
                         # loss_cls = focal_loss(outputs, labels)  # focal loss
                         # loss_cls = equalized_focal_loss(outputs, labels)  # efl
-                        loss_cls = reduce_equalized_focal_loss(outputs, labels)  # refl
+                        loss_cls = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
                         loss_spatial = torch.tensor(0)
                         loss_channel = torch.tensor(0)
 
@@ -137,8 +137,7 @@ class ClsGradTrainer:
                 print("\n")
                 for i in range(self.num_classes):
                     class_acc = 100 * class_correct[i] / class_total[i]
-                    # print('Accuracy of %2d : %2d %%' % (i, class_acc))
-                    print(f"acc of {i:2d} : {class_acc:.2f}%")
+                    print(f"\racc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss_cls = running_loss_cls / self.dataset_sizes[phase]
                 epoch_loss_gc = running_loss_gc / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
