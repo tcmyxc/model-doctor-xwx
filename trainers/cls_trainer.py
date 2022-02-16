@@ -90,8 +90,8 @@ class ClsTrainer:
                         _, preds = torch.max(outputs, dim=1)
                         # loss = self.criterion(outputs, labels)  # ce loss
                         # loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
-                        loss = focal_loss(outputs, labels) # fl
-                        # loss = equalized_focal_loss(outputs, labels)  # efl
+                        # loss = focal_loss(outputs, labels) # fl
+                        loss = equalized_focal_loss(outputs, labels)  # efl
                         # loss = reduced_focal_loss(outputs, labels)  # rfl
                         # loss = dual_focal_loss(outputs, labels)  # dfl
 
