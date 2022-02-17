@@ -13,6 +13,8 @@ import loaders
 from configs import config
 from trainers.cls_grad_trainer import ClsGradTrainer
 
+from utils.lr_util import get_lr_scheduler
+
 
 def main():
     parser = argparse.ArgumentParser(description='CLASSIFICATION MODEL TRAINER')
@@ -55,6 +57,7 @@ def main():
         optimizer = optim.SGD(
             params=model.parameters(),
             lr=cfg['optimizer']['lr'],
+            # lr=0.01,
             momentum=cfg['optimizer']['momentum'],
             weight_decay=cfg['optimizer']['weight_decay']
         )
@@ -63,6 +66,7 @@ def main():
             optimizer=optimizer,
             T_max=cfg['scheduler']['T_max']
         )
+        # scheduler = get_lr_scheduler(optimizer)
         # 检查学习率
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print("\n==> lr:", cur_lr)

@@ -172,7 +172,7 @@ alexnet 只有5层卷积
 - CE loss：acc1 is `69.34%`, err rate is `30.66%`, CB论文可以做到 err `29.64%`
 - REFL
     - th=0.5: acc1 is 68.69%
-    - th=0.4: acc1 is **70.72%**, err rate is **29.28%**; acc1 is **71.82%**, err1 is **28.18%**（自定义学习率）
+    - th=0.4: acc1 is 70.72%, err rate is 29.28%; acc1 is **71.82%**, err1 is **28.18%**（自定义学习率）
     - th=0.3: acc1 is 70.25%
     - th=0.25: acc1 is 66.55%
 - REFL V2
@@ -184,15 +184,19 @@ alexnet 只有5层卷积
     - th=0.4: acc1 is 68.55%
 - FL: acc1 is 69.20%
 - EFL: acc1 is 67.79%
-- DFL: acc1 is **70.71%**
+- DFL: acc1 is 70.71%
 - RFL: acc1 is 68.66%
+- REFL+MD
+    - th=0.4: acc1 is 74.14%
+    - th=0.4(余弦, init_lr=0.01): 
 
 
 # ResNet32+Cifar-100-lt-ir100（直接训练）
 - CE loss: acc1 is 40.58%, acc5 is 69.95%, err1 is **59.42%**, err5 is 30.05%
 - FL: acc1 is 39.11%, acc5 is 69.10%, err1 is **60.89%**, err5 is 30.90%
 - REFL
-   - th=0.5: acc1 is 41.77%, acc5 is 71.12%, err1 is **58.23%**,
-   - th=0.4: acc1 is 36.97%, acc5 is 67.70%;（自定义学习率）: acc1 is 39.73%, acc5 is 68.50%, err1 is 60.27%, err5 is 31.50%
-   - th=0.3: acc1 is 36.65%, acc5 is 61.91%
+    - th=0.5: acc1 is 41.77%, acc5 is 71.12%, err1 is **58.23%**,
+    - th=0.4: acc1 is 36.97%, acc5 is 67.70%;（自定义学习率）: acc1 is 39.73%, acc5 is 68.50%, err1 is 60.27%, err5 is 31.50%
+    - th=0.3: acc1 is 36.65%, acc5 is 61.91%
+- REFL+MD: 
 - EFL: acc1 is 38.94%, acc5 is 68.23%, err1 is 61.06%, err5 is 31.77%

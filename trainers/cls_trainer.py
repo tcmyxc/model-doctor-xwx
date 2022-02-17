@@ -141,10 +141,12 @@ class ClsTrainer:
                 
                 if phase == PHASE_EVAL:
                     self.history.draw()
+
                     cur_lr = float(self.optimizer.state_dict()['param_groups'][0]['lr'])
                     lr_list.append(cur_lr)
                     draw_lr(lr_list, self.result_path)  # 绘图
                     print("\n[Info] lr is ", self.optimizer.state_dict()["param_groups"][0]["lr"])
+                    
                     self.scheduler.step()
             
             # 打印一个完整的训练加测试花费多少时间

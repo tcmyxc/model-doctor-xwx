@@ -137,7 +137,7 @@ class ClsGradTrainer:
                 print("\n")
                 for i in range(self.num_classes):
                     class_acc = 100 * class_correct[i] / class_total[i]
-                    print(f"\racc of {i:2d} : {class_acc:.2f}%")
+                    print(f"acc of {i:2d} : {class_acc:.2f}%")
                 epoch_loss_cls = running_loss_cls / self.dataset_sizes[phase]
                 epoch_loss_gc = running_loss_gc / self.dataset_sizes[phase]
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
@@ -170,11 +170,15 @@ class ClsGradTrainer:
 
                 if phase == 'val':
                     self.history.draw()
-                    self.scheduler.step()
+
+                    # draw lr
                     cur_lr = float(self.optimizer.state_dict()['param_groups'][0]['lr'])
+                    print('- lr:', cur_lr)
                     lr_list.append(cur_lr)
                     draw_lr(lr_list, self.result_path)  # 绘图
-                    print('- lr:', self.optimizer.state_dict()['param_groups'][0]['lr'])
+
+                    self.scheduler.step()
+                    
 
             # 打印一个完整的训练加测试花费多少时间
             print_time(time.time()-batch_begin_time, epoch=True)
