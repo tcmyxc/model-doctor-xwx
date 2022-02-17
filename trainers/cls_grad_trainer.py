@@ -99,7 +99,7 @@ class ClsGradTrainer:
                         # loss_cls = self.criterion(outputs, labels)
                         # loss_cls = focal_loss(outputs, labels)  # focal loss
                         # loss_cls = equalized_focal_loss(outputs, labels)  # efl
-                        loss_cls = reduce_equalized_focal_loss(outputs, labels, threshold=0.4)  # refl
+                        loss_cls = reduce_equalized_focal_loss(outputs, labels, threshold=0.25)  # refl
                         loss_spatial = torch.tensor(0)
                         loss_channel = torch.tensor(0)
 

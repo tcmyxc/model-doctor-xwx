@@ -56,17 +56,17 @@ def main():
         # 2021-12-27，修改学习率没有在训练开始的时候重置的问题
         optimizer = optim.SGD(
             params=model.parameters(),
-            lr=cfg['optimizer']['lr'],
-            # lr=0.01,
+            # lr=cfg['optimizer']['lr'],
+            lr=0.01,
             momentum=cfg['optimizer']['momentum'],
             weight_decay=cfg['optimizer']['weight_decay']
         )
         # 使用余弦退火方案设置每个参数组的学习率
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            optimizer=optimizer,
-            T_max=cfg['scheduler']['T_max']
-        )
-        # scheduler = get_lr_scheduler(optimizer)
+        # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        #     optimizer=optimizer,
+        #     T_max=cfg['scheduler']['T_max']
+        # )
+        scheduler = get_lr_scheduler(optimizer)
         # 检查学习率
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print("\n==> lr:", cur_lr)
