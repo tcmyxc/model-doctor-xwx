@@ -139,7 +139,7 @@ alexnet 只有5层卷积
 | 6 | 232 |
 | 7 | 139 |
 | 8 | 83 |
-| 0 | 50 |
+| 9 | 50 |
 
 
 
@@ -186,7 +186,7 @@ alexnet 只有5层卷积
 - EFL: acc1 is 67.79%
 - DFL: acc1 is 70.71%
 - RFL: acc1 is 68.66%
-- REFL+MD
+- REFL+MD（初始学习率0.01）
     - th=0.5: acc1 is 73.21%
     - th=0.4: acc1 is 74.14%, (余弦, init_lr=0.01): acc1 is 72.97%
     - th=0.3: acc1 is 74.76%
@@ -203,4 +203,6 @@ alexnet 只有5层卷积
     - th=0.3: acc1 is 36.65%, acc5 is 61.91%
 - EFL: acc1 is 38.94%, acc5 is 68.23%, err1 is 61.06%, err5 is 31.77%
 - REFL+MD:
-    - th=0.25:
+    - th=0.2, 初始学习率0.01: acc1 is 41.60%
+    - th=0.2, 初始学习率0.001: acc1 is 42.48%, acc5 is 71.70%
+    - th=0.1, 初始学习率0.001:

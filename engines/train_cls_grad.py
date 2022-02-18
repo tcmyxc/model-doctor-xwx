@@ -57,7 +57,7 @@ def main():
         optimizer = optim.SGD(
             params=model.parameters(),
             # lr=cfg['optimizer']['lr'],
-            lr=0.01,
+            lr=0.001,
             momentum=cfg['optimizer']['momentum'],
             weight_decay=cfg['optimizer']['weight_decay']
         )
