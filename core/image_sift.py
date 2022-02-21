@@ -3,11 +3,15 @@ import os
 import torch
 import json
 
-sys.path.append('/home/xwx/model-doctor-xwx') #205
+sys.path.append('/nfs/xwx/model-doctor-xwx') #205
 import loaders
 import models
 from configs import config
 from utils import file_util
+
+from mylog import log
+
+train_log = log()
 
 
 class ImageSift:
@@ -61,7 +65,7 @@ class ImageSift:
         # print(self.scores)
         # print(self.nums)
 
-        image_dir = os.path.join(config.data_cifar10, 'test')
+        image_dir = os.path.join(config.data_cifar10_lt_ir100, 'test')
 
         class_names = sorted([d.name for d in os.scandir(image_dir) if d.is_dir()])
 
@@ -90,13 +94,12 @@ def sift_image(data_name, model_name, model_path, result_path):
     model.to(device)
     model.eval()
 
-    # data
-    data_loader, _ = loaders.load_data(data_name=data_name,
-                                       data_type='test')
+    # data，在测试集上面筛选是否合适？？？
+    data_loader, _ = loaders.load_data(data_name=data_name, data_type='test')
 
     image_sift = ImageSift(class_nums=cfg['model']['num_classes'],
                            image_nums=20,
-                           is_high_confidence=False)
+                           is_high_confidence=True)
 
     # forward
     for i, samples in enumerate(data_loader):
@@ -113,16 +116,20 @@ def sift_image(data_name, model_name, model_path, result_path):
 
 
 def main():
-    data_name = 'cifar-10'
-    model_name = 'resnet50'
+    data_name = 'cifar-10-lt-ir100'
+    model_name = 'resnet32'
     model_path = os.path.join(
         config.model_pretrained,
-        model_name + '-20211208-101731', 
-        'checkpoint.pth')
+        "resnet32-cifar-10-lt-ir100-refl-th-0.4-wr",
+        'checkpoint.pth'
+    )
+    train_log.info(model_path)
+    
     result_path = os.path.join(
         config.output_result, 
-        model_name + '-' + data_name, "low")
-    print("\n==> result_path", result_path)
+        model_name + '-' + data_name, "high"
+    )
+    train_log.info(result_path)
    
     if not os.path.exists(result_path):
         os.makedirs(result_path)
