@@ -18,13 +18,14 @@ from sklearn.metrics import classification_report
 
 from tqdm import tqdm
 import os
+import datetime
 
 # 梯度值
 modify_dict = {
     -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],
 }
 
-threshold = 0.25
+threshold = 0.4
 best_acc = 0
 
 def main():
@@ -97,9 +98,6 @@ def main():
         scheduler.step()
     print("Done!")
 
-    torch.save(model.state_dict(), "model-cos.pth")
-    print("Saved PyTorch Model State to model.pth")
-
     # model.eval()
     # test(data_loaders["val"], model, loss_fn, device)
 
@@ -169,6 +167,9 @@ def test(dataloader, model, loss_fn, device):
     if correct > best_acc:
         best_acc = correct
         print("update best acc:", best_acc)
+        best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.pth"
+        torch.save(model.state_dict(), best_model_name)
+        print("Saved Best PyTorch Model State to model.pth")
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
