@@ -76,18 +76,21 @@ class GradSift:
                 mask[np.where(grads > threshold)] = 1
 
                 method_name = 'inputs_label{}_layer{}'.format(label, layer)  # io
-                mask_path = os.path.join(self.result_path, 'grads_{}.npy'.format(method_name))
+                mask_root_path = os.path.join(self.result_path, str(layer), str(label))
+                if not os.path.exists(mask_root_path):
+                    os.makedirs(mask_root_path)
+                mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
                 np.save(mask_path, mask)
 
                 # self.visualize(grads, mask, method_name)
 
     def visualize(self, grads, mask, method_name):
         print(grads.size)
-        grads = grads.reshape((64, -1))
+        grads = grads.reshape((grads.size, -1))
         l_path = os.path.join(self.result_path, 'grads_{}.png'.format(method_name))
         image_util.view_grads(grads.transpose((1, 0)), grads.shape[0], grads.shape[1], l_path)
 
-        mask = mask.reshape((64, -1))
+        mask = mask.reshape((grads.size, -1))
         l_path = os.path.join(self.result_path, 'grads_{}_m.png'.format(method_name))
         image_util.view_grads(mask.transpose((1, 0)), mask.shape[0], mask.shape[1], l_path)
 
@@ -104,7 +107,7 @@ def main():
     train_log.info("model_path: " + model_path)
 
     input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/high/images"
-    result_path = os.path.join("/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100", 'grads')
+    result_path = os.path.join("/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100-all", 'grads')
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)

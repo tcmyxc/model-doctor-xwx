@@ -14,7 +14,7 @@ from torchsummary import summary
 cfg = json.load(open('configs/config_trainer.json'))["cifar-10"]
 
 model = models.load_model(
-    model_name="senet34",
+    model_name="resnet32",
     in_channels=cfg['model']['in_channels'], # 输入图像的通道数
     num_classes=cfg['model']['num_classes'] # 类别数
 )

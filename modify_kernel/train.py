@@ -20,11 +20,22 @@ from tqdm import tqdm
 import os
 import datetime
 
+import numpy as np
+
 # 梯度值
-modify_dict = {
-    # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
-    -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62]],  # label_89, 22个
-}
+# modify_dict = {
+#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
+#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62]],  # label_89, 22个
+#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 
+#     #           0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62,
+#     #           2, 3, 5, 8, 10, 11, 12, 16, 22, 30, 32, 35, 39, 59, 60]],  # label_789, 37个
+#     -1: [64, [3, 4, 5, 8, 10, 11, 12, 13, 17, 19, 29, 32, 35, 37, 39, 42, 47, 49, 53, 60,
+#               2, 16, 20, 22, 30, 38, 56, 59,
+#               27, 28, 36, 40, 46, 50]],  # 579, 34个
+# }
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict.npy"
+modify_dict = np.load(mask_path, allow_pickle=True).item()
+# print(modify_dict)
 
 threshold = 0.5
 best_acc = 0
@@ -37,7 +48,7 @@ def main():
     momentum = 0.9
     weight_decay = 5e-4
     epochs = 200
-    model_layers = [-1]
+    model_layers = range(0, 30)
 
     # device
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -170,7 +181,7 @@ def test(dataloader, model, loss_fn, device):
         print("update best acc:", best_acc)
         best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.pth"
         torch.save(model.state_dict(), best_model_name)
-        print("Saved Best PyTorch Model State to model.pth")
+        print(f"Saved Best PyTorch Model State to {best_model_name} \n")
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
 

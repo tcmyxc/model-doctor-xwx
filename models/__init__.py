@@ -90,7 +90,39 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'resnet32':
         module_modules = {
-            -1: model.layer3[4].conv2,
+            0: model.layer1[0].conv1,
+            1: model.layer1[0].conv2,
+            2: model.layer1[1].conv1,
+            3: model.layer1[1].conv2,
+            4: model.layer1[2].conv1,
+            5: model.layer1[2].conv2,
+            6: model.layer1[3].conv1,
+            7: model.layer1[3].conv2,
+            8: model.layer1[4].conv1,
+            9: model.layer1[4].conv2,
+
+            10: model.layer2[0].conv1,
+            11: model.layer2[0].conv2,
+            12: model.layer2[1].conv1,
+            13: model.layer2[1].conv2,
+            14: model.layer2[2].conv1,
+            15: model.layer2[2].conv2,
+            16: model.layer2[3].conv1,
+            17: model.layer2[3].conv2,
+            18: model.layer2[4].conv1,
+            19: model.layer2[4].conv2,
+
+            20: model.layer3[0].conv1,
+            21: model.layer3[0].conv2,
+            22: model.layer3[1].conv1,
+            23: model.layer3[1].conv2,
+            24: model.layer3[2].conv1,
+            25: model.layer3[2].conv2,
+            26: model.layer3[3].conv1,
+            27: model.layer3[3].conv2,
+            28: model.layer3[4].conv1,
+            29: model.layer3[4].conv2,
+            # -1: model.layer3[4].conv2,
         }
     elif model_name == 'resnet34':
         module_modules = {
