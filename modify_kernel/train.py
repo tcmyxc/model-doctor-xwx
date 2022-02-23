@@ -22,6 +22,12 @@ import datetime
 
 import numpy as np
 
+import matplotlib
+
+# 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 # 梯度值
 # modify_dict = {
 #     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
@@ -43,6 +49,8 @@ print("-"*40)
 
 threshold = 0.5
 best_acc = 0
+g_train_loss, g_train_acc = [], []
+g_test_loss, g_test_acc = [], []
 
 def main():
     # cfg
@@ -98,11 +106,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    # scheduler = get_lr_scheduler(optimizer, True)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=epochs
-    )
+    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=epochs
+    # )
 
     for t in range(epochs):
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
@@ -112,6 +120,9 @@ def main():
         train(data_loaders["train"], model, loss_fn, optimizer, modules, device)
         test(data_loaders["val"], model, loss_fn, device)
         scheduler.step()
+
+        draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
+        
     print("Done!")
 
     # model.eval()
@@ -119,10 +130,13 @@ def main():
 
 
 def train(dataloader, model, loss_fn, optimizer, modules, device):
+    global g_train_loss, g_train_acc
+    train_loss, correct = 0, 0
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
     size = len(dataloader.dataset)
+    num_batches = len(dataloader)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
@@ -133,8 +147,12 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
             # Compute prediction error
             pred = model(X)
             loss = loss_fn(pred, y, threshold=threshold)
+
+            train_loss += loss.item()
         
             y_pred_list.extend(pred.argmax(1).cpu().numpy())
+
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
             
             # Backpropagation
             optimizer.zero_grad()
@@ -155,12 +173,16 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
     
+    train_loss /= num_batches
+    correct /= size
+    g_train_loss.append(train_loss)
+    g_train_acc.append(correct)
     print("-" * 40)
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
 def test(dataloader, model, loss_fn, device):
-    global best_acc
+    global best_acc, g_test_loss, g_test_acc
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
@@ -182,7 +204,9 @@ def test(dataloader, model, loss_fn, device):
         correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
     test_loss /= num_batches
+    g_test_loss.append(test_loss)
     correct /= size
+    g_test_acc.append(correct)
     if correct > best_acc:
         best_acc = correct
         print("update best acc:", best_acc)
@@ -191,6 +215,26 @@ def test(dataloader, model, loss_fn, device):
         print(f"Saved Best PyTorch Model State to {best_model_name} \n")
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+
+
+def draw_acc(train_loss, test_loss, train_acc, test_acc):
+        num_epochs = len(train_loss)
+
+        plt.plot(range(1, num_epochs + 1), train_loss, 'r', label='train loss')
+        plt.plot(range(1, num_epochs + 1), test_loss, 'b', label='val loss')
+
+        plt.plot(range(1, num_epochs + 1), train_acc, 'g', label='train acc')
+        plt.plot(range(1, num_epochs + 1), test_acc, 'k', label='val acc')
+
+        plt.title("Acc and Loss of each epoch")
+        plt.xlabel("Training Epochs")
+        plt.ylabel("Acc & Loss")
+        plt.legend(loc="upper right")
+        plt.grid(True)
+        plt.legend()
+        plt.savefig('model.jpg')
+        plt.clf()
+        plt.close()
 
 
 if __name__ == '__main__':
