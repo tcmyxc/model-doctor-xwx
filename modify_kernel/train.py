@@ -21,8 +21,10 @@ import os
 import datetime
 
 import numpy as np
+import time
 
 import matplotlib
+from trainers.cls_trainer import print_time
 
 # 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
 matplotlib.use('Agg')
@@ -108,6 +110,7 @@ def main():
     )
 
     for t in range(epochs):
+        epoch_begin_time = time.time()
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print(f"\nEpoch {t+1}")
         print("[INFO] lr is:", cur_lr)
@@ -117,6 +120,7 @@ def main():
         scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
+        print_time(time.time()-epoch_begin_time, epoch=True)
         
     print("Done!")
 
