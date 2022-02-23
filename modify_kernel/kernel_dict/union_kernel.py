@@ -28,4 +28,4 @@ for k, a_v in a.items():
 print("-"*40)
 for k, v in b.items():
     print(k, v)
-# np.save("kernel_dict_label_89.npy", b)
+np.save("kernel_dict_label_89.npy", b)

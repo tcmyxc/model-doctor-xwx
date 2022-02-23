@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 #               2, 16, 20, 22, 30, 38, 56, 59,
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
-mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_9.npy"
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_89.npy"  # label_8&9
 modify_dict = np.load(mask_path, allow_pickle=True).item()
 
 print("-"*40)
@@ -81,12 +81,7 @@ def main():
         model_name=model_name,
         model_layers=model_layers
     )
-    # for layer in model.modules():
-    #     if(isinstance(layer, nn.Conv2d)):
-    #         print(layer.keys())
-    #         break
-    # print(modules)
-    # return
+    
     cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth')
     if not os.path.exists(cp_path):
         print("=" * 40)
@@ -106,11 +101,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    scheduler = get_lr_scheduler(optimizer, True)
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer=optimizer,
-    #     T_max=epochs
-    # )
+    # scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=epochs
+    )
 
     for t in range(epochs):
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
