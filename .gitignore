@@ -9,3 +9,4 @@ nohup.out
 **/nohup.out
 *.xls
 *.pth
+*.npy

@@ -33,9 +33,13 @@ import numpy as np
 #               2, 16, 20, 22, 30, 38, 56, 59,
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
-mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict.npy"
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_9.npy"
 modify_dict = np.load(mask_path, allow_pickle=True).item()
-# print(modify_dict)
+
+print("-"*40)
+for k, v in modify_dict.items():
+    print(k, v)
+print("-"*40)
 
 threshold = 0.5
 best_acc = 0
@@ -137,6 +141,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
             loss.backward()
 
             for layer in modify_dict.keys():
+                if layer <= 19:
+                    continue
+                # print("layer:", layer)
                 for kernel_index in range(modify_dict[layer][0]):
                     if kernel_index not in modify_dict[layer][1]:
                         modules[int(layer)].weight.grad[kernel_index, ::] = 0

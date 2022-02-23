@@ -40,7 +40,7 @@ for layer in range(len(modules)):
         mask_root_path = os.path.join(result_path, str(layer), str(label))
         method_name = 'inputs_label{}_layer{}'.format(label, layer)
         mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
-        if label == 9:
+        if label == 5:
             data = np.load(mask_path)
             # print(f"layer {layer}, label {label}", np.where(data==1))
             kernel_num = data.size
@@ -50,4 +50,5 @@ for layer in range(len(modules)):
             kernel_val.append(kernel_valid)
             kernel_dict[layer] = kernel_val
 
-np.save("kernel_dict.npy", kernel_dict)
+np.save("kernel_dict_label_5.npy", kernel_dict)
+# print(kernel_dict)
