@@ -1,16 +1,19 @@
 import numpy as np
+import os
 
-label_list = [8, 9]
+label_list = [5, 6789]
 
 # for label in label_list:
 #     mask_path_pattern = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_{}.npy".format(label)
 #     modify_dict = np.load(mask_path_pattern, allow_pickle=True).item()
 #     print(label, ":", modify_dict)
-mask_path_label_8 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_8.npy"
-mask_path_label_9 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_9.npy"
+mask_path_label_7 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{label_list[0]}.npy"
+mask_path_label_89 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{label_list[1]}.npy"
+print(mask_path_label_7)
+print(mask_path_label_89)
 
-a = np.load(mask_path_label_8, allow_pickle=True).item()
-b = np.load(mask_path_label_9, allow_pickle=True).item()
+a = np.load(mask_path_label_7, allow_pickle=True).item()
+b = np.load(mask_path_label_89, allow_pickle=True).item()
 
 print("-"*40)
 for k, v in a.items():
@@ -28,4 +31,8 @@ for k, a_v in a.items():
 print("-"*40)
 for k, v in b.items():
     print(k, v)
-# np.save("kernel_dict_label_89.npy", b)
+
+save_root = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict"
+result_name = f"kernel_dict_label_{label_list[0]}{label_list[1]}.npy"
+result_name = os.path.join(save_root, result_name)
+np.save(result_name, b)
