@@ -169,7 +169,7 @@ alexnet 只有5层卷积
 
 
 # ResNet32+Cifar-10-lt-ir100（直接训练）
-- CE loss：acc1 is `69.34%`, err rate is `30.66%`, CB论文可以做到 err `29.64%`
+- CE loss，**baseline**: acc1 is `69.34%`, err rate is `30.66%`, CB论文可以做到 err `29.64%`
 - REFL
     - th=0.5: acc1 is 68.69%
     - th=0.4: acc1 is 70.72%, err rate is 29.28%; acc1 is **71.82%**, err1 is **28.18%**（自定义学习率）
@@ -221,6 +221,7 @@ alexnet 只有5层卷积
 - 挑选卷积核（最后10层）
     - 选最后两个类
         - 自定义学习率, th=0.5, fl: 72.93%
+        - 自定义学习率, th=0.5:  
 
 
 # ResNet32+Cifar-100-lt-ir100（直接训练）

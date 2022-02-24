@@ -145,8 +145,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
         with torch.set_grad_enabled(True):
             # Compute prediction error
             pred = model(X)
-            # loss = loss_fn(pred, y, threshold=threshold)
-            loss = focal_loss(pred, y)
+            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = focal_loss(pred, y)
 
             train_loss += loss.item()
         
@@ -197,8 +197,8 @@ def test(dataloader, model, loss_fn, device):
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
             pred = model(X)
-            # loss = loss_fn(pred, y, threshold=threshold)
-            loss = focal_loss(pred, y)
+            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = focal_loss(pred, y)
 
             test_loss += loss.item()
 
