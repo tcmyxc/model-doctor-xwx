@@ -103,11 +103,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    # scheduler = get_lr_scheduler(optimizer, True)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=epochs
-    )
+    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=epochs
+    # )
 
     for t in range(epochs):
         epoch_begin_time = time.time()
@@ -145,7 +145,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
         with torch.set_grad_enabled(True):
             # Compute prediction error
             pred = model(X)
-            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = loss_fn(pred, y, threshold=threshold)
+            loss = focal_loss(pred, y)
 
             train_loss += loss.item()
         
@@ -196,7 +197,10 @@ def test(dataloader, model, loss_fn, device):
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
             pred = model(X)
-            test_loss += loss_fn(pred, y, threshold=threshold).item()
+            # loss = loss_fn(pred, y, threshold=threshold)
+            loss = focal_loss(pred, y)
+
+            test_loss += loss.item()
 
         y_pred_list.extend(pred.argmax(1).cpu().numpy())
 

@@ -6,6 +6,7 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=4.5=1_gnu
+  - autopep8=1.6.0=pyhd3eb1b0_0
   - blas=1.0=mkl
   - bzip2=1.0.8=h7b6447c_0
   - ca-certificates=2021.10.26=h06a4308_2
@@ -48,6 +49,7 @@ dependencies:
   - openssl=1.1.1m=h7f8727e_0
   - pillow=8.3.1=py36h2c7a002_0
   - pip=21.2.2=py36h06a4308_0
+  - pycodestyle=2.8.0=pyhd3eb1b0_0
   - python=3.6.13=h12debd9_1
   - pytorch=1.10.1=py3.6_cuda11.3_cudnn8.2.0_0
   - pytorch-mutex=1.0=cuda
@@ -56,6 +58,7 @@ dependencies:
   - six=1.16.0=pyhd3eb1b0_0
   - sqlite=3.36.0=hc218d9a_0
   - tk=8.6.11=h1ccaba5_0
+  - toml=0.10.2=pyhd3eb1b0_0
   - torchaudio=0.10.1=py36_cu113
   - torchvision=0.11.2=py36_cu113
   - typing_extensions=3.10.0.2=pyh06a4308_0
