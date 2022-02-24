@@ -41,7 +41,7 @@ import matplotlib.pyplot as plt
 #               2, 16, 20, 22, 30, 38, 56, 59,
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
-mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_89.npy"  # label_8&9
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_89.npy"  # label_8_9
 modify_dict = np.load(mask_path, allow_pickle=True).item()
 
 print("-"*40)

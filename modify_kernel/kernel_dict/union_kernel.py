@@ -6,8 +6,8 @@ label_list = [8, 9]
 #     mask_path_pattern = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_{}.npy".format(label)
 #     modify_dict = np.load(mask_path_pattern, allow_pickle=True).item()
 #     print(label, ":", modify_dict)
-mask_path_label_8 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_8.npy"
-mask_path_label_9 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_9.npy"
+mask_path_label_8 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_8.npy"
+mask_path_label_9 = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_9.npy"
 
 a = np.load(mask_path_label_8, allow_pickle=True).item()
 b = np.load(mask_path_label_9, allow_pickle=True).item()
@@ -28,4 +28,4 @@ for k, a_v in a.items():
 print("-"*40)
 for k, v in b.items():
     print(k, v)
-np.save("kernel_dict_label_89.npy", b)
+# np.save("kernel_dict_label_89.npy", b)

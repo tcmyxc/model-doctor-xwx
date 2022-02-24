@@ -65,7 +65,8 @@ class ImageSift:
         # print(self.scores)
         # print(self.nums)
 
-        image_dir = os.path.join(config.data_cifar10_lt_ir100, 'test')
+        # 训练集
+        image_dir = os.path.join(config.data_cifar10_lt_ir100, 'train')
 
         class_names = sorted([d.name for d in os.scandir(image_dir) if d.is_dir()])
 
@@ -94,8 +95,8 @@ def sift_image(data_name, model_name, model_path, result_path):
     model.to(device)
     model.eval()
 
-    # data，在测试集上面筛选是否合适？？？
-    data_loader, _ = loaders.load_data(data_name=data_name, data_type='test')
+    # data，训练集
+    data_loader, _ = loaders.load_data(data_name=data_name, data_type='train')
 
     image_sift = ImageSift(class_nums=cfg['model']['num_classes'],
                            image_nums=20,
@@ -112,7 +113,7 @@ def sift_image(data_name, model_name, model_path, result_path):
         image_sift(outputs=outputs, labels=labels, names=names)
 
     print('\n', end='', flush=True)
-    image_sift.save_image(result_path)  # 保存低置信度图片
+    image_sift.save_image(result_path)  # 保存图片
 
 
 def main():
