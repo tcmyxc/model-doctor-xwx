@@ -103,11 +103,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    scheduler = get_lr_scheduler(optimizer, True)
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer=optimizer,
-    #     T_max=epochs
-    # )
+    # scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=epochs
+    )
 
     for t in range(epochs):
         epoch_begin_time = time.time()
@@ -144,7 +144,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
 
         with torch.set_grad_enabled(True):
             # Compute prediction error
-            pred = model(X)
+            pred = model(X)  # 网络前向计算
             loss = loss_fn(pred, y, threshold=threshold)
             # loss = focal_loss(pred, y)
 
@@ -156,18 +156,18 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
             
             # Backpropagation
             optimizer.zero_grad()
-            loss.backward()
+            loss.backward()  # 得到模型中参数对当前输入的梯度
 
             for layer in modify_dict.keys():
-                if layer <= 19:
-                    continue
+                # if layer <= 19:
+                #     continue
                 # print("layer:", layer)
                 for kernel_index in range(modify_dict[layer][0]):
                     if kernel_index not in modify_dict[layer][1]:
                         modules[int(layer)].weight.grad[kernel_index, ::] = 0
             
 
-            optimizer.step()
+            optimizer.step()  # 更新参数
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
