@@ -26,6 +26,9 @@ import time
 import matplotlib
 from trainers.cls_trainer import print_time
 
+from configs import config
+import json
+
 # 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -41,14 +44,8 @@ import matplotlib.pyplot as plt
 #               2, 16, 20, 22, 30, 38, 56, 59,
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
-mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_789.npy"  # label_8_9
-modify_dict = np.load(mask_path, allow_pickle=True).item()
 
-print("-"*40)
-for k, v in modify_dict.items():
-    print(k, v)
-print("-"*40)
-
+modify_dicts = []
 threshold = 0.5
 best_acc = 0
 g_train_loss, g_train_acc = [], []
@@ -63,6 +60,14 @@ def main():
     weight_decay = 5e-4
     epochs = 200
     model_layers = range(0, 30)
+    
+    cfg = json.load(open('../configs/config_trainer.json'))[data_name]
+
+    num_classes=cfg['model']['num_classes']
+    for cls in range(num_classes):
+        mask_path_patten = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{cls}.npy"
+        modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
+        modify_dicts.append(modify_dict)
 
     # device
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -74,8 +79,8 @@ def main():
     # model
     model = models.load_model(
         model_name=model_name,
-        in_channels=3,
-        num_classes=10
+        in_channels=cfg['model']['in_channels'],
+        num_classes=num_classes
     )
 
     modules = models.load_modules(
@@ -141,33 +146,44 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
+        optimizer.zero_grad()
 
-        with torch.set_grad_enabled(True):
-            # Compute prediction error
-            pred = model(X)  # 网络前向计算
-            loss = loss_fn(pred, y, threshold=threshold)
-            # loss = focal_loss(pred, y)
+        for cls, modify_dict in enumerate(modify_dicts):
+            with torch.set_grad_enabled(True):
+                # 找到对应类别的图片
+                x_pos = (y==cls).nonzero().squeeze()
+                # 处理只有一个样本的情况
+                if x_pos.shape == torch.Size([]):
+                    x_pos = x_pos.unsqueeze(dim=0)
+                # 处理没有样本的情况
+                if min(x_pos.shape) == 0:
+                    continue
+                x_cls_i = torch.index_select(X, dim=0, index=x_pos)
+                y_cls_i = torch.index_select(y, dim=0, index=x_pos)
+                # Compute prediction error
+                pred = model(x_cls_i)  # 网络前向计算
+                loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                # loss = focal_loss(pred, y)
 
-            train_loss += loss.item()
-        
-            y_pred_list.extend(pred.argmax(1).cpu().numpy())
-
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                train_loss += loss.item()
             
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()  # 得到模型中参数对当前输入的梯度
+                y_pred_list.extend(pred.argmax(1).cpu().numpy())
 
-            for layer in modify_dict.keys():
-                if layer <= 19:
-                    modules[int(layer)].weight.grad[:] = 0
-                # print("layer:", layer)
-                for kernel_index in range(modify_dict[layer][0]):
-                    if kernel_index not in modify_dict[layer][1]:
-                        modules[int(layer)].weight.grad[kernel_index, ::] = 0
+                correct += (pred.argmax(1) == y_cls_i).type(torch.float).sum().item()
+                
+                # Backpropagation
+                loss.backward()  # 得到模型中参数对当前输入的梯度
+            
+                for layer in modify_dict.keys():
+                    if layer <= 19:
+                        modules[int(layer)].weight.grad[:] = 0
+                    # # print("layer:", layer)
+                    for kernel_index in range(modify_dict[layer][0]):
+                        if kernel_index not in modify_dict[layer][1]:
+                            modules[int(layer)].weight.grad[kernel_index, ::] = 0
             
 
-            optimizer.step()  # 更新参数
+                optimizer.step()  # 更新参数
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
