@@ -33,22 +33,24 @@ model = models.load_model(model_name=model_name,
 # modules
 modules = models.load_modules(model=model, model_name=model_name, model_layers=None)  # no first conv
 
-kernel_dict = {}
+for idx in range(cfg['model']['num_classes']):
+    kernel_dict = {}
 
-for layer in range(len(modules)):
-    for label in range(cfg['model']['num_classes']):
-        mask_root_path = os.path.join(result_path, str(layer), str(label))
-        method_name = 'inputs_label{}_layer{}'.format(label, layer)
-        mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
-        if label == 9:
-            data = np.load(mask_path)
-            # print(f"layer {layer}, label {label}", np.where(data==1))
-            kernel_num = data.size
-            kernel_valid = np.where(np.isin(data, 1))[0].tolist()
-            kernel_val = []
-            kernel_val.append(kernel_num)
-            kernel_val.append(kernel_valid)
-            kernel_dict[layer] = kernel_val
+    for layer in range(len(modules)):
+        for label in range(cfg['model']['num_classes']):
+            mask_root_path = os.path.join(result_path, str(layer), str(label))
+            method_name = 'inputs_label{}_layer{}'.format(label, layer)
+            mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
+            if label == idx:
+                data = np.load(mask_path)
+                # print(f"layer {layer}, label {label}", np.where(data==1))
+                kernel_num = data.size
+                kernel_valid = np.where(np.isin(data, 1))[0].tolist()
+                kernel_val = []
+                kernel_val.append(kernel_num)
+                kernel_val.append(kernel_valid)
+                kernel_dict[layer] = kernel_val
 
-np.save("kernel_dict_label_9.npy", kernel_dict)
-# print(kernel_dict)
+    np.save(f"kernel_dict_label_{idx}.npy", kernel_dict)
+    print(kernel_dict)
+    print("-"*40)

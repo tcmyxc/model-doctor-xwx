@@ -41,7 +41,7 @@ import matplotlib.pyplot as plt
 #               2, 16, 20, 22, 30, 38, 56, 59,
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
-mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_89.npy"  # label_8_9
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_789.npy"  # label_8_9
 modify_dict = np.load(mask_path, allow_pickle=True).item()
 
 print("-"*40)
@@ -103,11 +103,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    # scheduler = get_lr_scheduler(optimizer, True)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=epochs
-    )
+    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=epochs
+    # )
 
     for t in range(epochs):
         epoch_begin_time = time.time()
@@ -159,8 +159,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
             loss.backward()  # 得到模型中参数对当前输入的梯度
 
             for layer in modify_dict.keys():
-                # if layer <= 19:
-                #     continue
+                if layer <= 19:
+                    continue
                 # print("layer:", layer)
                 for kernel_index in range(modify_dict[layer][0]):
                     if kernel_index not in modify_dict[layer][1]:

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-label_list = [5, 6789]
+label_list = [6, 789]
 
 # for label in label_list:
 #     mask_path_pattern = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_{}.npy".format(label)
@@ -30,9 +30,9 @@ for k, a_v in a.items():
                 b[k][-1].append(internal_v)
 print("-"*40)
 for k, v in b.items():
-    print(k, v)
+    print(k, len(v[-1]))
 
 save_root = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict"
 result_name = f"kernel_dict_label_{label_list[0]}{label_list[1]}.npy"
 result_name = os.path.join(save_root, result_name)
-np.save(result_name, b)
+# np.save(result_name, b)
