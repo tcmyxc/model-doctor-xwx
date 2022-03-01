@@ -55,7 +55,7 @@ def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-4
+    lr = 1e-5
     momentum = 0.9
     weight_decay = 5e-4
     epochs = 200
@@ -251,7 +251,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model.jpg')
+        plt.savefig('model_lr1e-5.jpg')
         plt.clf()
         plt.close()
 

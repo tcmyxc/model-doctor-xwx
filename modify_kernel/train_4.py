@@ -45,6 +45,7 @@ import matplotlib.pyplot as plt
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
 
+# 只调整后十层
 modify_dicts = []
 threshold = 0.5
 best_acc = 0
@@ -55,7 +56,7 @@ def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-4
+    lr = 0.01
     momentum = 0.9
     weight_decay = 5e-4
     epochs = 200
@@ -175,9 +176,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
                 loss.backward()  # 得到模型中参数对当前输入的梯度
             
                 for layer in modify_dict.keys():
-                    # if layer <= 19:
-                    #     modules[int(layer)].weight.grad[:] = 0
-                    # # # print("layer:", layer)
+                    if layer <= 19:
+                        continue
+                        # modules[int(layer)].weight.grad[:] = 0
+                    # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
                         if kernel_index not in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
@@ -251,7 +253,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model.jpg')
+        plt.savefig('model_tmp_2.jpg')
         plt.clf()
         plt.close()
 

@@ -45,6 +45,7 @@ import matplotlib.pyplot as plt
 #               27, 28, 36, 40, 46, 50]],  # 579, 34个
 # }
 
+# 反向调整卷积核
 modify_dicts = []
 threshold = 0.5
 best_acc = 0
@@ -179,7 +180,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
                     #     modules[int(layer)].weight.grad[:] = 0
                     # # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
-                        if kernel_index not in modify_dict[layer][1]:
+                        if kernel_index in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
             
 
@@ -251,7 +252,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model.jpg')
+        plt.savefig('model_lr1e-4-reverse.jpg')
         plt.clf()
         plt.close()
 
