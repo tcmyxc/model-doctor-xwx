@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
 # }
 
 modify_dicts = []
-threshold = 0.5
+threshold = 0.4
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
@@ -55,7 +55,7 @@ def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-4
+    lr = 1e-5
     momentum = 0.9
     weight_decay = 5e-4
     epochs = 200
