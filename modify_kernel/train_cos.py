@@ -8,15 +8,12 @@ from loss.rfl import reduced_focal_loss
 from loss.dfl import dual_focal_loss
 
 import torch
-import torch.nn as nn
 from torch import optim
 import models
 import loaders
 
-from utils.lr_util import get_lr_scheduler
 from sklearn.metrics import classification_report
 
-from tqdm import tqdm
 import os
 import datetime
 
@@ -33,18 +30,8 @@ import json
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# 梯度值
-# modify_dict = {
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62]],  # label_89, 22个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 
-#     #           0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62,
-#     #           2, 3, 5, 8, 10, 11, 12, 16, 22, 30, 32, 35, 39, 59, 60]],  # label_789, 37个
-#     -1: [64, [3, 4, 5, 8, 10, 11, 12, 13, 17, 19, 29, 32, 35, 37, 39, 42, 47, 49, 53, 60,
-#               2, 16, 20, 22, 30, 38, 56, 59,
-#               27, 28, 36, 40, 46, 50]],  # 579, 34个
-# }
 
+# 使用余弦退火学习率
 modify_dicts = []
 threshold = 0.5
 best_acc = 0
@@ -108,7 +95,7 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    # scheduler = get_lr_scheduler(optimizer, True)
+    
     scheduler = optim.lr_scheduler.CosineAnnealingLR(
         optimizer=optimizer,
         T_max=epochs
