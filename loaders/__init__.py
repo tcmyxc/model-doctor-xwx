@@ -11,7 +11,8 @@ from loaders.mnin_loader import load_images_masks as load_mnin_images_masks
 # for long-tailed dataset
 from loaders.imagenet_lt_loader import load_images as load_imagenet_lt_images
 
-from loaders.cifar_lt_loader import load_cifar_lt_images
+# from loaders.cifar_lt_loader import load_cifar_lt_images
+from loaders.cifar_lt_loader import load_class_balanced_cifar_lt_images as load_cifar_lt_images
 
 
 def load_data(data_name, data_type=None, with_mask=False):

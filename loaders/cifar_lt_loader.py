@@ -94,7 +94,7 @@ def load_class_balanced_cifar_lt_images(data_type, dataset_name):
         data_loader = DataLoader(dataset=data_set,
                              batch_size=128,
                              num_workers=4,
-                             shuffle=True)
+                             shuffle=False)
 
    
     return data_loader, len(data_set)
