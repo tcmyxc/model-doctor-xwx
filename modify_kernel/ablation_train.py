@@ -30,8 +30,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # 消融实验，只使用类别平衡采样和REFL，不更新卷积核
+# 1. th=0.5, lr=1e-2: 77.20%
+# 2. th=0.5, lr=1e-4: 
 
+lr = 1e-3
 threshold = 0.5
+
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
@@ -40,7 +44,6 @@ def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-5
     momentum = 0.9
     weight_decay = 5e-4
     epochs = 200
@@ -51,7 +54,7 @@ def main():
     num_classes=cfg['model']['num_classes']
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -118,7 +121,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
-    size = len(dataloader.dataset)
+    # size = len(dataloader.dataset)
+    size = 50000
     num_batches = len(dataloader)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
@@ -209,7 +213,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model_cbs_refl.jpg')
+        plt.savefig('model_ablation.jpg')
         plt.clf()
         plt.close()
 

@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
 # }
 
 modify_dicts = []
-threshold = 0.4
+threshold = 0.5
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
@@ -251,7 +251,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model.jpg')
+        plt.savefig('model_lr1e-5.jpg')
         plt.clf()
         plt.close()
 
