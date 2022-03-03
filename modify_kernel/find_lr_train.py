@@ -32,7 +32,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-lr = 1e-2
+lr = 1e-4
 threshold = 0.5
 epochs = 20
 
@@ -112,7 +112,7 @@ def main():
         test(data_loaders["val"], model, loss_fn, device)
         scheduler.step()
 
-        draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
+        # draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
         draw_lr_loss(g_lr_list, g_train_loss, g_test_loss)
         print_time(time.time()-epoch_begin_time, epoch=True)
         
@@ -248,8 +248,12 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
 def draw_lr_loss(lr_list, train_loss, test_loss):
     plt.plot(lr_list, train_loss, label='train loss')
     plt.plot(lr_list, test_loss, label='val loss')
-    plt.xlabel("lr")
-    plt.ylabel("loss")
+    
+    plt.xlabel("Learning rate")
+    plt.ylabel("Loss")
+    plt.legend(loc="upper right")
+    plt.grid(True)
+    plt.legend()
     plt.savefig("lr_loss.jpg")
     plt.clf()
     plt.close()
@@ -257,10 +261,7 @@ def draw_lr_loss(lr_list, train_loss, test_loss):
 
 def adjust_learning_rate(epoch):
     """Sets the learning rate, 在20轮内找一个合适的学习率"""
-    base_lr=0
-    max_lr=lr
-    k = (max_lr - base_lr) / epochs
-    decay = k * epoch + base_lr
+    decay = epoch / epochs
     return decay
 
 

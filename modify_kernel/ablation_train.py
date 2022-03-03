@@ -33,9 +33,10 @@ import matplotlib.pyplot as plt
 # 1. th=0.5, lr=1e-2: 77.20%
 # 2. th=0.5, lr=1e-3: 77.56%
 # 3. th=0.5, lr=1e-4: 77.57%
-# 4. th=0.5, lr=1e-5: 
+# 4. th=0.5, lr=1e-5: 77.32%
+# 5. th=0.5, lr=5e-4: 
 
-lr = 1e-5
+lr = 5e-4
 threshold = 0.5
 
 
