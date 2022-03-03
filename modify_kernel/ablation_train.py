@@ -31,10 +31,11 @@ import matplotlib.pyplot as plt
 
 # 消融实验，只使用类别平衡采样和REFL，不更新卷积核
 # 1. th=0.5, lr=1e-2: 77.20%
-# 2. th=0.5, lr=1e-4: 
+# 2. th=0.5, lr=1e-3: 77.56%
 
-lr = 1e-3
+lr = 1e-4
 threshold = 0.5
+
 
 best_acc = 0
 g_train_loss, g_train_acc = [], []

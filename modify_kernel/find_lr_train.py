@@ -1,65 +1,54 @@
 import sys
 sys.path.append('/nfs/xwx/model-doctor-xwx')
 
+import torch
+import torch.nn as nn
+from torch import optim
+from torch.optim import lr_scheduler
+
+from sklearn.metrics import classification_report
+
+import os
+import datetime
+import numpy as np
+import time
+import matplotlib
+
+import models
+import loaders
+
+from trainers.cls_trainer import print_time
+
 from loss.fl import focal_loss
 from loss.efl import equalized_focal_loss
 from loss.refl import reduce_equalized_focal_loss
 from loss.rfl import reduced_focal_loss
 from loss.dfl import dual_focal_loss
 
-import torch
-import torch.nn as nn
-from torch import optim
-import models
-import loaders
-
-from utils.lr_util import get_lr_scheduler
-from sklearn.metrics import classification_report
-
-from tqdm import tqdm
-import os
-import datetime
-
-import numpy as np
-import time
-
-import matplotlib
-from trainers.cls_trainer import print_time
-
-from configs import config
 import json
 
 # 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# 梯度值
-# modify_dict = {
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62]],  # label_89, 22个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 
-#     #           0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62,
-#     #           2, 3, 5, 8, 10, 11, 12, 16, 22, 30, 32, 35, 39, 59, 60]],  # label_789, 37个
-#     -1: [64, [3, 4, 5, 8, 10, 11, 12, 13, 17, 19, 29, 32, 35, 37, 39, 42, 47, 49, 53, 60,
-#               2, 16, 20, 22, 30, 38, 56, 59,
-#               27, 28, 36, 40, 46, 50]],  # 579, 34个
-# }
 
-# 反向调整卷积核
-modify_dicts = []
+lr = 1e-2
 threshold = 0.5
+epochs = 20
+
+
+modify_dicts = []
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
+g_lr_list = []
 
 def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-4
     momentum = 0.9
     weight_decay = 5e-4
-    epochs = 200
     model_layers = range(0, 30)
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
@@ -111,22 +100,20 @@ def main():
         weight_decay=weight_decay
     )
     scheduler = get_lr_scheduler(optimizer, True)
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer=optimizer,
-    #     T_max=epochs
-    # )
 
     for t in range(epochs):
         epoch_begin_time = time.time()
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print(f"\nEpoch {t+1}")
         print("[INFO] lr is:", cur_lr)
+        g_lr_list.append(cur_lr)
         print("-"*40)
         train(data_loaders["train"], model, loss_fn, optimizer, modules, device)
         test(data_loaders["val"], model, loss_fn, device)
         scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
+        draw_lr_loss(g_lr_list, g_train_loss, g_test_loss)
         print_time(time.time()-epoch_begin_time, epoch=True)
         
     print("Done!")
@@ -180,7 +167,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
                     #     modules[int(layer)].weight.grad[:] = 0
                     # # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
-                        if kernel_index in modify_dict[layer][1]:
+                        if kernel_index not in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
             
 
@@ -230,11 +217,12 @@ def test(dataloader, model, loss_fn, device):
     if correct >= best_acc:
         best_acc = correct
         print("[FEAT] update best acc:", best_acc)
-        best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
-        torch.save(model.state_dict(), best_model_name)
-        print(f"Saved Best PyTorch Model State to {best_model_name} \n")
+        # best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
+        # torch.save(model.state_dict(), best_model_name)
+        # print(f"Saved Best PyTorch Model State to {best_model_name} \n")
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc):
@@ -252,10 +240,38 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model_lr1e-4-reverse.jpg')
+        plt.savefig('model_lr1e-5.jpg')
         plt.clf()
         plt.close()
 
+
+def draw_lr_loss(lr_list, train_loss, test_loss):
+    plt.plot(lr_list, train_loss, label='train loss')
+    plt.plot(lr_list, test_loss, label='val loss')
+    plt.xlabel("lr")
+    plt.ylabel("loss")
+    plt.savefig("lr_loss.jpg")
+    plt.clf()
+    plt.close()
+
+
+def adjust_learning_rate(epoch):
+    """Sets the learning rate, 在20轮内找一个合适的学习率"""
+    base_lr=0
+    max_lr=lr
+    k = (max_lr - base_lr) / epochs
+    decay = k * epoch + base_lr
+    return decay
+
+
+def get_lr_scheduler(optimizer, verbose=False):
+    scheduler = lr_scheduler.LambdaLR(
+        optimizer,
+        lr_lambda=adjust_learning_rate,
+        verbose=verbose
+    )
+
+    return scheduler
 
 if __name__ == '__main__':
     main()

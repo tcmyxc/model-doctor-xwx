@@ -48,7 +48,7 @@ def main():
         num_classes=10
     )
     
-    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220301-051630-acc0.7481.pth')
+    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220302-205325-acc0.7756.pth')
     if not os.path.exists(cp_path):
         print("=" * 40)
         print("模型文件的路径不存在, 请检查")
@@ -63,7 +63,7 @@ def main():
     loss_fn = reduce_equalized_focal_loss
 
     model.eval()
-    test(data_loaders["val"], model, loss_fn, device)
+    test(data_loaders["train"], model, loss_fn, device)
 
 
 def test(dataloader, model, loss_fn, device):
