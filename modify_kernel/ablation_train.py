@@ -30,11 +30,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # 消融实验，只使用类别平衡采样和REFL，不更新卷积核
-# 1. th=0.5, lr=1e-2: 77.20%
-# 2. th=0.5, lr=1e-3: 77.56%
-# 3. th=0.5, lr=1e-4: 77.57%
-# 4. th=0.5, lr=1e-5: 77.32%
-# 5. th=0.5, lr=5e-4: 
+# baseline: 71.82%
+# 1. th=0.5, lr=1e-2: 77.20%, Epoch 2
+# 2. th=0.5, lr=1e-3: 77.56%, Epoch 6
+# 3. th=0.5, lr=1e-4: 77.57%, Epoch 44
+# 4. th=0.5, lr=1e-5: 77.32%, Epoch 161
+# 5. th=0.5, lr=5e-4: 77.35%, Epoch 6
 
 lr = 5e-4
 threshold = 0.5
