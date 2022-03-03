@@ -33,20 +33,13 @@ import json
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# 梯度值
-# modify_dict = {
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53]],  # label_9, 11个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62]],  # label_89, 22个
-#     # -1: [64, [4, 19, 20, 27, 28, 36, 38, 40, 46, 50, 53, 
-#     #           0, 1, 18, 31, 33, 44, 52, 54, 55, 56, 62,
-#     #           2, 3, 5, 8, 10, 11, 12, 16, 22, 30, 32, 35, 39, 59, 60]],  # label_789, 37个
-#     -1: [64, [3, 4, 5, 8, 10, 11, 12, 13, 17, 19, 29, 32, 35, 37, 39, 42, 47, 49, 53, 60,
-#               2, 16, 20, 22, 30, 38, 56, 59,
-#               27, 28, 36, 40, 46, 50]],  # 579, 34个
-# }
+# 此脚本用于微调模型
+
+lr = 1e-5
+threshold = 0.5
+
 
 modify_dicts = []
-threshold = 0.5
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
@@ -55,10 +48,9 @@ def main():
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    lr = 1e-5
     momentum = 0.9
     weight_decay = 5e-4
-    epochs = 200
+    epochs = 50
     model_layers = range(0, 30)
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
@@ -115,14 +107,14 @@ def main():
     #     T_max=epochs
     # )
 
-    for t in range(epochs):
+    for epoch in range(epochs):
         epoch_begin_time = time.time()
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
-        print(f"\nEpoch {t+1}")
+        print(f"\nEpoch {epoch+1}")
         print("[INFO] lr is:", cur_lr)
         print("-"*40)
         train(data_loaders["train"], model, loss_fn, optimizer, modules, device)
-        test(data_loaders["val"], model, loss_fn, device)
+        test(data_loaders["val"], model, loss_fn, optimizer, epoch, device)
         scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc)
@@ -197,7 +189,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
-def test(dataloader, model, loss_fn, device):
+def test(dataloader, model, loss_fn, optimizer, epoch, device):
     global best_acc, g_test_loss, g_test_acc
     # 这里加入了 classification_report
     y_pred_list = []
@@ -229,8 +221,16 @@ def test(dataloader, model, loss_fn, device):
     if correct >= best_acc:
         best_acc = correct
         print("[FEAT] update best acc:", best_acc)
+
         best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
-        torch.save(model.state_dict(), best_model_name)
+        model_state = {
+            'epoch': epoch,  # 注意这里的epoch是从0开始的
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'acc': best_acc,
+        }
+        torch.save(model_state, best_model_name)
+
         print(f"Saved Best PyTorch Model State to {best_model_name} \n")
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
