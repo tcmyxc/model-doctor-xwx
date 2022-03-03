@@ -32,8 +32,10 @@ import matplotlib.pyplot as plt
 # 消融实验，只使用类别平衡采样和REFL，不更新卷积核
 # 1. th=0.5, lr=1e-2: 77.20%
 # 2. th=0.5, lr=1e-3: 77.56%
+# 3. th=0.5, lr=1e-4: 77.57%
+# 4. th=0.5, lr=1e-5: 
 
-lr = 1e-4
+lr = 1e-5
 threshold = 0.5
 
 
