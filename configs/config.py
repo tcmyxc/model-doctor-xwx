@@ -23,6 +23,9 @@ data_mini_imagenet_temp = output_data + '/mini_imagenet/temp'
 data_mini_imagenet_10   = output_data + '/mini_imagenet_10/images'
 
 data_imagenet_lt        = output_data + "/ImageNet_LT"
+
+data_inaturalist2018    = output_data + "/iNaturalist2018"
+
 data_cifar10_lt_ir10    = output_data + "/cifar10_lt_ir10/images"
 data_cifar10_lt_ir100   = output_data + "/cifar10_lt_ir100/images"
 
