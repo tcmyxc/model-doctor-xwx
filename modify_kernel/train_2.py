@@ -50,7 +50,7 @@ def main():
     model_name = 'resnet32'
     momentum = 0.9
     weight_decay = 5e-4
-    epochs = 50
+    epochs = 100
     model_layers = range(0, 30)
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
@@ -62,7 +62,7 @@ def main():
         modify_dicts.append(modify_dict)
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
