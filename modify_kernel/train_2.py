@@ -132,7 +132,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
-    size = len(dataloader.dataset)
+    # size = len(dataloader.dataset)
+    size = 50000 # cifar
     num_batches = len(dataloader)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
@@ -251,7 +252,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model_lr1e-5.jpg')
+        plt.savefig('fine-tuning.jpg')
         plt.clf()
         plt.close()
 
