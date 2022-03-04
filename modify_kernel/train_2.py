@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 
 lr = 1e-5
 threshold = 0.5
+epochs = 100
 
 
 modify_dicts = []
@@ -50,7 +51,6 @@ def main():
     model_name = 'resnet32'
     momentum = 0.9
     weight_decay = 5e-4
-    epochs = 100
     model_layers = range(0, 30)
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
