@@ -252,7 +252,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('fine-tuning.jpg')
+        plt.savefig('fine_tuning.jpg')
         plt.clf()
         plt.close()
 
