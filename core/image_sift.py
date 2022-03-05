@@ -81,7 +81,7 @@ class ImageSift:
 
 def sift_image(data_name, model_name, model_path, result_path):
     # device
-    # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
     device = torch.device('cuda:0')
 
     # config
@@ -91,7 +91,7 @@ def sift_image(data_name, model_name, model_path, result_path):
     model = models.load_model(model_name=model_name,
                               in_channels=cfg['model']['in_channels'],
                               num_classes=cfg['model']['num_classes'])
-    model.load_state_dict(torch.load(model_path)['model'])
+    model.load_state_dict(torch.load(model_path))
     model.to(device)
     model.eval()
 
