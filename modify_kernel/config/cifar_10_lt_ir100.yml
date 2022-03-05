@@ -1,0 +1,14 @@
+data_name: cifar-10-lt-ir100
+model_name: resnet32
+image_type: high
+epochs: 50
+lr: 1e-5
+momentum: 0.9
+weight_decay: 5e-4
+model_layer_nums: 30
+threshold: 0.5
+model:
+  num_classes: 10
+  in_channels: 3
+model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/消融实验/自定义学习率-lr1e-4-th-0.5-refl-cbs/best-model-20220303-121641-acc0.7757.pth
+kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict

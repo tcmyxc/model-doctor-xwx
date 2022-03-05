@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 
 lr = 1e-5
 threshold = 0.5
-epochs = 100
+epochs = 50
 
 
 modify_dicts = []
@@ -55,19 +55,22 @@ def main():
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
 
+    # kernel
     num_classes=cfg['model']['num_classes']
     for cls in range(num_classes):
-        mask_path_patten = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{cls}.npy"
+        mask_path_patten = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100/kernel_dict_label_{cls}.npy"
         modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
         modify_dicts.append(modify_dict)
+    
+    print(modify_dicts)
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
     # data
-    data_loaders, _ = loaders.load_data(data_name=data_name)
+    data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
 
     # model
     model = models.load_model(
@@ -76,20 +79,22 @@ def main():
         num_classes=num_classes
     )
 
+    # modules
     modules = models.load_modules(
         model=model,
         model_name=model_name,
         model_layers=model_layers
     )
     
-    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth')
+    # checkpoint
+    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/modify_kernel/消融实验/自定义学习率-lr1e-4-th-0.5-refl-cbs/best-model-20220303-121641-acc0.7757.pth')
     if not os.path.exists(cp_path):
         print("=" * 40)
         print("模型文件的路径不存在, 请检查")
         return
     state = torch.load(cp_path)
    
-    model.load_state_dict(state['model'])
+    model.load_state_dict(state)
     model.to(device)
 
 
@@ -102,10 +107,6 @@ def main():
         weight_decay=weight_decay
     )
     scheduler = get_lr_scheduler(optimizer, True)
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer=optimizer,
-    #     T_max=epochs
-    # )
 
     for epoch in range(epochs):
         epoch_begin_time = time.time()
@@ -122,9 +123,6 @@ def main():
         
     print("Done!")
 
-    # model.eval()
-    # test(data_loaders["val"], model, loss_fn, device)
-
 
 def train(dataloader, model, loss_fn, optimizer, modules, device):
     global g_train_loss, g_train_acc
@@ -136,7 +134,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
     size = 50000 # cifar
     num_batches = len(dataloader)
     model.train()
-    for batch, (X, y) in enumerate(dataloader):
+    for batch, (X, y, _) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
 
         for cls, modify_dict in enumerate(modify_dicts):
@@ -200,7 +198,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for X, y in dataloader:
+    for X, y, _ in dataloader:
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
