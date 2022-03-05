@@ -67,7 +67,8 @@ class LT_Dataset(Dataset):
             sample = self.transform(sample)
 
         # return sample, label, path
-        return sample, label
+        name = os.path.split(path)[1]
+        return sample, label, name
 
 class iNaturalistDataLoader(DataLoader):
     """
