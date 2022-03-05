@@ -220,7 +220,7 @@ def load_class_balanced_images(data_type):
         data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
         sampler = get_sampler()
         data_loader = DataLoader(dataset=data_set,
-                             batch_size=100,
+                             batch_size=8,
                              num_workers=4,
                              shuffle=False,  # shuffle must be false
                              sampler=sampler(data_set, 1))
@@ -289,17 +289,17 @@ if __name__ == "__main__":
 
     loader, size = load_class_balanced_images("train")
     print("dataset size:", size)
-    # cnt = 0
-    # l = []
-    # for idx, samples in enumerate(loader):
-    #     inputs, labels, _ = samples
-    #     l.extend(labels.numpy())
-    #     cnt +=1
-    #     if cnt == 10:
-    #         break
+    cnt = 0
+    l = []
+    for idx, samples in enumerate(loader):
+        inputs, labels, _ = samples
+        l.extend(labels.numpy())
+        cnt +=1
+        if cnt == 125:
+            break
     
-    # print(len(l))
-    # print(np.unique(l))
+    print(len(l))
+    print(np.unique(l))
     
     # dataset = LT_Dataset(dst_root,  test_txt)
     # print("dataset size:", len(dataset))
