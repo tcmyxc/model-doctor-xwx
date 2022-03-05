@@ -13,6 +13,8 @@ from PIL import Image
 sys.path.append('/nfs/xwx/model-doctor-xwx')
 from configs import config
 
+# sampler
+from loaders.ClassAwareSampler import get_sampler
 
 class BalancedSampler(Sampler):
     def __init__(self, buckets, retain_epoch_size=False):
@@ -193,6 +195,47 @@ def load_images(data_type):
     return data_loader, len(data_set)
 
 
+def load_class_balanced_images(data_type):
+    """类别均衡采样(所有类别都采样相同数量的样本)"""
+    assert data_type in ['train', 'test']
+
+    data_dir = config.data_imagenet_lt
+    train_txt= config.data_imagenet_lt + "/ImageNet_LT_train.txt"
+    test_txt= config.data_imagenet_lt + "/ImageNet_LT_test.txt"
+
+    train_trsfm = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+    test_trsfm = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    if data_type == 'train':
+        data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
+        sampler = get_sampler()
+        data_loader = DataLoader(dataset=data_set,
+                             batch_size=100,
+                             num_workers=4,
+                             shuffle=False,  # shuffle must be false
+                             sampler=sampler(data_set, 1))
+    else:
+        data_set = LT_Dataset(data_dir, test_txt, test_trsfm)
+        data_loader = DataLoader(dataset=data_set,
+                             batch_size=8,
+                             num_workers=4,
+                             shuffle=True)
+
+    num_classes = len(np.unique(data_set.targets))
+    assert num_classes == 1000
+    
+    return data_loader, len(data_set)
+
 
 def extract_imagenet_lt_image(src_root, dst_root, mode, txt):
     assert mode in ["train", "test"]
@@ -244,12 +287,19 @@ if __name__ == "__main__":
     #     mode="train", txt=train_txt
     # )
 
-    loader, size = load_images("test")
+    loader, size = load_class_balanced_images("train")
     print("dataset size:", size)
-    for idx, samples in enumerate(loader):
-        inputs, labels = samples
-        print(inputs, labels)
-        break
+    # cnt = 0
+    # l = []
+    # for idx, samples in enumerate(loader):
+    #     inputs, labels, _ = samples
+    #     l.extend(labels.numpy())
+    #     cnt +=1
+    #     if cnt == 10:
+    #         break
+    
+    # print(len(l))
+    # print(np.unique(l))
     
     # dataset = LT_Dataset(dst_root,  test_txt)
     # print("dataset size:", len(dataset))
