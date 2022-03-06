@@ -7,7 +7,6 @@ import sys
 import os
 import torch
 from torch import optim
-import json
 import yaml
 import datetime
 import time
@@ -47,7 +46,8 @@ g_test_loss, g_test_acc = [], []
 def main():
     os.environ["CUDA_VISIBLE_DEVICES"] = '1'
     device = torch.device('cuda:0')
-    cfg = get_cfg()
+    cfg_filename = "cifar_10_lt_ir100.yml"
+    cfg = get_cfg(cfg_filename)
     # sift_image_path = get_sift_image(cfg, device)
     # grad_result_path = find_kernel(cfg, sift_image_path, device)
     # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path)
@@ -71,12 +71,12 @@ def check_path(path, msg=None):
             print(f"\n[INFO] {msg}:", path)
 
 
-def get_cfg():
+def get_cfg(cfg_filename):
     """获取配置"""
     # 获取当前文件所在目录
     curPath = os.path.dirname(os.path.realpath(__file__))
     # 获取yaml文件路径
-    yamlPath = os.path.join(curPath, "config", "cifar_10_lt_ir100.yml")
+    yamlPath = os.path.join(curPath, "config", cfg_filename)
 
     with open(yamlPath, encoding="utf-8") as f:
         cfg = yaml.load(f, Loader)
@@ -102,13 +102,10 @@ def get_sift_image(cfg, device):
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
-    # config
-    local_cfg = json.load(open('configs/config_trainer.json'))[data_name]
-
     # model
     model = models.load_model(model_name=model_name,
-                              in_channels=local_cfg['model']['in_channels'],
-                              num_classes=local_cfg['model']['num_classes'])
+                              in_channels=cfg['model']['in_channels'],
+                              num_classes=cfg['model']['num_classes'])
     model.load_state_dict(torch.load(model_path))
     model.to(device)
     model.eval()
@@ -116,7 +113,7 @@ def get_sift_image(cfg, device):
     # data, 普通的数据加载器
     data_loader, _ = loaders.load_data(data_name=data_name, data_type='train')
 
-    image_sift = ImageSift(class_nums=local_cfg['model']['num_classes'],
+    image_sift = ImageSift(class_nums=cfg['model']['num_classes'],
                            image_nums=20,
                            is_high_confidence=True)
 
@@ -155,13 +152,10 @@ def find_kernel(cfg, sift_image_path, device):
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
-    # config
-    local_cfg = json.load(open('configs/config_trainer.json'))[data_name]
-
     # model
     model = models.load_model(model_name=model_name,
-                              in_channels=local_cfg['model']['in_channels'],
-                              num_classes=local_cfg['model']['num_classes'])
+                              in_channels=cfg['model']['in_channels'],
+                              num_classes=cfg['model']['num_classes'])
     model.load_state_dict(torch.load(model_path))
     model.eval()
     model.to(device)
@@ -171,10 +165,10 @@ def find_kernel(cfg, sift_image_path, device):
     # print("\n modules:", modules)
 
     grad_sift = GradSift(modules=modules,
-                         class_nums=local_cfg['model']['num_classes'],
+                         class_nums=cfg['model']['num_classes'],
                          result_path=result_path)
 
-    data_loader = data_util.load_data(input_path)
+    data_loader = data_util.load_data(data_path=input_path)
     for i, samples in enumerate(data_loader):
         print('\r[{}/{}]'.format(i, len(data_loader)), end='', flush=True)
         inputs, labels, _ = samples
@@ -199,21 +193,19 @@ def union_cls_kernel(cfg, grad_result_path):
     if not os.path.exists(kernel_dict_path):
         os.makedirs(kernel_dict_path)
 
-    # config
-    local_cfg = json.load(open('configs/config_trainer.json'))[data_name]
     # model
     model = models.load_model(model_name=model_name,
-                                in_channels=local_cfg['model']['in_channels'],
-                                num_classes=local_cfg['model']['num_classes'])
+                                in_channels=cfg['model']['in_channels'],
+                                num_classes=cfg['model']['num_classes'])
 
     # modules
     modules = models.load_modules(model=model, model_name=model_name, model_layers=None)  # no first conv
 
-    for idx in range(local_cfg['model']['num_classes']):
+    for idx in range(cfg['model']['num_classes']):
         kernel_dict = {}
 
         for layer in range(len(modules)):
-            for label in range(local_cfg['model']['num_classes']):
+            for label in range(cfg['model']['num_classes']):
                 mask_root_path = os.path.join(result_path, str(layer), str(label))
                 method_name = 'inputs_label{}_layer{}'.format(label, layer)
                 mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
