@@ -8,7 +8,9 @@ from torchvision import transforms
 from loaders.datasets.image_dataset import ImageDataset
 
 
-def load_data(data_path):
+def load_data(data_path, data_name=None):
+    """加载高置信度图片的 dataloader"""
+    # 后期需要根据数据集名称添加不同的 transform
     data_set = ImageDataset(image_dir=data_path,
                             transform=transforms.Compose([
                                 transforms.RandomCrop(32, padding=4),
