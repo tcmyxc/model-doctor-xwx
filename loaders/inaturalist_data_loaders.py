@@ -174,6 +174,6 @@ if __name__ == "__main__":
     loader, size = load_images("train")
     print("dataset size:", size)
     for idx, samples in enumerate(loader):
-        inputs, labels = samples
+        inputs, labels, _ = samples
         print(inputs, labels)
         break
