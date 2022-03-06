@@ -1,13 +1,11 @@
 # 此脚本只是单纯训练一个分类模型
+# 1. 使用普通的数据加载器
+# 2. 使用REFL
 
 import sys
 sys.path.append('/nfs/xwx/model-doctor-xwx')
 
-from loss.fl import focal_loss
-from loss.efl import equalized_focal_loss
 from loss.refl import reduce_equalized_focal_loss
-from loss.rfl import reduced_focal_loss
-from loss.dfl import dual_focal_loss
 
 import time
 import torch
@@ -32,6 +30,7 @@ momentum = 0.9
 weight_decay = 5e-4
 in_channels = 3
 num_classes = 10
+
 
 best_acc = 0
 g_train_loss, g_train_acc = [], []
