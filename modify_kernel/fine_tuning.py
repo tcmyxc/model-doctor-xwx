@@ -32,10 +32,14 @@ import json
 # 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--lr', default='1e-5')
 
 # 此脚本用于微调模型
 
-lr = 1e-5
+# lr = 1e-2
 threshold = 0.5
 epochs = 50
 
@@ -44,8 +48,14 @@ modify_dicts = []
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
+g_draw_lr = ""
 
 def main():
+    args = parser.parse_args()
+    global g_draw_lr
+    g_draw_lr = args.lr
+    lr = float(args.lr)
+    print(f"\n[INFO] args.lr: {lr} \n")
     # cfg
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
@@ -166,7 +176,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device):
                 loss.backward()  # 得到模型中参数对当前输入的梯度
             
                 for layer in modify_dict.keys():
-                    # if layer <= 19:
+                    if layer <= 19:
+                        continue
                     #     modules[int(layer)].weight.grad[:] = 0
                     # # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
@@ -250,7 +261,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('fine_tuning.jpg')
+        plt.savefig(f'fine_tuning_{g_draw_lr}.jpg')
         plt.clf()
         plt.close()
 
