@@ -152,8 +152,8 @@ def load_class_balanced_data(data_name, data_type=None):
             train_loader, train_size = load_class_balanced_cifar_lt_images("train", data_name)
             test_loader, test_size = load_class_balanced_cifar_lt_images("test", data_name)
         elif data_name == "imagenet-lt":
-            train_loader, train_size = load_class_balanced_imagenet_lt_images("train", data_name)
-            test_loader, test_size   = load_class_balanced_imagenet_lt_images("test", data_name)
+            train_loader, train_size = load_class_balanced_imagenet_lt_images("train")
+            test_loader, test_size   = load_class_balanced_imagenet_lt_images("test")
        
         data_loaders = {'train': train_loader, 'val': test_loader}
         dataset_sizes = {'train': train_size, 'val': test_size}
@@ -172,4 +172,4 @@ def load_class_balanced_data(data_name, data_type=None):
         elif data_name == 'cifar-100-lt-ir100':
             return load_class_balanced_cifar_lt_images(data_type, data_name)
         elif data_name == "imagenet-lt":
-            return load_class_balanced_imagenet_lt_images(data_type, data_name)
+            return load_class_balanced_imagenet_lt_images(data_type)

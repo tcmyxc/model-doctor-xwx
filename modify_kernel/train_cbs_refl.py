@@ -24,7 +24,7 @@ import json
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# 从头开始训练，只使用类别平衡采样和REFL，不更新卷积核
+# 使用类别平衡采样和REFL对预训练模型进行调整
 
 threshold = 0.5
 best_acc = 0
@@ -33,12 +33,13 @@ g_test_loss, g_test_acc = [], []
 
 def main():
     # cfg
-    data_name = 'cifar-10-lt-ir100'
-    model_name = 'resnet32'
-    lr = 1e-3
+    data_name = 'imagenet-lt'
+    model_name = 'resnext50'
+    model_path = "/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnext50-imagenet-lt/checkpoint.pth"
+    lr = 1e-4
     momentum = 0.9
     weight_decay = 5e-4
-    epochs = 200
+    epochs = 20
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
 
@@ -56,6 +57,7 @@ def main():
         in_channels=cfg['model']['in_channels'],
         num_classes=cfg['model']['num_classes']
     )
+    model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
 
@@ -94,7 +96,7 @@ def train(dataloader, model, loss_fn, optimizer, device):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     model.train()
-    for batch, (X, y) in enumerate(dataloader):
+    for batch, (X, y, _) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
@@ -137,7 +139,7 @@ def test(dataloader, model, loss_fn, device):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for X, y in dataloader:
+    for X, y, _ in dataloader:
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
@@ -180,7 +182,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig('model_cbs_refl_pure.jpg')
+        plt.savefig('model_cbs_refl.jpg')
         plt.clf()
         plt.close()
 
