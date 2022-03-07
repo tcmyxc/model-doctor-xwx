@@ -130,7 +130,7 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'resnet50':
         module_modules = {
-            0: model.conv1[0],  # 64
+            # 0: model.conv1[0],  # 64
 
             1: model.conv2_x[0].residual_function[0],
             2: model.conv2_x[0].residual_function[3],
@@ -200,7 +200,59 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'resnext50':
         module_modules = {
-            -1: model.conv5[2].split_transforms[6]  # 2048,4,4
+            0: model.conv2[0].split_transforms[0],
+            1: model.conv2[0].split_transforms[3],
+            2: model.conv2[0].split_transforms[6],
+            3: model.conv2[1].split_transforms[0],
+            4: model.conv2[1].split_transforms[3],
+            5: model.conv2[1].split_transforms[6],
+            6: model.conv2[2].split_transforms[0],
+            7: model.conv2[2].split_transforms[3],
+            8: model.conv2[2].split_transforms[6],
+
+            9:  model.conv3[0].split_transforms[0],
+            10: model.conv3[0].split_transforms[3],
+            11: model.conv3[0].split_transforms[6],
+            12: model.conv3[1].split_transforms[0],
+            13: model.conv3[1].split_transforms[3],
+            14: model.conv3[1].split_transforms[6],
+            15: model.conv3[2].split_transforms[0],
+            16: model.conv3[2].split_transforms[3],
+            17: model.conv3[2].split_transforms[6],
+            18: model.conv3[3].split_transforms[0],
+            19: model.conv3[3].split_transforms[3],
+            20: model.conv3[3].split_transforms[6],
+
+            21: model.conv4[0].split_transforms[0],
+            22: model.conv4[0].split_transforms[3],
+            23: model.conv4[0].split_transforms[6],
+            24: model.conv4[1].split_transforms[0],
+            25: model.conv4[1].split_transforms[3],
+            26: model.conv4[1].split_transforms[6],
+            27: model.conv4[2].split_transforms[0],
+            28: model.conv4[2].split_transforms[3],
+            29: model.conv4[2].split_transforms[6],
+            30: model.conv4[3].split_transforms[0],
+            31: model.conv4[3].split_transforms[3],
+            32: model.conv4[3].split_transforms[6],
+            33: model.conv4[4].split_transforms[0],
+            34: model.conv4[4].split_transforms[3],
+            35: model.conv4[4].split_transforms[6],
+            36: model.conv4[5].split_transforms[0],
+            37: model.conv4[5].split_transforms[3],
+            38: model.conv4[5].split_transforms[6],
+            
+            39: model.conv5[0].split_transforms[0],
+            40: model.conv5[0].split_transforms[3],
+            41: model.conv5[0].split_transforms[6],
+            42: model.conv5[1].split_transforms[0],
+            43: model.conv5[1].split_transforms[3],
+            44: model.conv5[1].split_transforms[6],
+            45: model.conv5[2].split_transforms[0],
+            46: model.conv5[2].split_transforms[3],
+            47: model.conv5[2].split_transforms[6],
+
+            # -1: model.conv5[2].split_transforms[6]  # 2048,4,4
         }
     elif model_name == 'densenet121':
         module_modules = {

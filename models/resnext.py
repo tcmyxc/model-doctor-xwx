@@ -131,3 +131,7 @@ def resnext152():
     """
     return ResNext(ResNextBottleNeckC, [3, 4, 36, 3])
 
+
+if __name__ == "__main__":
+    model = resnext50()
+    print(model)

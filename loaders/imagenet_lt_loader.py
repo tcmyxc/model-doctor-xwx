@@ -195,7 +195,7 @@ def load_images(data_type):
     return data_loader, len(data_set)
 
 
-def load_class_balanced_images(data_type):
+def load_class_balanced_imagenet_lt_images(data_type):
     """类别均衡采样(所有类别都采样相同数量的样本)"""
     assert data_type in ['train', 'test']
 
@@ -287,19 +287,19 @@ if __name__ == "__main__":
     #     mode="train", txt=train_txt
     # )
 
-    loader, size = load_class_balanced_images("train")
+    loader, size = load_images("train")
     print("dataset size:", size)
-    cnt = 0
-    l = []
-    for idx, samples in enumerate(loader):
-        inputs, labels, _ = samples
-        l.extend(labels.numpy())
-        cnt +=1
-        if cnt == 125:
-            break
+    # cnt = 0
+    # l = []
+    # for idx, samples in enumerate(loader):
+    #     inputs, labels, _ = samples
+    #     l.extend(labels.numpy())
+    #     cnt +=1
+    #     if cnt == 125:
+    #         break
     
-    print(len(l))
-    print(np.unique(l))
+    # print(len(l))
+    # print(np.unique(l))
     
     # dataset = LT_Dataset(dst_root,  test_txt)
     # print("dataset size:", len(dataset))

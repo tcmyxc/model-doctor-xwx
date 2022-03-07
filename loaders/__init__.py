@@ -10,6 +10,7 @@ from loaders.mnin_loader import load_images_masks as load_mnin_images_masks
 
 # for long-tailed dataset
 from loaders.imagenet_lt_loader import load_images as load_imagenet_lt_images
+from loaders.imagenet_lt_loader import load_class_balanced_imagenet_lt_images
 
 from loaders.cifar_lt_loader import load_cifar_lt_images
 from loaders.cifar_lt_loader import load_class_balanced_cifar_lt_images
@@ -150,6 +151,9 @@ def load_class_balanced_data(data_name, data_type=None):
         elif data_name == 'cifar-100-lt-ir100':
             train_loader, train_size = load_class_balanced_cifar_lt_images("train", data_name)
             test_loader, test_size = load_class_balanced_cifar_lt_images("test", data_name)
+        elif data_name == "imagenet-lt":
+            train_loader, train_size = load_class_balanced_imagenet_lt_images("train", data_name)
+            test_loader, test_size   = load_class_balanced_imagenet_lt_images("test", data_name)
        
         data_loaders = {'train': train_loader, 'val': test_loader}
         dataset_sizes = {'train': train_size, 'val': test_size}
@@ -167,3 +171,5 @@ def load_class_balanced_data(data_name, data_type=None):
             return load_class_balanced_cifar_lt_images(data_type, data_name)
         elif data_name == 'cifar-100-lt-ir100':
             return load_class_balanced_cifar_lt_images(data_type, data_name)
+        elif data_name == "imagenet-lt":
+            return load_class_balanced_imagenet_lt_images(data_type, data_name)

@@ -1,0 +1,14 @@
+data_name: imagenet-lt
+model_name: resnext50
+image_type: high
+epochs: 30
+lr: 1e-5
+momentum: 0.9
+weight_decay: 5e-4
+model_layer_nums: 30
+threshold: 0.5
+model:
+  num_classes: 1000
+  in_channels: 3
+model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnext50-imagenet-lt/checkpoint.pth
+kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict

@@ -153,3 +153,7 @@ def resnet152(in_channels=3, num_classes=10):
     """
     return ResNet(BottleNeck, [3, 8, 36, 3], in_channels=in_channels, num_classes=num_classes)
 
+
+if __name__ == "__main__":
+    model = resnet50()
+    print(model)
