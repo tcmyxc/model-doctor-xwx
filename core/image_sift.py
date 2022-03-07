@@ -61,17 +61,19 @@ class ImageSift:
                         self.names[label.item()][self.nums[label].item()] = names[i]
                         self.nums[label] += 1
 
-    def save_image(self, result_path):
+    def save_image(self, dataset_root, result_path):
         # print(self.scores)
         # print(self.nums)
 
         # 训练集
-        image_dir = os.path.join(config.data_cifar10_lt_ir100, 'train')
+        image_dir = os.path.join(dataset_root, 'train')
 
         class_names = sorted([d.name for d in os.scandir(image_dir) if d.is_dir()])
 
         for label, image_list in enumerate(self.names):
             for image in image_list:
+                if image is None:
+                    continue
                 class_name = class_names[label]
 
                 src_path = os.path.join(image_dir, class_name, str(image))

@@ -44,15 +44,22 @@ g_test_loss, g_test_acc = [], []
 
 
 def main():
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     device = torch.device('cuda:0')
-    cfg_filename = "cifar_10_lt_ir100.yml"
+    cfg_filename = "imagenet_lt.yml"
     cfg = get_cfg(cfg_filename)
-    # sift_image_path = get_sift_image(cfg, device)
+    dataset_root = get_dataset_root(cfg)
+    sift_image_path = get_sift_image(cfg, dataset_root, device)
     # grad_result_path = find_kernel(cfg, sift_image_path, device)
     # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path)
-    kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
-    train_and_val(cfg, kernel_dict_root_path, device)
+    # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
+    # train_and_val(cfg, kernel_dict_root_path, device)
+
+
+def get_dataset_root(cfg):
+    data_name = cfg["data_name"]
+    if data_name == "imagenet-lt":
+        return config.data_imagenet_lt
 
 
 
@@ -63,7 +70,7 @@ def check_path(path, msg=None):
             print("\n[ERROR] path does not exist")
         else:
             print(f"\n[ERROR] {msg} does not exist")
-        return
+        sys.exit(1)
     else:
         if msg == None:
             print("\n[INFO] path:", path)
@@ -84,12 +91,14 @@ def get_cfg(cfg_filename):
     return cfg
 
 
-def get_sift_image(cfg, device):
+def get_sift_image(cfg, dataset_root, device):
     """筛选高置信度图片"""
+    check_path(dataset_root)
     data_name = cfg["data_name"]
     model_name = cfg["model_name"]
     model_path = cfg["model_path"]
     check_path(model_path, "model_path")
+    
 
     result_path = os.path.join(
         config.output_result, 
@@ -106,7 +115,7 @@ def get_sift_image(cfg, device):
     model = models.load_model(model_name=model_name,
                               in_channels=cfg['model']['in_channels'],
                               num_classes=cfg['model']['num_classes'])
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
     model.eval()
 
@@ -128,7 +137,7 @@ def get_sift_image(cfg, device):
         image_sift(outputs=outputs, labels=labels, names=names)
 
     print('\n', end='', flush=True)
-    image_sift.save_image(result_path)  # 保存图片
+    image_sift.save_image(dataset_root, result_path)  # 保存图片
 
     return os.path.join(result_path, "images")
 
@@ -156,7 +165,7 @@ def find_kernel(cfg, sift_image_path, device):
     model = models.load_model(model_name=model_name,
                               in_channels=cfg['model']['in_channels'],
                               num_classes=cfg['model']['num_classes'])
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path)["model"])
     model.eval()
     model.to(device)
 
