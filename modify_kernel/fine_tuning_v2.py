@@ -38,14 +38,22 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default='1e-5')
 parser.add_argument('--threshold', type=float, default='0.5')
 
-# 此脚本用于微调模型
+# 计算loss使用常规方法
 
 # lr = 1e-2
 # threshold = 0.5
 epochs = 100
 
 
-modify_dicts = []
+mask_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100/kernel_dict_label_789.npy"  # label_8_9
+modify_dict = np.load(mask_path, allow_pickle=True).item()
+
+print("-"*40)
+for k, v in modify_dict.items():
+    print(k, v)
+print("-"*40)
+
+
 best_acc = 0
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
@@ -63,17 +71,10 @@ def main():
     
     cfg = json.load(open('../configs/config_trainer.json'))[data_name]
 
-    # kernel
     num_classes=cfg['model']['num_classes']
-    for cls in range(num_classes):
-        mask_path_patten = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100/kernel_dict_label_{cls}.npy"
-        modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
-        modify_dicts.append(modify_dict)
-    
-    print(modify_dicts)
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -146,53 +147,39 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
     num_batches = len(dataloader)
     model.train()
     for batch, (X, y, _) in enumerate(dataloader):
+        y_train_list.extend(y.numpy())
+
         X, y = X.to(device), y.to(device)
 
-        for cls, modify_dict in enumerate(modify_dicts):
-            with torch.set_grad_enabled(True):
-                # 找到对应类别的图片
-                x_pos = (y==cls).nonzero().squeeze()
-                # 处理只有一个样本的情况
-                if x_pos.shape == torch.Size([]):
-                    x_pos = x_pos.unsqueeze(dim=0)
-                # 处理没有样本的情况
-                if min(x_pos.shape) == 0:
-                    continue
-                x_cls_i = torch.index_select(X, dim=0, index=x_pos)
-                y_cls_i = torch.index_select(y, dim=0, index=x_pos)
-                y_train_list.extend(y_cls_i.cpu().numpy())
-                # Compute prediction error
-                pred = model(x_cls_i)  # 网络前向计算
-                loss = loss_fn(pred, y_cls_i, threshold=threshold)
-                # loss = focal_loss(pred, y)
+        with torch.set_grad_enabled(True):
+            # Compute prediction error
+            pred = model(X)  # 网络前向计算
+            loss = loss_fn(pred, y, threshold=threshold)
 
-                train_loss += loss.item()
-            
-                y_pred_list.extend(pred.argmax(1).cpu().numpy())
+            train_loss += loss.item()
+        
+            y_pred_list.extend(pred.argmax(1).cpu().numpy())
 
-                correct += (pred.argmax(1) == y_cls_i).type(torch.float).sum().item()
-                
-                # Backpropagation
-                optimizer.zero_grad()
-                loss.backward()  # 得到模型中参数对当前输入的梯度
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
             
-                for layer in modify_dict.keys():
+            # Backpropagation
+            optimizer.zero_grad()
+            loss.backward()  # 得到模型中参数对当前输入的梯度
+            
+            for layer in modify_dict.keys():
                     # if layer <= 19:
-                    #     continue
-                    # #     modules[int(layer)].weight.grad[:] = 0
-                    # # # # print("layer:", layer)
+                    #     modules[int(layer)].weight.grad[:] = 0
+                    # # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
                         if kernel_index not in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
-            
-
-                optimizer.step()  # 更新参数
-
+            optimizer.step()  # 更新参数
+    
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
     
-    train_loss /= (num_batches * len(modify_dicts))
+    train_loss /= num_batches
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
@@ -265,7 +252,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
         plt.legend(loc="upper right")
         plt.grid(True)
         plt.legend()
-        plt.savefig(f'fine_tuning_{args.lr}_th{args.threshold}.jpg')
+        plt.savefig(f'fine_tuning_lr{args.lr}_th{args.threshold}_v2.jpg')
         plt.clf()
         plt.close()
 
