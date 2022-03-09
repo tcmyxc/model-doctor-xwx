@@ -161,6 +161,8 @@ class ImageNetLTDataLoader(DataLoader):
 
 def load_images(data_type):
     assert data_type in ['train', 'test']
+    
+    batch_size = 16
 
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_LT_train.txt"
@@ -188,7 +190,7 @@ def load_images(data_type):
     assert num_classes == 1000
 
     data_loader = DataLoader(dataset=data_set,
-                             batch_size=8,
+                             batch_size=batch_size,
                              num_workers=4,
                              shuffle=True)
 
@@ -202,6 +204,8 @@ def load_class_balanced_imagenet_lt_images(data_type):
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_LT_train.txt"
     test_txt= config.data_imagenet_lt + "/ImageNet_LT_test.txt"
+
+    batch_size = 8
 
     train_trsfm = transforms.Compose([
             transforms.RandomResizedCrop(224),
@@ -220,16 +224,15 @@ def load_class_balanced_imagenet_lt_images(data_type):
         data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
         sampler = get_sampler()
         data_loader = DataLoader(dataset=data_set,
-                             batch_size=8,
+                             batch_size=batch_size,
                              num_workers=4,
                              shuffle=False,  # shuffle must be false
                              sampler=sampler(data_set, 1))
     else:
         data_set = LT_Dataset(data_dir, test_txt, test_trsfm)
         data_loader = DataLoader(dataset=data_set,
-                             batch_size=8,
-                             num_workers=4,
-                             shuffle=True)
+                             batch_size=batch_size,
+                             num_workers=4)
 
     num_classes = len(np.unique(data_set.targets))
     assert num_classes == 1000

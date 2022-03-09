@@ -171,9 +171,9 @@ def load_images(data_type):
     return data_loader, len(data_set)
 
 if __name__ == "__main__":
-    loader, size = load_images("train")
+    loader, size = load_images("test")
     print("dataset size:", size)
-    for idx, samples in enumerate(loader):
-        inputs, labels, _ = samples
-        print(inputs, labels)
-        break
+    # for idx, samples in enumerate(loader):
+    #     inputs, labels, _ = samples
+    #     print(inputs, labels)
+    #     break

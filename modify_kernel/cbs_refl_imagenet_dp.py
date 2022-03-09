@@ -44,7 +44,7 @@ def main():
     # device
     # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('-' * 79, '\n[Info] train on ', device)
+    print('-' * 79, '\n[INFO] train on ', device)
 
     # get cfg
     global threshold
@@ -69,9 +69,8 @@ def main():
     # data
     data_loaders, _ = loaders.load_data(data_name=data_name)
     if "cifar" in data_name:
-        print("use cbs sampler")
+        print("\n[INFO] use cbs sampler")
         data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
-    
 
     # model
     model = models.load_model(
@@ -82,8 +81,8 @@ def main():
     model.load_state_dict(torch.load(pretrained_model_path)["model"])
     model.to(device)
     if torch.cuda.device_count() > 1:
-        print("Use", torch.cuda.device_count(), "GPUs!")
-        model = torch.nn.DataParallel(model, device_ids=[0, 1])
+        print("\n[INFO] use", torch.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model, device_ids=[1, 2, 3])
 
     # optimizer
     loss_fn = reduce_equalized_focal_loss
