@@ -55,6 +55,7 @@ print("-"*40)
 
 
 best_acc = 0
+best_model_path = None
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
 
@@ -221,18 +222,16 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
     g_test_acc.append(correct)
     if correct >= best_acc:
         best_acc = correct
-        print("[FEAT] update best acc:", best_acc)
+        print(f"[FEAT] epoch {epoch+1}, update best acc:", best_acc)
 
-        best_model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
+        model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
         model_state = {
             'epoch': epoch,  # 注意这里的epoch是从0开始的
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
             'acc': best_acc,
         }
-        torch.save(model_state, best_model_name)
-
-        print(f"Saved Best PyTorch Model State to {best_model_name} \n")
+        update_best_model(None, model_state, model_name)
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
@@ -257,5 +256,17 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
         plt.close()
 
 
+def update_best_model(result_path, model_state, model_name):
+    """更新权重文件"""
+    global best_model_path
+    cp_path = model_name
+
+    if best_model_path is not None:
+        # remove previous model weights
+        os.remove(best_model_path)
+
+    torch.save(model_state, cp_path)
+    best_model_path = cp_path
+    print(f"Saved Best PyTorch Model State to {model_name} \n")
 if __name__ == '__main__':
     main()
