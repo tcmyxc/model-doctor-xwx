@@ -31,7 +31,7 @@ threshold = 0.5
 
 def main():
     # cfg
-    data_name = 'cifar-10-lt-ir100'
+    data_name = 'cifar-100-lt-ir100'
     model_name = 'resnet32'
 
     # device
@@ -45,15 +45,15 @@ def main():
     model = models.load_model(
         model_name=model_name,
         in_channels=3,
-        num_classes=10
+        num_classes=100
     )
     
-    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220302-205325-acc0.7756.pth')
+    cp_path = os.path.join('/nfs/xwx/model-doctor-xwx/best-model-20220309-150622-acc0.2323.pth')
     if not os.path.exists(cp_path):
         print("=" * 40)
         print("模型文件的路径不存在, 请检查")
         return
-    state = torch.load(cp_path)
+    state = torch.load(cp_path)["model"]
    
     model.load_state_dict(state)
     model.to(device)
@@ -63,7 +63,7 @@ def main():
     loss_fn = reduce_equalized_focal_loss
 
     model.eval()
-    test(data_loaders["train"], model, loss_fn, device)
+    test(data_loaders["val"], model, loss_fn, device)
 
 
 def test(dataloader, model, loss_fn, device):
@@ -75,7 +75,7 @@ def test(dataloader, model, loss_fn, device):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for X, y in dataloader:
+    for X, y, _ in dataloader:
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
