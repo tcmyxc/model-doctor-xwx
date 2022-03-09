@@ -83,7 +83,7 @@ def load_class_balanced_cifar_lt_images(data_type, dataset_name):
                              batch_size=128,
                              num_workers=4,
                              shuffle=False,  # shuffle must be false
-                             sampler=sampler(data_set, 8))
+                             sampler=sampler(data_set, 4))
     else:
         data_set = ImageDataset(image_dir=image_dir,
                                 transform=transforms.Compose([

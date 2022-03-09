@@ -1,14 +1,14 @@
 import numpy as np
 import os
 
-label_list = [6, 789]
+label_list = [7, 89]
 
 # for label in label_list:
 #     mask_path_pattern = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict_label_{}.npy".format(label)
 #     modify_dict = np.load(mask_path_pattern, allow_pickle=True).item()
 #     print(label, ":", modify_dict)
-mask_path_label_7 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{label_list[0]}.npy"
-mask_path_label_89 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/kernel_dict_label_{label_list[1]}.npy"
+mask_path_label_7 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100/kernel_dict_label_{label_list[0]}.npy"
+mask_path_label_89 = f"/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100/kernel_dict_label_{label_list[1]}.npy"
 print(mask_path_label_7)
 print(mask_path_label_89)
 
@@ -35,4 +35,4 @@ for k, v in b.items():
 save_root = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict"
 result_name = f"kernel_dict_label_{label_list[0]}{label_list[1]}.npy"
 result_name = os.path.join(save_root, result_name)
-# np.save(result_name, b)
+np.save(result_name, b)

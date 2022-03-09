@@ -1,0 +1,12 @@
+cifar-100-lt-ir100:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    lr: 1e-4
+    momentum: 0.9
+    weight_decay: 5e-4
+  epochs: 200
+  model_name: resnet32
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220308-230356-acc0.3720.pth
