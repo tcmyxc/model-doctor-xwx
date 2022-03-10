@@ -4,26 +4,27 @@
 # 3. 训练模型
 
 import sys
+sys.path.append('/nfs/xwx/model-doctor-xwx') #205
+
 import os
 import torch
-from torch import optim
+import argparse
+import matplotlib
 import yaml
 import datetime
 import time
+import loaders
+import models
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
+
 try:
     from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader
-
-from sklearn.metrics import classification_report
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-sys.path.append('/nfs/xwx/model-doctor-xwx') #205
-import loaders
-import models
+from torch import optim
 from configs import config
 from utils import data_util
 from core.image_sift import ImageSift
@@ -31,7 +32,12 @@ from core.pattern_sift import GradSift
 from utils.lr_util import get_lr_scheduler
 from trainers.cls_trainer import print_time
 from loss.refl import reduce_equalized_focal_loss
+from sklearn.metrics import classification_report
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--data_name', default='cifar-100-lt-ir100')
+parser.add_argument('--threshold', type=float, default='0.5')
 
 
 # todo：再写一个函数，只是普通加载数据，不使用类别平衡采样（已写好cifar）
@@ -44,22 +50,40 @@ g_test_loss, g_test_acc = [], []
 
 
 def main():
+    args = parser.parse_args()
+    print(f"\n[INFO] args: {args} \n")
+
+    threshold = args.threshold
+    data_name = args.data_name
+
     os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-    device = torch.device('cuda:0')
-    cfg_filename = "imagenet_lt.yml"
-    cfg = get_cfg(cfg_filename)
-    dataset_root = get_dataset_root(cfg)
-    sift_image_path = get_sift_image(cfg, dataset_root, device)
-    # grad_result_path = find_kernel(cfg, sift_image_path, device)
-    # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path)
+    device = torch.device('cuda')
+    cfg_filename = "cbs_refl.yml"
+    cfg = get_cfg(cfg_filename)[data_name]
+
+    print("-" * 42)
+    for k, v in cfg.items():
+        print(f"{k}: {v}")
+    print("-" * 42)
+
+    dataset_root = get_dataset_root(data_name)
+    check_path(dataset_root)
+    sift_image_path = get_sift_image(cfg, dataset_root, device, args)
+    check_path(sift_image_path)
+    grad_result_path = find_kernel(cfg, sift_image_path, device, args)
+    check_path(grad_result_path)
+    kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
+    check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
     # train_and_val(cfg, kernel_dict_root_path, device)
 
 
-def get_dataset_root(cfg):
-    data_name = cfg["data_name"]
+def get_dataset_root(data_name):
+    # todo: 其他数据集
     if data_name == "imagenet-lt":
         return config.data_imagenet_lt
+    elif data_name == "cifar-100-lt-ir100":
+        return config.data_cifar100_lt_ir100
 
 
 
@@ -91,12 +115,11 @@ def get_cfg(cfg_filename):
     return cfg
 
 
-def get_sift_image(cfg, dataset_root, device):
+def get_sift_image(cfg, dataset_root, device, args):
     """筛选高置信度图片"""
-    check_path(dataset_root)
-    data_name = cfg["data_name"]
+    data_name = args.data_name
     model_name = cfg["model_name"]
-    model_path = cfg["model_path"]
+    model_path = cfg["two_stage_model_path"]
     check_path(model_path, "model_path")
     
 
@@ -142,12 +165,11 @@ def get_sift_image(cfg, dataset_root, device):
     return os.path.join(result_path, "images")
 
 
-def find_kernel(cfg, sift_image_path, device):
-    check_path(sift_image_path)
+def find_kernel(cfg, sift_image_path, device, args):
 
-    data_name = cfg["data_name"]
+    data_name = args.data_name
     model_name = cfg["model_name"]
-    model_path = cfg["model_path"]
+    model_path = cfg["two_stage_model_path"]
     check_path(model_path, "model_path")
 
     input_path = sift_image_path
@@ -192,10 +214,10 @@ def find_kernel(cfg, sift_image_path, device):
     return result_path
 
 
-def union_cls_kernel(cfg, grad_result_path):
-    check_path(grad_result_path)
+def union_cls_kernel(cfg, grad_result_path, args):
+    
     result_path = grad_result_path
-    data_name = cfg["data_name"]
+    data_name = args.data_name
     model_name = cfg["model_name"]
 
     kernel_dict_path = os.path.join(cfg["kernel_dict_path"], f"{model_name}-{data_name}")

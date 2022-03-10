@@ -162,7 +162,7 @@ class ImageNetLTDataLoader(DataLoader):
 def load_images(data_type):
     assert data_type in ['train', 'test']
     
-    batch_size = 16
+    batch_size = 8
 
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_LT_train.txt"

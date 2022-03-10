@@ -23,5 +23,9 @@ imagenet-lt:
     weight_decay: 5e-4
   epochs: 20
   model_name: resnext50
+  image_type: high
+  model_layer_nums: 30
+  threshold: 0.5
   # 预训练模型路径
   pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnext50-imagenet-lt/checkpoint.pth
+  kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict

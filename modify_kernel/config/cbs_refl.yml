@@ -7,6 +7,13 @@ cifar-100-lt-ir100:
     momentum: 0.9
     weight_decay: 5e-4
   epochs: 200
+  two_stage_epochs: 30
+  three_stage_epochs: 20
   model_name: resnet32
+  image_type: high
   # 预训练模型路径
   pretrained_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220308-230356-acc0.3720.pth
+  # 第二阶段模型路径
+  two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/cbs-refl/resnet32-cifar-100-lt-ir100-th0.5/best-model-20220309-160336-acc0.3924.pth
+  kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  
