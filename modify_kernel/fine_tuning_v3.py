@@ -104,9 +104,11 @@ def main():
 
     model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
-    if torch.cuda.device_count() > 1:
-        print("\n[INFO] Use", torch.cuda.device_count(), "GPUs! \n")
-        model = nn.DataParallel(model, device_ids=[0, 1])
+
+    # 单机多卡的代码，可以不用
+    # if torch.cuda.device_count() > 1:
+    #     print("\n[INFO] Use", torch.cuda.device_count(), "GPUs! \n")
+    #     model = nn.DataParallel(model, device_ids=[0, 1])
 
     # optimizer
     loss_fn = reduce_equalized_focal_loss
@@ -295,7 +297,7 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     labels = []
     accs = []
     samplers =[]
-    for x_i, y_i in reports:
+    for x_i, y_i in reports.items():
         labels.append(x_i)
         accs.append(y_i["recall"])
         samplers.append(y_i["support"])
