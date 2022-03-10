@@ -306,7 +306,7 @@ def load_modules(model, model_name, model_layers):
 
     print('-' * 40)
     print('Model Layer:', model_layers)
-    print('Model Module:', modules)
+    # print('Model Module:', modules)
     print('-' * 40)
 
     return modules

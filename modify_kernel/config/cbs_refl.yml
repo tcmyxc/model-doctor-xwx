@@ -11,6 +11,7 @@ cifar-100-lt-ir100:
   three_stage_epochs: 20
   model_name: resnet32
   image_type: high
+  model_layers: 30
   # 预训练模型路径
   pretrained_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/best-model-20220308-230356-acc0.3720.pth
   # 第二阶段模型路径
