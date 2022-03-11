@@ -29,6 +29,7 @@ import torch.nn as nn
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='cifar-100-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
+parser.add_argument('--lr', type=float, default='1e-4')
 
 
 # global config
@@ -44,7 +45,7 @@ def main():
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -62,7 +63,8 @@ def main():
 
     model_name = cfg["model_name"]
     model_path = cfg["two_stage_model_path"]
-    lr = float(cfg["optimizer"]["lr"])
+    # lr = float(cfg["optimizer"]["lr"])
+    lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
     epochs = cfg["three_stage_epochs"]
@@ -181,6 +183,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                 loss.backward()  # 得到模型中参数对当前输入的梯度
             
                 for layer in modify_dict.keys():
+                    if layer <= 19:  continue
                     for kernel_index in range(modify_dict[layer][0]):
                         if kernel_index not in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
@@ -190,9 +193,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
     
-    train_loss /= num_batches
+    # train_loss /= num_batches
+    train_loss /= (num_batches * len(modify_dicts))  # for cifar
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
@@ -205,6 +209,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     data_name = args.data_name
     result_path = os.path.join(config.output_model,
                                "three-stage",
+                               str(args.lr),
                                f"{model_name}-{data_name}-th{args.threshold}")
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -264,6 +269,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     
     result_path = os.path.join(config.output_model,
                                "three-stage",
+                               str(args.lr),
                                f"{model_name}-{data_name}-th{args.threshold}")
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -298,6 +304,7 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     accs = []
     samplers =[]
     for x_i, y_i in reports.items():
+        if x_i == "accuracy": break
         labels.append(x_i)
         accs.append(y_i["recall"])
         samplers.append(y_i["support"])
@@ -306,7 +313,6 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     plt.title("Acc of each class")
     plt.xlabel("Classes")
     plt.ylabel("Accuracy")
-    plt.grid(True)
     plt.savefig(os.path.join(result_path, f"{mode_type}_classification_report.jpg"))
     plt.clf()
     plt.close()

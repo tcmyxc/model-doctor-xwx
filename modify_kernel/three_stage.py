@@ -19,6 +19,7 @@ import models
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 try:
     from yaml import CLoader as Loader
@@ -26,7 +27,7 @@ except ImportError:
     from yaml import Loader
 from torch import optim
 from configs import config
-from utils import data_util
+from utils import data_util, image_util
 from core.image_sift import ImageSift
 from core.pattern_sift import GradSift
 from utils.lr_util import get_lr_scheduler
@@ -66,14 +67,17 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
-    dataset_root = get_dataset_root(data_name)
-    check_path(dataset_root)
-    sift_image_path = get_sift_image(cfg, dataset_root, device, args)
-    check_path(sift_image_path)
-    grad_result_path = find_kernel(cfg, sift_image_path, device, args)
-    check_path(grad_result_path)
-    kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
-    check_path(kernel_dict_root_path)
+    # dataset_root = get_dataset_root(data_name)
+    # check_path(dataset_root)
+    # sift_image_path = get_sift_image(cfg, dataset_root, device, args)
+    # check_path(sift_image_path)
+    # sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/high/images"
+    # grad_result_path = find_kernel(cfg, sift_image_path, device, args)
+    grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/grads"
+    view_layer_kernel(grad_result_path, cfg, args)
+    # check_path(grad_result_path)
+    # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
+    # check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
     # train_and_val(cfg, kernel_dict_root_path, device)
 
@@ -212,6 +216,51 @@ def find_kernel(cfg, sift_image_path, device, args):
     grad_sift.sift()
 
     return result_path
+
+def view_layer_kernel(grad_result_path, cfg, args):
+    result_path = grad_result_path
+    data_name = args.data_name
+    model_name = cfg["model_name"]
+
+    kernel_dict_path = os.path.join(cfg["kernel_dict_path"], f"{model_name}-{data_name}")
+    if not os.path.exists(kernel_dict_path):
+        os.makedirs(kernel_dict_path)
+
+    # model
+    model = models.load_model(model_name=model_name,
+                                in_channels=cfg['model']['in_channels'],
+                                num_classes=cfg['model']['num_classes'])
+
+    # modules
+    modules = models.load_modules(model=model, model_name=model_name, model_layers=None)  # no first conv
+
+    for layer in range(len(modules)):
+        label_grads = []
+        for label in range(cfg['model']['num_classes']):
+            mask_root_path = os.path.join(result_path, str(layer), str(label))
+            method_name = 'inputs_label{}_layer{}'.format(label, layer)
+            mask_path = os.path.join(mask_root_path, 'grads_{}.npy'.format(method_name))
+            data = np.load(mask_path)
+            label_grads.append(data)
+        
+        res_path = os.path.join(kernel_dict_path, "label_grads_layer")
+        if not os.path.exists(res_path):
+            os.makedirs(res_path)
+        np.save(os.path.join(res_path, f"label_grads_layer{layer}.npy"), label_grads)
+
+        pic_path = os.path.join(res_path, f"label_grads_layer{layer}.png")
+        view_grads(label_grads, pic_path)
+
+
+def view_grads(label_grads, pic_path):
+    f, ax = plt.subplots(figsize=(64, 32), ncols=1)
+    ax.set_xlabel('convolutional kernel')
+    ax.set_ylabel('category')
+    sns.heatmap(np.array(label_grads).T, ax=ax, linewidths=0.1, annot=False, cbar=False)
+    # plt.imshow(np.array(label_grads).T)
+    plt.savefig(pic_path, bbox_inches='tight')
+    plt.clf()
+    plt.close()
 
 
 def union_cls_kernel(cfg, grad_result_path, args):

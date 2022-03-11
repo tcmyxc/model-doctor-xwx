@@ -7,35 +7,29 @@ sys.path.append('/nfs/xwx/model-doctor-xwx')
 
 import os
 import time
+import yaml
 import torch
-import matplotlib
-import argparse
 import models
 import loaders
 import datetime
+import argparse
+import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy as np
 
 from torch import optim
-from loss.refl import reduce_equalized_focal_loss
-from sklearn.metrics import classification_report
 from utils.lr_util import get_lr_scheduler
 from trainers.cls_trainer import print_time
+from loss.refl import reduce_equalized_focal_loss
+from sklearn.metrics import classification_report
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-100-lt-ir100')
-parser.add_argument('--num_classes', type=int, default=100)
-parser.add_argument('--model_name', default='resnet32')
+parser.add_argument('--data_name', default='imagenet-10-lt')
+parser.add_argument('--model_name', default='resnet18')
 parser.add_argument('--threshold', type=float, default='0.5')
-
-# global config
-epochs = 200
-lr = 0.01
-momentum = 0.9
-weight_decay = 5e-4
-in_channels = 3
 
 
 best_acc = 0
@@ -46,9 +40,18 @@ g_test_loss, g_test_acc = [], []
 def main():
     args = parser.parse_args()
     print(f"\n[INFO] args: {args} \n")
+
+    # get cfg
     data_name   = args.data_name
     model_name  = args.model_name
-    num_classes = args.num_classes
+    cfg_filename = "one_stage.yml"
+    cfg = get_cfg(cfg_filename)[data_name]
+
+    print("-" * 42)
+    for k, v in cfg.items():
+        print(f"{k}: {v}")
+    print("-" * 42)
+
     # device
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
@@ -59,22 +62,23 @@ def main():
     # model
     model = models.load_model(
         model_name=model_name, 
-        in_channels=in_channels,
-        num_classes=num_classes
+        in_channels=cfg["model"]["in_channels"],
+        num_classes=cfg["model"]["num_classes"]
     )
     model.to(device)
 
     loss_fn = reduce_equalized_focal_loss
     optimizer = optim.SGD(
         params=model.parameters(),
-        lr=lr,
-        momentum=momentum,
-        weight_decay=weight_decay
+        lr=cfg["optimizer"]["lr"],
+        momentum=cfg["optimizer"]["momentum"],
+        weight_decay=float(cfg["optimizer"]["weight_decay"])
     )
     # lr scheduler
     scheduler = get_lr_scheduler(optimizer, True)
 
-    for epoch in range(epochs):
+    begin_time = time.time()
+    for epoch in range(cfg["epochs"]):
         epoch_begin_time = time.time()
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print(f"\nEpoch {epoch+1}")
@@ -88,6 +92,7 @@ def main():
         print_time(time.time()-epoch_begin_time, epoch=True)
         
     print("Done!")
+    print_time(time.time()-begin_time)
 
 
 def train(dataloader, model, loss_fn, optimizer, device, args):
@@ -176,10 +181,11 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
             'optimizer': optimizer.state_dict(),
             'acc': best_acc,
         }
-        update_best_model(None, model_state, model_name)
+        update_best_model("./pretained", model_state, model_name)
         
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+    draw_classification_report("test", "./pretained", y_train_list, y_pred_list)
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
@@ -204,11 +210,12 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
     plt.clf()
     plt.close()
 
+
 def update_best_model(result_path, model_state, model_name):
     """更新权重文件"""
     global best_model_path
-    # cp_path = os.path.join(result_path, model_name)
-    cp_path = model_name
+    cp_path = os.path.join(result_path, model_name)
+    # cp_path = model_name
 
     if best_model_path is not None:
         # remove previous model weights
@@ -217,6 +224,47 @@ def update_best_model(result_path, model_state, model_name):
     torch.save(model_state, cp_path)
     best_model_path = cp_path
     print(f"Saved Best PyTorch Model State to {model_name} \n")
+
+
+def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list):
+    """绘制在训练集/测试集上面的 classification_report"""
+    reports = classification_report(y_train_list, y_pred_list, digits=4, output_dict=True)
+    np.save(os.path.join(result_path, f"{mode_type}_classification_report.npy"), reports)
+
+    labels = []
+    accs = []
+    samplers =[]
+    for x_i, y_i in reports.items():
+        if x_i == "accuracy": break
+        labels.append(x_i)
+        accs.append(y_i["recall"])
+        samplers.append(y_i["support"])
+
+    plt.plot(labels, accs)
+    plt.title("Acc of each class")
+    plt.xlabel("Classes")
+    plt.ylabel("Accuracy")
+    plt.savefig(os.path.join(result_path, f"{mode_type}_classification_report.jpg"))
+    plt.clf()
+    plt.close()
+
+
+def get_cfg(cfg_filename):
+    """获取配置"""
+    try:
+        from yaml import CLoader as Loader
+    except ImportError:
+        from yaml import Loader
+    # 获取当前文件所在目录
+    curPath = os.path.dirname(os.path.realpath(__file__))
+    # 获取yaml文件路径
+    yamlPath = os.path.join(curPath, "config", cfg_filename)
+
+    with open(yamlPath, encoding="utf-8") as f:
+        cfg = yaml.load(f, Loader)
+    
+    return cfg
+
 
 
 if __name__ == '__main__':

@@ -10,3 +10,4 @@ nohup.out
 *.xls
 *.pth
 *.npy
+**/label_grads_layer

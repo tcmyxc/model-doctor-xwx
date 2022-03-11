@@ -5,7 +5,7 @@ from torch.optim import lr_scheduler
 def adjust_learning_rate(epoch):
     """Sets the learning rate"""
     if epoch < 5:
-        decay = epoch / 4
+        decay = (epoch + 1) / 5
     elif epoch < 160:
         decay = 1
     elif epoch < 180:

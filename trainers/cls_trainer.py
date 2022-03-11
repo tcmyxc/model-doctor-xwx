@@ -88,8 +88,8 @@ class ClsTrainer:
                     with torch.set_grad_enabled(True):
                         outputs = self.model(inputs)
                         _, preds = torch.max(outputs, dim=1)
-                        # loss = self.criterion(outputs, labels)  # ce loss
-                        loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.5)  # refl
+                        loss = self.criterion(outputs, labels)  # ce loss
+                        # loss = reduce_equalized_focal_loss(outputs, labels, threshold=0.5)  # refl
                         # loss = focal_loss(outputs, labels) # fl
                         # loss = equalized_focal_loss(outputs, labels)  # efl
                         # loss = reduced_focal_loss(outputs, labels)  # rfl
@@ -124,7 +124,7 @@ class ClsTrainer:
                 epoch_acc = running_corrects / self.dataset_sizes[phase]
                 print(f"\n[{phase}] loss is {epoch_loss:.4f}, acc is {epoch_acc:.4f}")
                 print(f"\n[{phase}] acc1 is {top1.avg:.2f}%, acc5 is {top5.avg:.2f}%")
-                print(f"\n[{phase}] err1 is {(100-top1.avg):.2f}%, err5 is {(100-top5.avg):.2f}%")
+                print(f"[{phase}] err1 is {(100-top1.avg):.2f}%, err5 is {(100-top5.avg):.2f}%")
 
                 # save best epoch
                 is_best = self.history.update(phase=phase, acc=epoch_acc, loss=epoch_loss)
@@ -133,7 +133,7 @@ class ClsTrainer:
                     state = {
                         "model": self.model.state_dict(),
                         "optimizer": self.optimizer,
-                        "epoch": f"{epoch+1}",  # 第几个 epoch
+                        "epoch": epoch,  # 第几个 epoch
                         "acc": f"{epoch_acc}"
                     }
                     cp_path = os.path.join(self.result_path, "checkpoint.pth")
@@ -161,7 +161,7 @@ class ClsTrainer:
         cp_path = os.path.join(self.result_path, CHECKPOINT_MODEL_NAME)
         if not os.path.exists(cp_path):
             print("=" * 42)
-            print("模型文件的路径不存在，请检查")
+            print("模型文件的路径不存在, 请检查")
             return
         state = torch.load(cp_path)
         # print("bets res is", state["epoch"], "epoch, optimizer is", state["optimizer"])

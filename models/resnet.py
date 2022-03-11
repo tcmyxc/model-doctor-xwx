@@ -124,10 +124,10 @@ class ResNet(nn.Module):
         return output
 
 
-def resnet18():
+def resnet18(in_channels=3, num_classes=10):
     """ return a ResNet 18 object
     """
-    return ResNet(BasicBlock, [2, 2, 2, 2])
+    return ResNet(BasicBlock, [2, 2, 2, 2], in_channels=in_channels, num_classes=num_classes)
 
 
 def resnet34(in_channels=3, num_classes=10):
@@ -155,5 +155,5 @@ def resnet152(in_channels=3, num_classes=10):
 
 
 if __name__ == "__main__":
-    model = resnet50()
+    model = resnet18()
     print(model)

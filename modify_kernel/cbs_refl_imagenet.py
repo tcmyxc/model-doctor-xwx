@@ -42,7 +42,7 @@ def main():
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -81,9 +81,9 @@ def main():
     )
     model.load_state_dict(torch.load(pretrained_model_path)["model"])
     model.to(device)
-    if torch.cuda.device_count() > 1:
-        print("Use", torch.cuda.device_count(), "GPUs!")
-        model = torch.nn.DataParallel(model, device_ids=[0, 1])
+    # if torch.cuda.device_count() > 1:
+    #     print("Use", torch.cuda.device_count(), "GPUs!")
+    #     model = torch.nn.DataParallel(model, device_ids=[0, 1])
 
     # optimizer
     loss_fn = reduce_equalized_focal_loss

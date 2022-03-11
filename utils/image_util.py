@@ -57,6 +57,7 @@ def view_grads(grads, fig_w, fig_h, fig_path):
     plt.savefig(fig_path, bbox_inches='tight')
     # plt.show()
     plt.clf()
+    plt.close()
 
     # plt.xlabel('convolutional kernel')
     # plt.ylabel('category')

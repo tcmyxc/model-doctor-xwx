@@ -1,3 +1,4 @@
+import torchvision
 from models import simnet, alexnet, alexnetv2, alexnetv3, vgg, resnet, \
     senet, resnext, densenet, simplenetv1, \
     efficientnetv2, googlenet, xception, mobilenetv2, \
@@ -21,6 +22,8 @@ def load_model(model_name, in_channels=3, num_classes=10):
         model = alexnetv3.alexnet(in_channels, num_classes)
     elif model_name == 'vgg16':
         model = vggv2.vgg16_bn(in_channels, num_classes)
+    elif model_name == 'resnet18':
+        model = resnet.resnet18(in_channels, num_classes)
     elif model_name == 'resnet32':
         model = resnetv2.resnet32(in_channels, num_classes)
     elif model_name == 'resnet34':
@@ -87,6 +90,28 @@ def load_modules(model, model_name, model_layers):
             5: model.features[37],  # 512, 14, 14
             -2: model.features[40],  # 512, 14, 14, CONV
             -1: model.classifier[3], # FC
+        }
+    elif model_name == 'resnet18':
+        module_modules = {
+            1: model.conv2_x[0].residual_function[0],
+            2: model.conv2_x[0].residual_function[3],
+            3: model.conv2_x[1].residual_function[0],
+            4: model.conv2_x[1].residual_function[3],
+
+            5: model.conv3_x[0].residual_function[0],
+            6: model.conv3_x[0].residual_function[3],
+            7: model.conv3_x[1].residual_function[0],
+            8: model.conv3_x[1].residual_function[3],
+
+            9: model.conv4_x[0].residual_function[0],
+            10: model.conv4_x[0].residual_function[3],
+            11: model.conv4_x[1].residual_function[0],
+            12: model.conv4_x[1].residual_function[3],
+
+            13: model.conv5_x[0].residual_function[0],
+            14: model.conv5_x[0].residual_function[3],
+            15: model.conv5_x[1].residual_function[0],
+            16: model.conv5_x[1].residual_function[3],
         }
     elif model_name == 'resnet32':
         module_modules = {
