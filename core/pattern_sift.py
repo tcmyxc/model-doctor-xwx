@@ -64,6 +64,7 @@ class GradSift:
 
     def sift(self):
         for layer in range(len(self.modules)):
+            # 每个类别在某一层的梯度
             for label, grads in enumerate(self.grads[layer]):
                 grads = np.asarray(grads)  # image_nums, val
                 # print('grads.shape', grads.shape)
