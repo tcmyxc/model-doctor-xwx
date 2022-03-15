@@ -186,3 +186,22 @@ def load_class_balanced_data(data_name, data_type=None):
             return load_class_balanced_imagenet_lt_images(data_type)
         elif data_name == "imagenet-10-lt":
             return load_class_balanced_imagenet_10_lt_images(data_type)
+
+
+def load_single_class_images(data_name, data_type=None):
+    """只加载一个类别"""
+    from loaders.imagenet_10_lt_loader import load_single_class_images
+
+    print('-' * 42, f'\n[INFO] load singel class data: {data_name} \n', '-' * 42)
+
+    if data_type is None:
+        train_loader, test_loader, train_size, test_size = None, None, None, None
+
+        train_loader, train_size = load_single_class_images('train')
+        test_loader, test_size = load_single_class_images('test')
+
+        data_loaders = {'train': train_loader, 'val': test_loader}
+        dataset_sizes = {'train': train_size, 'val': test_size}
+        return data_loaders, dataset_sizes
+    else:
+        return load_single_class_images(data_type)

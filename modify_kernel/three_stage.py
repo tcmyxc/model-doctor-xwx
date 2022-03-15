@@ -37,7 +37,7 @@ from sklearn.metrics import classification_report
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-100-lt-ir100')
+parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 
 
@@ -67,17 +67,17 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
-    # dataset_root = get_dataset_root(data_name)
-    # check_path(dataset_root)
-    # sift_image_path = get_sift_image(cfg, dataset_root, device, args)
-    # check_path(sift_image_path)
+    dataset_root = get_dataset_root(data_name)
+    check_path(dataset_root)
+    sift_image_path = get_sift_image(cfg, dataset_root, device, args)
+    check_path(sift_image_path)
     # sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/high/images"
-    # grad_result_path = find_kernel(cfg, sift_image_path, device, args)
-    grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/grads"
+    grad_result_path = find_kernel(cfg, sift_image_path, device, args)
+    # grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/grads"
     view_layer_kernel(grad_result_path, cfg, args)
-    # check_path(grad_result_path)
-    # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
-    # check_path(kernel_dict_root_path)
+    check_path(grad_result_path)
+    kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
+    check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
     # train_and_val(cfg, kernel_dict_root_path, device)
 
@@ -86,10 +86,11 @@ def get_dataset_root(data_name):
     # todo: 其他数据集
     if data_name == "imagenet-lt":
         return config.data_imagenet_lt
+    elif data_name == "imagenet-10-lt":
+        return config.data_imagenet_lt
     elif data_name == "cifar-100-lt-ir100":
         return config.data_cifar100_lt_ir100
-
-
+    
 
 def check_path(path, msg=None):
     """检查路径是否合法"""
@@ -203,7 +204,7 @@ def find_kernel(cfg, sift_image_path, device, args):
                          class_nums=cfg['model']['num_classes'],
                          result_path=result_path)
 
-    data_loader = data_util.load_data(data_path=input_path)
+    data_loader = data_util.load_data(data_path=input_path, data_name=args.data_name)
     for i, samples in enumerate(data_loader):
         print('\r[{}/{}]'.format(i, len(data_loader)), end='', flush=True)
         inputs, labels, _ = samples

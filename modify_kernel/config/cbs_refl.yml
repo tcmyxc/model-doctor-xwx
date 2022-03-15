@@ -39,3 +39,23 @@ cifar-10-lt-ir100:
   two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
   
+imagenet-10-lt:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    lr: 1e-4
+    momentum: 0.9
+    weight_decay: 5e-4
+  epochs: 200
+  two_stage_epochs: 30
+  three_stage_epochs: 20
+  model_name: resnet32
+  image_type: high
+  model_layers: 30
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/pretained/resnet32-imagenet-10-lt-customlr/best-model-20220312-234319-acc0.5340.pth
+  # 第二阶段模型路径
+  two_stage_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/pretained/resnet32-imagenet-10-lt-customlr/best-model-20220312-234319-acc0.5340.pth
+  kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  
