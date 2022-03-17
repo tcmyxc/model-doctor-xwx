@@ -11,18 +11,26 @@ from loaders.datasets.image_dataset import ImageDataset
 def load_data(data_path, data_name=None):
     """加载高置信度图片的 dataloader"""
     # 后期需要根据数据集名称添加不同的 transform
-    data_set = ImageDataset(image_dir=data_path,
-                            transform=transforms.Compose([
-                                transforms.RandomCrop(32, padding=4),
-                                transforms.ToTensor(),
-                                transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                     (0.2023, 0.1994, 0.2010)),
-                            ]))
-    
+    if "cifar" in data_name:
+        train_trsfm = transforms.Compose([
+                                    transforms.RandomCrop(32, padding=4),
+                                    transforms.ToTensor(),
+                                    transforms.Normalize((0.4914, 0.4822, 0.4465),
+                                                        (0.2023, 0.1994, 0.2010)),
+                                ])
+    elif "imagenet" in data_name:
+        train_trsfm = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+
+    data_set = ImageDataset(image_dir=data_path, transform=train_trsfm)
     data_loader = DataLoader(dataset=data_set,
-                             batch_size=32,
-                             num_workers=4,
-                             shuffle=True)
+                                batch_size=4,
+                                num_workers=4,
+                                shuffle=True)
     return data_loader
 
 
