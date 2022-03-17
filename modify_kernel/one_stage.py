@@ -28,7 +28,7 @@ from sklearn.metrics import classification_report
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
-parser.add_argument('--model_name', default='resnet18')
+parser.add_argument('--model_name', default='resnext50')
 parser.add_argument('--threshold', type=float, default='0.5')
 
 
@@ -54,7 +54,7 @@ def main():
 
     # device
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print('-' * 79, '\n[Info] train on ', device)
+    print('-' * 42, '\n[Info] train on ', device)
 
     # data,普通数据加载器
     data_loaders, _ = loaders.load_data(data_name=data_name)
@@ -75,12 +75,18 @@ def main():
         weight_decay=float(cfg["optimizer"]["weight_decay"])
     )
     # lr scheduler
-    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=cfg["epochs"]
+    )
 
     begin_time = time.time()
+    lr_list=[]
     for epoch in range(cfg["epochs"]):
         epoch_begin_time = time.time()
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
+        lr_list.append(cur_lr)
         print(f"\nEpoch {epoch+1}")
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
@@ -89,6 +95,7 @@ def main():
         scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, args)
+        draw_lr(lr_list)
         print_time(time.time()-epoch_begin_time, epoch=True)
         
     print("Done!")
@@ -129,7 +136,7 @@ def train(dataloader, model, loss_fn, optimizer, device, args):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
     
     train_loss /= num_batches
     correct /= size
@@ -207,6 +214,21 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
     plt.grid(True)
     plt.legend()
     plt.savefig(f'{model_name}_{data_name}_th{threshold}_pure_train_cls_model.jpg')
+    plt.clf()
+    plt.close()
+
+def draw_lr(lr_list):
+    num_epochs = len(lr_list)
+
+    plt.plot(range(1, num_epochs + 1), lr_list, label='lr')
+
+    plt.title("Learning rate of each epoch")
+    plt.xlabel("Training Epochs")
+    plt.ylabel("Learning rate")
+    plt.legend(loc="upper right")
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('model_lr.jpg')
     plt.clf()
     plt.close()
 
