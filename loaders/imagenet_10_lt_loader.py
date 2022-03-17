@@ -162,7 +162,7 @@ class ImageNetLTDataLoader(DataLoader):
 def load_images(data_type):
     assert data_type in ['train', 'test']
     
-    batch_size = 8
+    batch_size = 4
 
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_10_LT_train.txt"
@@ -205,7 +205,7 @@ def load_class_balanced_imagenet_10_lt_images(data_type):
     train_txt= config.data_imagenet_lt + "/ImageNet_10_LT_train.txt"
     test_txt= config.data_imagenet_lt + "/ImageNet_10_LT_test.txt"
 
-    batch_size = 8
+    batch_size = 32
 
     train_trsfm = transforms.Compose([
             transforms.RandomResizedCrop(224),
@@ -238,6 +238,45 @@ def load_class_balanced_imagenet_10_lt_images(data_type):
     assert num_classes == 10
     
     return data_loader, len(data_set)
+
+
+def load_single_class_images(data_type):
+    assert data_type in ['train', 'test']
+    
+    batch_size = 32
+
+    data_dir = config.data_imagenet_lt
+    train_txt= config.data_imagenet_lt + "/ImageNet_one_class_train.txt"
+    test_txt= config.data_imagenet_lt + "/ImageNet_one_class_test.txt"
+
+    train_trsfm = transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+    test_trsfm = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    if data_type == 'train':
+        data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
+    else:
+        data_set = LT_Dataset(data_dir, test_txt, test_trsfm)
+
+    num_classes = len(np.unique(data_set.targets))
+    assert num_classes == 1
+
+    data_loader = DataLoader(dataset=data_set,
+                             batch_size=batch_size,
+                             num_workers=4,
+                             shuffle=True)
+
+    return data_loader, len(data_set)
+
 
 
 if __name__ == "__main__":
