@@ -1,7 +1,7 @@
+from random import sample
 import sys
+from numpy import dtype
 sys.path.append('/nfs/xwx/model-doctor-xwx')
-
-from loss.refl import reduce_equalized_focal_loss
 
 import torch
 import models
@@ -14,22 +14,30 @@ import matplotlib
 import yaml
 
 from torch import optim
-from utils.lr_util import get_lr_scheduler
-from sklearn.metrics import classification_report
-from trainers.cls_trainer import print_time
 from configs import config
+from core.grad_percent import KernelGrad
+from utils.lr_util import get_lr_scheduler
+from trainers.cls_trainer import print_time
+from sklearn.metrics import classification_report
+from loss.refl import reduce_equalized_focal_loss
 
-# 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
 
-# 使用类别平衡采样和REFL对预训练模型进行调整
+# REFL, 权重卷积核梯度
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
-parser.add_argument('--threshold', type=float, default='0.4')
+parser.add_argument('--threshold', type=float, default='0.5')
+parser.add_argument('--lr', type=float, default='1e-4')
 
+
+# global config
+# modify_dicts = []
+kernel_percents = {}
 threshold = None
 best_acc = 0
 best_model_path = None
@@ -41,17 +49,16 @@ def main():
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
     # get cfg
+    global threshold
+    threshold = args.threshold
     data_name = args.data_name
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
-
-    global threshold
-    threshold = args.threshold
 
     print("-" * 42)
     for k, v in cfg.items():
@@ -59,14 +66,30 @@ def main():
     print("-" * 42)
 
     model_name = cfg["model_name"]
-    pretrained_model_path = cfg["pretrained_model_path"]
-    lr = float(cfg["optimizer"]["lr"])
+    model_path = cfg["two_stage_model_path"]
+    # lr = float(cfg["optimizer"]["lr"])
+    lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
-    epochs = cfg["epochs"]
+    epochs = cfg["three_stage_epochs"]
+    model_layers = range(cfg["model_layers"])
+    kernel_percent_path = cfg["kernel_percent_path"]
+
+    for layer in range(cfg["model_layers"]):
+        kernel_percent = np.load(os.path.join(kernel_percent_path, f"grads_percent_inputs_layer{layer}.npy"))
+        kernel_percents[layer] = kernel_percent
+
+    # for k, v in kernel_percents.items():
+    #     print(f"{k}: {v}")
+    # print("-" * 42)
+    # return 
 
     # data
-    data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
+    data_loaders, _ = loaders.load_data(data_name=data_name)
+    # if "cifar" in data_name:
+    #     print("\n[INFO] use cbs sampler \n")
+    #     data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
+    
 
     # model
     model = models.load_model(
@@ -74,8 +97,23 @@ def main():
         in_channels=cfg['model']['in_channels'],
         num_classes=cfg['model']['num_classes']
     )
-    model.load_state_dict(torch.load(pretrained_model_path)["model"])
+
+    # modules
+    modules = models.load_modules(
+        model=model,
+        model_name=model_name,
+        model_layers=model_layers
+    )
+
+    kernel_grad = KernelGrad(model, modules, kernel_percent_path)
+
+    model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
+
+    # 单机多卡的代码，可以不用
+    # if torch.cuda.device_count() > 1:
+    #     print("\n[INFO] Use", torch.cuda.device_count(), "GPUs! \n")
+    #     model = nn.DataParallel(model, device_ids=[0, 1])
 
     # optimizer
     loss_fn = reduce_equalized_focal_loss
@@ -93,8 +131,9 @@ def main():
         cur_lr = float(optimizer.state_dict()['param_groups'][0]['lr'])
         print(f"\nEpoch {epoch+1}")
         print("[INFO] lr is:", cur_lr)
-        print("-"*40)
-        train(data_loaders["train"], model, loss_fn, optimizer, device)
+        print("-" * 42)
+
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, device, args, cfg)
         test(data_loaders["val"], model, loss_fn, optimizer, epoch, device, args, cfg)
         scheduler.step()
 
@@ -105,47 +144,72 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, device):
+def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
     global g_train_loss, g_train_acc
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
-    # size = len(dataloader.dataset)
-    # size = 50000  # for cifar
-    size = 5160  # for imagenet-10-lt
+    size = len(dataloader.dataset)
     num_batches = len(dataloader)
     model.train()
+    # model.eval()
     for batch, (X, y, _) in enumerate(dataloader):
-        y_train_list.extend(y.numpy())
-
         X, y = X.to(device), y.to(device)
 
-        with torch.set_grad_enabled(True):
-            # Compute prediction error
-            pred = model(X)  # 网络前向计算
-            loss = loss_fn(pred, y, threshold=threshold)
 
-            train_loss += loss.item()
-        
-            y_pred_list.extend(pred.argmax(1).cpu().numpy())
+        modules_grads = [[] for _ in range(cfg['model']['num_classes'])]
+        for cls in range(cfg['model']['num_classes']):
+            with torch.set_grad_enabled(True):
+                # 找到对应类别的图片
+                x_pos = (y==cls).nonzero().squeeze()
+                # 处理只有一个样本的情况
+                if x_pos.shape == torch.Size([]):
+                    x_pos = x_pos.unsqueeze(dim=0)
+                # 处理没有样本的情况
+                if min(x_pos.shape) == 0:
+                    continue
+                x_cls_i = torch.index_select(X, dim=0, index=x_pos)
+                y_cls_i = torch.index_select(y, dim=0, index=x_pos)
+                y_train_list.extend(y_cls_i.cpu().numpy())
+                # Compute prediction error
+                pred = model(x_cls_i)  # 网络前向计算
+                loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                # loss = focal_loss(pred, y)
 
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                train_loss += loss.item()
             
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()  # 得到模型中参数对当前输入的梯度
-            optimizer.step()  # 更新参数
-    
+                y_pred_list.extend(pred.argmax(1).cpu().numpy())
+
+                correct += (pred.argmax(1) == y_cls_i).type(torch.float).sum().item()
+                
+                # Backpropagation
+                optimizer.zero_grad()
+                loss.backward()  # 得到模型中参数对当前输入的梯度
+
+                for module in modules:
+                    modules_grads[cls].append(module.weight.grad)
+            
+        for layer in kernel_percents.keys():
+            kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
+            kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
+            kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).to(device)
+            modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
+            for cls, modules_grad in enumerate(modules_grads):
+                if modules_grad:
+                    modules[int(layer)].weight.grad += kernel_weight[cls] * modules_grad[int(layer)]
+
+        optimizer.step()  # 更新参数
+
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
     
-    train_loss /= num_batches
+    train_loss /= (num_batches * cfg['model']['num_classes'])
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
-    print("-" * 40)
+    print("-" * 42)
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
@@ -153,7 +217,8 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     model_name = cfg["model_name"]
     data_name = args.data_name
     result_path = os.path.join(config.output_model,
-                               "cbs-refl",
+                               "three-stage",
+                               str(args.lr),
                                f"{model_name}-{data_name}-th{args.threshold}")
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -198,6 +263,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
 
     print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+    draw_classification_report("test", result_path, y_train_list, y_pred_list)
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
@@ -211,7 +277,8 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     }
     
     result_path = os.path.join(config.output_model,
-                               "cbs-refl",
+                               "three-stage",
+                               str(args.lr),
                                f"{model_name}-{data_name}-th{args.threshold}")
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -232,7 +299,30 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     plt.legend(loc="upper right")
     plt.grid(True)
     plt.legend()
-    plt.savefig(os.path.join(result_path, "cbs_refl_model.jpg"))
+    plt.savefig(os.path.join(result_path, "three_stage_model.jpg"))
+    plt.clf()
+    plt.close()
+
+
+def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list):
+    """绘制在训练集/测试集上面的 classification_report"""
+    reports = classification_report(y_train_list, y_pred_list, digits=4, output_dict=True)
+    np.save(os.path.join(result_path, f"{mode_type}_classification_report.npy"), reports)
+
+    labels = []
+    accs = []
+    samplers =[]
+    for x_i, y_i in reports.items():
+        if x_i == "accuracy": break
+        labels.append(x_i)
+        accs.append(y_i["recall"])
+        samplers.append(y_i["support"])
+
+    plt.plot(labels, accs)
+    plt.title("Acc of each class")
+    plt.xlabel("Classes")
+    plt.ylabel("Accuracy")
+    plt.savefig(os.path.join(result_path, f"{mode_type}_classification_report.jpg"))
     plt.clf()
     plt.close()
 

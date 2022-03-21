@@ -58,4 +58,5 @@ imagenet-10-lt:
   # 第二阶段模型路径
   two_stage_model_path: /nfs/xwx/model-doctor-xwx/modify_kernel/pretained/resnet32-imagenet-10-lt-customlr/best-model-20220312-234319-acc0.5340.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  kernel_percent_path: /nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads/grad_percent
   

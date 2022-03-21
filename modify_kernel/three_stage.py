@@ -57,7 +57,7 @@ def main():
     threshold = args.threshold
     data_name = args.data_name
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
     device = torch.device('cuda')
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
@@ -67,17 +67,17 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
-    dataset_root = get_dataset_root(data_name)
-    check_path(dataset_root)
-    sift_image_path = get_sift_image(cfg, dataset_root, device, args)
-    check_path(sift_image_path)
-    # sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/high/images"
-    grad_result_path = find_kernel(cfg, sift_image_path, device, args)
-    # grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-100-lt-ir100/stage3/grads"
+    # dataset_root = get_dataset_root(data_name)
+    # check_path(dataset_root)
+    # sift_image_path = get_sift_image(cfg, dataset_root, device, args)
+    # check_path(sift_image_path)
+    # sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/high/images"
+    # grad_result_path = find_kernel(cfg, sift_image_path, device, args)
+    grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads"
     view_layer_kernel(grad_result_path, cfg, args)
-    check_path(grad_result_path)
-    kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
-    check_path(kernel_dict_root_path)
+    # check_path(grad_result_path)
+    # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
+    # check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
     # train_and_val(cfg, kernel_dict_root_path, device)
 
@@ -214,9 +214,11 @@ def find_kernel(cfg, sift_image_path, device, args):
         outputs = model(inputs)
         grad_sift(outputs, labels)
 
-    grad_sift.sift()
+    # grad_sift.sift()
+    grad_sift.cal_percent()
 
     return result_path
+
 
 def view_layer_kernel(grad_result_path, cfg, args):
     result_path = grad_result_path
@@ -254,10 +256,11 @@ def view_layer_kernel(grad_result_path, cfg, args):
 
 
 def view_grads(label_grads, pic_path):
-    f, ax = plt.subplots(figsize=(64, 32), ncols=1)
+    f, ax = plt.subplots(figsize=(28, 10), ncols=1)
     ax.set_xlabel('convolutional kernel')
     ax.set_ylabel('category')
-    sns.heatmap(np.array(label_grads).T, ax=ax, linewidths=0.1, annot=False, cbar=False)
+    # sns.heatmap(np.array(label_grads), ax=ax, linewidths=0.1, annot=False, cbar=False)
+    sns.heatmap(np.array(label_grads), ax=ax, linewidths=0.1, annot=False)
     # plt.imshow(np.array(label_grads).T)
     plt.savefig(pic_path, bbox_inches='tight')
     plt.clf()

@@ -10,7 +10,7 @@ import torch.nn.functional as F
 
 def focal_loss(logits, labels, gamma=2):
     r"""
-    focal loss for multi classification（简洁版实现）
+    focal loss for multi classification
 
     `https://arxiv.org/pdf/1708.02002.pdf`
 
