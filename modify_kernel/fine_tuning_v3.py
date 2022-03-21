@@ -27,7 +27,7 @@ import torch.nn as nn
 # 使用类别平衡采样和REFL对预训练模型进行调整
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-100-lt-ir100')
+parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-4')
 
@@ -147,10 +147,11 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
-    # size = len(dataloader.dataset)
-    size = 50000  # cifar
+    size = len(dataloader.dataset)
+    # size = 50000  # cifar
     num_batches = len(dataloader)
-    model.train()
+    # model.train()
+    model.eval()
     for batch, (X, y, _) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
 
