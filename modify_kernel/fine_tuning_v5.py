@@ -20,6 +20,8 @@ from utils.lr_util import get_lr_scheduler
 from trainers.cls_trainer import print_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
+from loss.fl import focal_loss
+from modify_kernel.myutil import get_cfg
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -32,7 +34,7 @@ import torch.nn.functional as F
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
-parser.add_argument('--lr', type=float, default='1e-4')
+parser.add_argument('--lr', type=float, default='1e-5')
 
 
 # global config
@@ -49,7 +51,7 @@ def main():
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -60,7 +62,7 @@ def main():
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
 
-    print("-" * 42)
+    print("-" * 20, "config", "-" * 20)
     for k, v in cfg.items():
         print(f"{k}: {v}")
     print("-" * 42)
@@ -105,7 +107,7 @@ def main():
         model_layers=model_layers
     )
 
-    kernel_grad = KernelGrad(model, modules, kernel_percent_path)
+    # kernel_grad = KernelGrad(model, modules, kernel_percent_path)
 
     model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
@@ -175,7 +177,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
                 # Compute prediction error
                 pred = model(x_cls_i)  # 网络前向计算
                 loss = loss_fn(pred, y_cls_i, threshold=threshold)
-                # loss = focal_loss(pred, y)
+                # loss = focal_loss(pred, y_cls_i)
 
                 train_loss += loss.item()
             
@@ -192,7 +194,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
             
         for layer in kernel_percents.keys():
             kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
-            kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
+            # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
+            kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), kernel_weight, 10 * kernel_weight)
             kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).to(device)
             modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
             for cls, modules_grad in enumerate(modules_grads):
@@ -238,6 +241,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
         with torch.set_grad_enabled(True):
             pred = model(X)
             loss = loss_fn(pred, y, threshold=threshold)
+            # loss = focal_loss(pred, y)
 
             test_loss += loss.item()
 
@@ -325,23 +329,6 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     plt.savefig(os.path.join(result_path, f"{mode_type}_classification_report.jpg"))
     plt.clf()
     plt.close()
-
-
-def get_cfg(cfg_filename):
-    """获取配置"""
-    try:
-        from yaml import CLoader as Loader
-    except ImportError:
-        from yaml import Loader
-    # 获取当前文件所在目录
-    curPath = os.path.dirname(os.path.realpath(__file__))
-    # 获取yaml文件路径
-    yamlPath = os.path.join(curPath, "config", cfg_filename)
-
-    with open(yamlPath, encoding="utf-8") as f:
-        cfg = yaml.load(f, Loader)
-    
-    return cfg
 
 
 def update_best_model(result_path, model_state, model_name):
