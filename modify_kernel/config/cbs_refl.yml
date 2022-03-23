@@ -39,6 +39,7 @@ cifar-10-lt-ir100:
   two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
   
+  
 imagenet-10-lt:
   model:
     in_channels: 3
@@ -60,3 +61,24 @@ imagenet-10-lt:
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
   kernel_percent_path: /nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads/grad_percent
   
+
+cifar-10:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    lr: 1e-4
+    momentum: 0.9
+    weight_decay: 5e-4
+  epochs: 200
+  two_stage_epochs: 30
+  three_stage_epochs: 20
+  model_name: alexnetv2
+  image_type: high
+  model_layers: 4
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/alexnetv2-cifar-10/checkpoint.pth
+  # 第二阶段模型路径
+  two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/alexnetv2-cifar-10/checkpoint.pth
+  kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  kernel_percent_path: /nfs/xwx/model-doctor-xwx/output/result/alexnetv2-cifar-10/stage3/grads/grad_percent
