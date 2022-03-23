@@ -72,8 +72,11 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'alexnetv2':
         module_modules = {
-            -2: model.features[10], # CONV
-            -1: model.classifier[4], # FC
+            0: model.features[3],
+            1: model.features[6],
+            2: model.features[8],
+            3: model.features[10], # CONV
+            # -1: model.classifier[4], # FC
         }
     elif model_name == 'alexnetv3':
         module_modules = {
