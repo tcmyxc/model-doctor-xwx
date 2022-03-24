@@ -20,16 +20,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from torch import optim
-from utils.lr_util import get_lr_scheduler
-from trainers.cls_trainer import print_time
-from loss.refl import reduce_equalized_focal_loss
 from sklearn.metrics import classification_report
+from utils.lr_util import get_lr_scheduler
+from utils.time_util import print_time
+from loss.refl import reduce_equalized_focal_loss
+
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--model_name', default='resnext50')
 parser.add_argument('--threshold', type=float, default='0.5')
+parser.add_argument('--loss_name', type=str, default='ce')
 
 
 best_acc = 0

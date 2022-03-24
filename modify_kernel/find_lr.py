@@ -17,7 +17,7 @@ import matplotlib
 import models
 import loaders
 
-from trainers.cls_trainer import print_time
+from utils.time_util import print_time
 
 from loss.fl import focal_loss
 from loss.efl import equalized_focal_loss

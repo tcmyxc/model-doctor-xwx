@@ -16,7 +16,7 @@ import yaml
 from torch import optim
 from utils.lr_util import get_lr_scheduler
 from sklearn.metrics import classification_report
-from trainers.cls_trainer import print_time
+from utils.time_util import print_time
 from configs import config
 
 # 在导入matplotlib库后，且在matplotlib.pyplot库被导入前加下面这句话，不然不起作用

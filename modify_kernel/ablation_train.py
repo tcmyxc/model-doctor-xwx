@@ -21,7 +21,7 @@ import datetime
 import time
 
 import matplotlib
-from trainers.cls_trainer import print_time
+from utils.time_util import print_time
 
 import json
 
