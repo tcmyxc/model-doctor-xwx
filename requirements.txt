@@ -10,7 +10,7 @@ scikit_learn
 scipy==1.5.2
 seaborn==0.11.2
 scikit-image
-torch==1.11.0
+torch==1.10.1
+torchvision
 torchsummary==1.5.1
-torchvision==0.12.0
 tqdm==4.62.3

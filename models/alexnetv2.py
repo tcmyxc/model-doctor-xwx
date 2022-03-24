@@ -51,6 +51,6 @@ def alexnet(in_channels: int = 3, num_classes: int = 10) -> AlexNet:
 if __name__ == '__main__':
     from torchsummary import summary
     alexnet = alexnet().cuda()
-    # print(alexnet)
-    summary(model=alexnet, input_size=(3, 64, 64))
+    print(alexnet)
+    # summary(model=alexnet, input_size=(3, 64, 64))
     

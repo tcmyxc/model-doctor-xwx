@@ -51,7 +51,7 @@ class GradSift:
     def __call__(self, outputs, labels):
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
         for layer, module in enumerate(self.h_modules):
-            grads = module.grads(-nll_loss, module.inputs)  # io
+            grads = module.grads(-nll_loss, module.outputs)  # io
             grads = torch.relu(grads)
 
             # if self.modules[layer][0] == 'Conv2d':

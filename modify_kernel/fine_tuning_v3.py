@@ -27,7 +27,7 @@ import torch.nn as nn
 # 使用类别平衡采样和REFL对预训练模型进行调整
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='imagenet-10-lt')
+parser.add_argument('--data_name', default='cifar-10')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-5')
 
@@ -85,9 +85,9 @@ def main():
 
     # data
     data_loaders, _ = loaders.load_data(data_name=data_name)
-    if "cifar" in data_name:
-        print("\n[INFO] use cbs sampler \n")
-        data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
+    # if "cifar" in data_name:
+    #     print("\n[INFO] use cbs sampler \n")
+    #     data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
     
 
     # model
@@ -169,8 +169,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                 y_train_list.extend(y_cls_i.cpu().numpy())
                 # Compute prediction error
                 pred = model(x_cls_i)  # 网络前向计算
-                loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                # loss = loss_fn(pred, y_cls_i, threshold=threshold)
                 # loss = focal_loss(pred, y)
+                loss = nn.CrossEntropyLoss()(pred, y_cls_i)
 
                 train_loss += loss.item()
             
@@ -183,8 +184,11 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                 loss.backward()  # 得到模型中参数对当前输入的梯度
             
                 for layer in modify_dict.keys():
-                    if layer <= 19:  continue
+                    # print("-"*42)
+                    # print(modify_dict[layer][0])
+                    if layer <= 1:  continue
                     for kernel_index in range(modify_dict[layer][0]):
+                        # print(kernel_index)
                         if kernel_index not in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
             
@@ -228,7 +232,8 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
             pred = model(X)
-            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = loss_fn(pred, y, threshold=threshold)
+            loss = nn.CrossEntropyLoss()(pred, y)
 
             test_loss += loss.item()
 

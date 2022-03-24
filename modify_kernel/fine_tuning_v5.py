@@ -176,8 +176,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
                 y_train_list.extend(y_cls_i.cpu().numpy())
                 # Compute prediction error
                 pred = model(x_cls_i)  # 网络前向计算
-                loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                # loss = loss_fn(pred, y_cls_i, threshold=threshold)
                 # loss = focal_loss(pred, y_cls_i)
+                loss = nn.CrossEntropyLoss()(pred, y_cls_i)
 
                 train_loss += loss.item()
             
@@ -193,11 +194,13 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
                     modules_grads[cls].append(module.weight.grad)
             
         for layer in kernel_percents.keys():
-            kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
-            # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
-            kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), kernel_weight, 10 * kernel_weight)
-            kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).to(device)
             modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
+            if layer <= 19:
+                continue
+            kernel_weight = torch.from_numpy(kernel_percents[layer-1]).float()  # 10*16, num_cls*num_kernel
+            kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
+            # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), 0.1 * kernel_weight, 10 * kernel_weight)
+            kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).to(device)
             for cls, modules_grad in enumerate(modules_grads):
                 if modules_grad:
                     modules[int(layer)].weight.grad += kernel_weight[cls] * modules_grad[int(layer)]
@@ -206,14 +209,14 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
     
     train_loss /= (num_batches * cfg['model']['num_classes'])
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
     print("-" * 42)
-    print(classification_report(y_train_list, y_pred_list, digits=4))
+    print(classification_report(y_train_list, y_pred_list, digits=4), flush=True)
 
 
 def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
@@ -234,14 +237,15 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for X, y, _ in dataloader:
+    for batch, (X, y, _) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
             pred = model(X)
-            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = loss_fn(pred, y, threshold=threshold)
             # loss = focal_loss(pred, y)
+            loss = nn.CrossEntropyLoss()(pred, y)
 
             test_loss += loss.item()
 
@@ -249,13 +253,17 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
 
         correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
+        if batch % 10 == 0:
+            loss, current = loss.item(), batch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+
     test_loss /= num_batches
     g_test_loss.append(test_loss)
     correct /= size
     g_test_acc.append(correct)
     if correct > best_acc:
         best_acc = correct
-        print(f"[FEAT] epoch {epoch+1}, update best acc: {best_acc:.4f}")
+        print(f"\n[FEAT] epoch {epoch+1}, update best acc: {best_acc:.4f}")
         model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
         model_state = {
             'epoch': epoch,  # 注意这里的epoch是从0开始的

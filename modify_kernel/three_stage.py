@@ -71,13 +71,12 @@ def main():
     # check_path(dataset_root)
     # sift_image_path = get_sift_image(cfg, dataset_root, device, args)
     # check_path(sift_image_path)
-    # sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/high/images"
-    # grad_result_path = find_kernel(cfg, sift_image_path, device, args)
-    grad_result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads"
+    sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/high/images"
+    grad_result_path = find_kernel(cfg, sift_image_path, device, args)
+    check_path(grad_result_path)
     view_layer_kernel(grad_result_path, cfg, args)
-    # check_path(grad_result_path)
-    # kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
-    # check_path(kernel_dict_root_path)
+    kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
+    check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
     # train_and_val(cfg, kernel_dict_root_path, device)
 
@@ -90,6 +89,8 @@ def get_dataset_root(data_name):
         return config.data_imagenet_lt
     elif data_name == "cifar-100-lt-ir100":
         return config.data_cifar100_lt_ir100
+    elif data_name == "cifar-10":
+        return config.data_cifar10
     
 
 def check_path(path, msg=None):
@@ -214,7 +215,7 @@ def find_kernel(cfg, sift_image_path, device, args):
         outputs = model(inputs)
         grad_sift(outputs, labels)
 
-    # grad_sift.sift()
+    grad_sift.sift()
     grad_sift.cal_percent()
 
     return result_path
