@@ -72,11 +72,11 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'alexnetv2':
         module_modules = {
-            0: model.features[0],  # 64*11*11
-            1: model.features[3],  # 192*5*5
-            2: model.features[6],  # 384*3*3
-            3: model.features[8],  # 256*3*3
-            4: model.features[10], # 256*3*3
+            # 0: model.features[0],  # 64*11*11
+            0: model.features[3],  # 192*5*5
+            1: model.features[6],  # 384*3*3
+            2: model.features[8],  # 256*3*3
+            3: model.features[10], # 256*3*3
             # -1: model.classifier[4], # FC
         }
     elif model_name == 'alexnetv3':
@@ -119,7 +119,7 @@ def load_modules(model, model_name, model_layers):
         }
     elif model_name == 'resnet32':
         module_modules = {
-            0: model.layer1[0].conv1,
+            0: model.layer1[0].conv1,  # 卷积核, 16*3*3
             1: model.layer1[0].conv2,
             2: model.layer1[1].conv1,
             3: model.layer1[1].conv2,
@@ -130,7 +130,7 @@ def load_modules(model, model_name, model_layers):
             8: model.layer1[4].conv1,
             9: model.layer1[4].conv2,
 
-            10: model.layer2[0].conv1,
+            10: model.layer2[0].conv1,  # 32*3*3
             11: model.layer2[0].conv2,
             12: model.layer2[1].conv1,
             13: model.layer2[1].conv2,
@@ -141,7 +141,7 @@ def load_modules(model, model_name, model_layers):
             18: model.layer2[4].conv1,
             19: model.layer2[4].conv2,
 
-            20: model.layer3[0].conv1,
+            20: model.layer3[0].conv1,  # 64*3*3
             21: model.layer3[0].conv2,
             22: model.layer3[1].conv1,
             23: model.layer3[1].conv2,
@@ -328,6 +328,7 @@ def load_modules(model, model_name, model_layers):
             -1: model.features[18][0]  # 1280, 1, 1
         }
 
+    # 转成数组形式，索引从0开始
     if model_layers is not None:
         modules = [module_modules[layer] for layer in model_layers]
     else:

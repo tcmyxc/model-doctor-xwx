@@ -50,7 +50,7 @@ imagenet-10-lt:
     weight_decay: 5e-4
   epochs: 200
   two_stage_epochs: 30
-  three_stage_epochs: 20
+  three_stage_epochs: 50
   model_name: resnet32
   image_type: high
   model_layers: 30
@@ -72,7 +72,7 @@ cifar-10:
     weight_decay: 5e-4
   epochs: 200
   two_stage_epochs: 30
-  three_stage_epochs: 20
+  three_stage_epochs: 50
   model_name: alexnetv2
   image_type: high
   model_layers: 4

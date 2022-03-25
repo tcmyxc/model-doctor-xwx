@@ -9,10 +9,6 @@ import models
 from configs import config
 from utils import file_util
 
-from mylog import log
-
-train_log = log()
-
 
 class ImageSift:
     def __init__(self, class_nums, image_nums, is_high_confidence=True):
@@ -126,13 +122,13 @@ def main():
         "resnet32-cifar-10-lt-ir100-refl-th-0.4-wr",
         'checkpoint.pth'
     )
-    train_log.info(model_path)
+    
     
     result_path = os.path.join(
         config.output_result, 
         model_name + '-' + data_name, "high"
     )
-    train_log.info(result_path)
+    
    
     if not os.path.exists(result_path):
         os.makedirs(result_path)

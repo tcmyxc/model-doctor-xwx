@@ -14,9 +14,7 @@ from configs import config
 from utils import image_util
 from utils import data_util
 
-from mylog import log
 
-train_log = log()
 
 class HookModule:
     def __init__(self, module):
@@ -51,7 +49,7 @@ class GradSift:
     def __call__(self, outputs, labels):
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
         for layer, module in enumerate(self.h_modules):
-            grads = module.grads(-nll_loss, module.outputs)  # io
+            grads = module.grads(-nll_loss, module.outputs)  # output
             grads = torch.relu(grads)
 
             # if self.modules[layer][0] == 'Conv2d':
@@ -134,14 +132,12 @@ def main():
         "resnet32-cifar-10-lt-ir100-refl-th-0.4-wr",
         'checkpoint.pth'
     )
-    train_log.info("model_path: " + model_path)
-
+    
     input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/high/images"
     result_path = os.path.join("/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100-all", 'grads')
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
-    train_log.info("result_path: " + result_path)
 
     # config
     cfg = json.load(open('configs/config_trainer.json'))[data_name]

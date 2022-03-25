@@ -9,10 +9,10 @@ import cv2
 
 import seaborn as sns
 
-percent_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads/grad_percent/grads_percent_inputs_layer29.npy"
+percent_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/grads/grad_percent/grads_percent_inputs_layer10.npy"
 
 modify_dict = np.load(percent_path)
-print(np.sum(modify_dict, axis=0))
+print(modify_dict.shape)
 
 
 # f, ax = plt.subplots(figsize=(28, 10), ncols=1)

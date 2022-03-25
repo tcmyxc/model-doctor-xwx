@@ -31,13 +31,13 @@ from utils import data_util, image_util
 from core.image_sift import ImageSift
 from core.pattern_sift import GradSift
 from utils.lr_util import get_lr_scheduler
-from trainers.cls_trainer import print_time
+from utils.time_util import print_time
 from loss.refl import reduce_equalized_focal_loss
 from sklearn.metrics import classification_report
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='imagenet-10-lt')
+parser.add_argument('--data_name', default='cifar-10')
 parser.add_argument('--threshold', type=float, default='0.5')
 
 
@@ -67,11 +67,10 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
-    # dataset_root = get_dataset_root(data_name)
-    # check_path(dataset_root)
-    # sift_image_path = get_sift_image(cfg, dataset_root, device, args)
-    # check_path(sift_image_path)
-    sift_image_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-imagenet-10-lt/stage3/high/images"
+    dataset_root = get_dataset_root(data_name)
+    check_path(dataset_root)
+    sift_image_path = get_sift_image(cfg, dataset_root, device, args)
+    check_path(sift_image_path)
     grad_result_path = find_kernel(cfg, sift_image_path, device, args)
     check_path(grad_result_path)
     view_layer_kernel(grad_result_path, cfg, args)
