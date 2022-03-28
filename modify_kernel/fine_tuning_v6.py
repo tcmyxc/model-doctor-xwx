@@ -315,7 +315,6 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     plt.ylabel("Acc & Loss")
     plt.legend(loc="upper right")
     plt.grid(True)
-    plt.legend()
     plt.savefig(os.path.join(result_path, "three_stage_model.jpg"))
     plt.clf()
     plt.close()
