@@ -159,10 +159,10 @@ def main():
                          class_nums=cfg['model']['num_classes'],
                          result_path=result_path)
 
-    data_loader = data_util.load_data(input_path)
+    data_loader = data_util.load_data(input_path, data_name)
     for i, samples in enumerate(data_loader):
         print('\r[{}/{}]'.format(i, len(data_loader)), end='', flush=True)
-        inputs, labels = samples
+        inputs, labels, _ = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
 

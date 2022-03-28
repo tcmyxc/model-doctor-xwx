@@ -313,3 +313,8 @@ cifar 数据集大概调整 50 轮就可以了
 
 应该对模块的输出求导，不应该对输入求导，需要修改很多部分：
 pattern_sift， 求梯度，模型模块定义那边
+
+```bash
+git config --global user.name tcmyxc
+git config --global user.email 1282494272@qq.com
+```
