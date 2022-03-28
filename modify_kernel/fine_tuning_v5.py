@@ -195,9 +195,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
             
         for layer in kernel_percents.keys():
             modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
-            # if layer <= 19:
-            #     continue
-            kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
+            if layer <= 19:
+                continue
+            kernel_weight = 1 - torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), 0.1 * kernel_weight, 10 * kernel_weight)
             kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).unsqueeze(4).to(device)
@@ -349,6 +349,7 @@ def update_best_model(result_path, model_state, model_name):
         os.remove(best_model_path)
 
     torch.save(model_state, cp_path)
+    torch.save(model_state, os.path.join(result_path, "best-model.pth"))
     best_model_path = cp_path
     print(f"Saved Best PyTorch Model State to {model_name} \n")
 
