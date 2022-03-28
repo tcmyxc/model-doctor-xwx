@@ -266,6 +266,7 @@ def update_best_model(result_path, model_state, model_name):
         os.remove(best_model_path)
 
     torch.save(model_state, cp_path)
+    torch.save(model_state, os.path.join(result_path, "best-model.pth"))
     best_model_path = cp_path
     print(f"Saved Best PyTorch Model State to {model_name} \n")
 if __name__ == '__main__':
