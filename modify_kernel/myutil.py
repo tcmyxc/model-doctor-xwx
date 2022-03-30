@@ -69,7 +69,6 @@ def draw_acc(result_path, train_loss, test_loss, train_acc, test_acc, filename=N
     plt.ylabel("Acc & Loss")
     plt.legend(loc="upper right")
     plt.grid(True)
-    plt.legend()
     plt.savefig(os.path.join(result_path, "model.jpg" if filename is None else f"{filename}.jpg"))
     plt.clf()
     plt.close()

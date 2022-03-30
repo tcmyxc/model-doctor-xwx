@@ -16,6 +16,9 @@ from configs import config
 # sampler
 from loaders.ClassAwareSampler import get_sampler
 
+
+batch_size = 32
+
 class BalancedSampler(Sampler):
     def __init__(self, buckets, retain_epoch_size=False):
         for bucket in buckets:
@@ -161,8 +164,6 @@ class ImageNetLTDataLoader(DataLoader):
 
 def load_images(data_type):
     assert data_type in ['train', 'test']
-    
-    batch_size = 32
 
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_10_LT_train.txt"
@@ -205,8 +206,6 @@ def load_class_balanced_imagenet_10_lt_images(data_type):
     train_txt= config.data_imagenet_lt + "/ImageNet_10_LT_train.txt"
     test_txt= config.data_imagenet_lt + "/ImageNet_10_LT_test.txt"
 
-    batch_size = 32
-
     train_trsfm = transforms.Compose([
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
@@ -242,8 +241,6 @@ def load_class_balanced_imagenet_10_lt_images(data_type):
 
 def load_single_class_images(data_type):
     assert data_type in ['train', 'test']
-    
-    batch_size = 32
 
     data_dir = config.data_imagenet_lt
     train_txt= config.data_imagenet_lt + "/ImageNet_one_class_train.txt"

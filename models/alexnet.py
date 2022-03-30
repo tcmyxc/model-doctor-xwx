@@ -39,3 +39,11 @@ class AlexNet(nn.Module):
 
 def alexnet(in_channels=3, num_classes=10):
     return AlexNet(in_channels=in_channels, num_classes=num_classes)
+
+
+if __name__ == '__main__':
+    from torchsummary import summary
+    alexnet = alexnet().cuda()
+    # print(alexnet)
+    summary(model=alexnet, input_size=(3, 32, 32))
+    
