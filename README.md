@@ -318,3 +318,7 @@ pattern_sift， 求梯度，模型模块定义那边
 git config --global user.name tcmyxc
 git config --global user.email 1282494272@qq.com
 ```
+
+```bash
+$(date "+%Y%m%d-%H%M%S").log
+```
