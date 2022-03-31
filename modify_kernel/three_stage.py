@@ -215,7 +215,7 @@ def find_kernel(cfg, sift_image_path, device, args):
         grad_sift(outputs, labels)
 
     grad_sift.sift()
-    grad_sift.cal_percent()
+    # grad_sift.cal_percent()
 
     return result_path
 

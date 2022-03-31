@@ -29,7 +29,7 @@ from loss.refl import reduce_equalized_focal_loss
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
-parser.add_argument('--model_name', default='resnext50')
+parser.add_argument('--model_name', default='resnet32')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--loss_name', type=str, default='ce')
 
@@ -55,6 +55,7 @@ def main():
     print("-" * 42)
 
     # device
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 42, '\n[Info] train on ', device)
 

@@ -184,8 +184,10 @@ def load_images(data_type):
 
     if data_type == 'train':
         data_set = LT_Dataset(data_dir,  train_txt, train_trsfm)
+        shuffle = True
     else:
         data_set = LT_Dataset(data_dir, test_txt, test_trsfm)
+        shuffle = False
 
     num_classes = len(np.unique(data_set.targets))
     assert num_classes == 10
@@ -193,7 +195,7 @@ def load_images(data_type):
     data_loader = DataLoader(dataset=data_set,
                              batch_size=batch_size,
                              num_workers=4,
-                             shuffle=True)
+                             shuffle=shuffle)
 
     return data_loader, len(data_set)
 
