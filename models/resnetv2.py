@@ -36,6 +36,15 @@ from torch.autograd import Variable
 
 __all__ = ['ResNet', 'resnet20', 'resnet32', 'resnet44', 'resnet56', 'resnet110', 'resnet1202']
 
+class FeatureGRU(nn.Module):
+    def __init__(self, input_size, num_layers, batch_first=True) -> None:
+        super().__init__()
+        self.gru = nn.GRU(input_size, input_size, num_layers, batch_first=batch_first)
+    
+    def forward(self, x):
+        xn, _ = self.gru(x)
+        return xn
+
 def _weights_init(m):
     classname = m.__class__.__name__
     #print(classname)
@@ -96,6 +105,7 @@ class ResNet(nn.Module):
         self.linear = nn.Linear(64, num_classes)
 
         # self.apply(_weights_init)
+        self.gru = FeatureGRU(1, 1)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -111,11 +121,15 @@ class ResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        feature_out = out
         out = F.avg_pool2d(out, out.size()[3])
+
+        xn = self.gru(torch.flatten(out, 2))
+        xn = torch.reshape(xn, out.shape)
+        out = out * xn
+
         out = out.view(out.size(0), -1)
         out = self.linear(out)
-        return out, feature_out
+        return out
 
 
 def resnet20():
@@ -143,5 +157,6 @@ def resnet1202():
 
 
 if __name__ == "__main__":
-    model = resnet32()
-    print(model)
+    from torchsummary import summary
+    model = resnet32().cuda()
+    summary(model=model, input_size=(3, 224, 224))
