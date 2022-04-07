@@ -2,6 +2,16 @@ import torch
 import torch.nn as nn
 
 
+class FeatureGRU(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, batch_first=True) -> None:
+        super().__init__()
+        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=batch_first)
+    
+    def forward(self, x):
+        xn, _ = self.gru(x)
+        return xn
+
+
 # no LRN
 class AlexNet(nn.Module):
     def __init__(self, in_channels: int = 3, num_classes: int = 10) -> None:
@@ -51,6 +61,6 @@ def alexnet(in_channels: int = 3, num_classes: int = 10) -> AlexNet:
 if __name__ == '__main__':
     from torchsummary import summary
     alexnet = alexnet().cuda()
-    print(alexnet)
-    # summary(model=alexnet, input_size=(3, 64, 64))
+    # print(alexnet)
+    summary(model=alexnet, input_size=(3, 224, 224))
     
