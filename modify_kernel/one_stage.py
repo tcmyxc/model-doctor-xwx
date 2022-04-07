@@ -29,7 +29,7 @@ from loss.refl import reduce_equalized_focal_loss
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
-parser.add_argument('--model_name', default='resnet32')
+parser.add_argument('--model_name', default='alexnetv2')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--loss_name', type=str, default='ce')
 
@@ -68,6 +68,8 @@ def main():
         in_channels=cfg["model"]["in_channels"],
         num_classes=cfg["model"]["num_classes"]
     )
+    model_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/pretained/alexnet-imagenet-10-lt/best-model-20220406-224232-acc0.5640.pth"
+    model.load_state_dict(torch.load(model_path)["model"], strict=False)
     model.to(device)
 
     loss_fn = reduce_equalized_focal_loss
@@ -150,7 +152,6 @@ def train(dataloader, model, loss_fn, optimizer, device, args):
 
 
 def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
-    data_name  = args.data_name
     model_name = args.model_name
     threshold  = args.threshold
     global best_acc, g_test_loss, g_test_acc
@@ -162,7 +163,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for X, y, _ in dataloader:
+    for batch, (X, y, _) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
@@ -176,6 +177,10 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
         y_pred_list.extend(pred.argmax(1).cpu().numpy())
 
         correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+
+        if batch % 10 == 0:
+            loss, current = loss.item(), batch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
 
     test_loss /= num_batches
     g_test_loss.append(test_loss)
@@ -199,9 +204,6 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
-    data_name  = args.data_name
-    model_name = args.model_name
-    threshold  = args.threshold
     num_epochs = len(train_loss)
 
     plt.plot(range(1, num_epochs + 1), train_loss, 'r', label='train loss')
@@ -216,7 +218,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args):
     plt.legend(loc="upper right")
     plt.grid(True)
     plt.legend()
-    plt.savefig(f'{model_name}_{data_name}_th{threshold}_pure_train_cls_model.jpg')
+    plt.savefig('pure_train_cls_model.jpg')
     plt.clf()
     plt.close()
 
