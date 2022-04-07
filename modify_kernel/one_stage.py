@@ -32,6 +32,7 @@ parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--model_name', default='alexnetv2')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--loss_name', type=str, default='ce')
+parser.add_argument('--lr_scheduler', type=str, default='custom')
 
 
 best_acc = 0
@@ -80,11 +81,13 @@ def main():
         weight_decay=float(cfg["optimizer"]["weight_decay"])
     )
     # lr scheduler
-    # scheduler = get_lr_scheduler(optimizer, True)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=cfg["epochs"]
-    )
+    if args.lr_scheduler == "custom":
+        scheduler = get_lr_scheduler(optimizer, True)
+    else:
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=cfg["epochs"]
+        )
 
     begin_time = time.time()
     lr_list=[]
@@ -188,7 +191,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args):
     g_test_acc.append(correct)
     if correct > best_acc:
         best_acc = correct
-        print(f"[FEAT] Epoch {epoch+1}, update best acc:", best_acc)
+        print(f"\n[FEAT] Epoch {epoch+1}, update best acc:", best_acc)
         model_name=f"best-model-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}-acc{best_acc:.4f}.pth"
         model_state = {
             'epoch': epoch,  # 注意这里的epoch是从0开始的
