@@ -155,5 +155,7 @@ def resnet152(in_channels=3, num_classes=10):
 
 
 if __name__ == "__main__":
-    model = resnet18()
-    print(model)
+    from torchsummary import summary
+    model = resnet50().cuda()
+    # print(model)
+    summary(model=model, input_size=(3, 224, 224))
