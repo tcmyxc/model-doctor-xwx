@@ -31,6 +31,7 @@ parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--lr_scheduler', type=str, default='custom')
+parser.add_argument('--data_loader_type', type=int, default='0')
 
 # global config
 threshold = None
@@ -85,8 +86,11 @@ def main():
 
     print(f"\n[INFO] result will save in:\n{result_path}")
 
-    # data
-    data_loaders, _ = loaders.load_data(data_name=data_name)
+    # data loader
+    if args.data_loader_type == 0:
+        data_loaders, _ = loaders.load_data(data_name=data_name)
+    elif args.data_loader_type == 1:
+        data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
 
     # model
     model = models.load_model(
