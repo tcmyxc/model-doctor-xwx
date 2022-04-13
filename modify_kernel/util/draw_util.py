@@ -36,3 +36,18 @@ def draw_acc_and_loss(result_path, train_loss, test_loss, train_acc, test_acc, f
     plt.savefig(os.path.join(result_path, "model.jpg" if filename is None else f"{filename}.jpg"))
     plt.clf()
     plt.close()
+
+
+def draw_lr(result_path, lr_list):
+    num_epochs = len(lr_list)
+
+    plt.plot(range(1, num_epochs + 1), lr_list, label='lr')
+
+    plt.title("Learning rate of each epoch")
+    plt.xlabel("Training Epochs")
+    plt.ylabel("Learning rate")
+    plt.legend(loc="upper right")
+    plt.grid(True)
+    plt.savefig(os.path.join(result_path, "model_lr.jpg"))
+    plt.clf()
+    plt.close()
