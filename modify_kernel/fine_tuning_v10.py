@@ -78,11 +78,9 @@ def main():
 
     model_name = cfg["model_name"]
     model_path = cfg["two_stage_model_path"]
-    # lr = float(cfg["optimizer"]["lr"])
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
-    # epochs = cfg["three_stage_epochs"]
     epochs = args.epochs
     print(f"\n[INFO] total epoch: {epochs}")
     model_layers = range(cfg["model_layers"])
@@ -156,7 +154,7 @@ def main():
     elif args.lr_scheduler == "cos":
         scheduler = optim.lr_scheduler.CosineAnnealingLR(
             optimizer=optimizer,
-            T_max=cfg["epochs"]
+            T_max=epochs
         )
     elif args.lr_scheduler == "constant":
         scheduler = None
@@ -210,7 +208,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
             features.extend(tmp_feature_out.numpy())
 
             ft_loss = cal_ft_loss(X, y, feature_out)
-            ft_loss = ft_loss / 100
+            ft_loss = ft_loss / 200
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
