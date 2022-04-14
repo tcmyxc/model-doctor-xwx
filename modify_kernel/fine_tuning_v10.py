@@ -36,9 +36,9 @@ parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
-parser.add_argument('--epochs', type=int, default='10')
+parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cos', help="choose from ['cos', 'custom', 'constant']")
-parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
+parser.add_argument('--loss_type', type=str, default='refl', help="choose from ['ce', 'fl', 'refl']")
 
 # global config
 modify_dicts = []
@@ -212,7 +212,6 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
             features.extend(tmp_feature_out.numpy())
 
             ft_loss = cal_ft_loss(X, y, feature_out)
-            ft_loss = ft_loss / 200
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
@@ -418,11 +417,10 @@ def cal_ft_loss(X, y, feature_out):
                 ft_true += ft_cls_i[:, kernel_index, ::]
             
         # ft_loss += torch.abs(ft_err - ft_true).mean().item()  # l1
-        ft_loss += F.smooth_l1_loss(ft_err, ft_true)
-        # ft_loss += F.nll_loss(ft_err, ft_true)
+        ft_loss += F.l1_loss(ft_err, ft_true)
                         
 
-    return ft_loss
+    return ft_loss / 100
 
 def get_cfg(cfg_filename):
     """获取配置"""
