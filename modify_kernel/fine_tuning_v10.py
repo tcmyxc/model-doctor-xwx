@@ -36,7 +36,7 @@ parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
-parser.add_argument('--epochs', type=int, default='500')
+parser.add_argument('--epochs', type=int, default='10')
 parser.add_argument('--lr_scheduler', type=str, default='cos', help="choose from ['cos', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 
@@ -157,7 +157,11 @@ def main():
             T_max=epochs
         )
     elif args.lr_scheduler == "constant":
-        scheduler = None
+        scheduler = optim.lr_scheduler.ConstantLR(
+            optimizer=optimizer,
+            factor=1,
+            total_iters=epochs
+        )
 
     
     begin_time = time.time()
@@ -172,7 +176,7 @@ def main():
 
         train(data_loaders["train"], model, loss_fn, optimizer, modules, epoch, device)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
-        if scheduler is not None:  scheduler.step()
+        scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, result_path)
         draw_lr(result_path, lr_list)
@@ -284,7 +288,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
             'epoch': epoch,  # 注意这里的epoch是从0开始的
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            "scheduler": scheduler.state_dict() if scheduler is not None  else "",
+            "scheduler": scheduler.state_dict(),
             'acc': best_acc
         }
         update_best_model(result_path, model_state, model_name)
@@ -413,7 +417,9 @@ def cal_ft_loss(X, y, feature_out):
             else:
                 ft_true += ft_cls_i[:, kernel_index, ::]
             
-        ft_loss += torch.abs(ft_err - ft_true).mean().item()
+        # ft_loss += torch.abs(ft_err - ft_true).mean().item()  # l1
+        ft_loss += F.smooth_l1_loss(ft_err, ft_true)
+        # ft_loss += F.nll_loss(ft_err, ft_true)
                         
 
     return ft_loss
