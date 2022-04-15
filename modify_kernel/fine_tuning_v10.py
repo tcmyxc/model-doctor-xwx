@@ -32,11 +32,11 @@ import torch.nn.functional as F
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='imagenet-10-lt')
+parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
-parser.add_argument('--epochs', type=int, default='20')
+parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cos', help="choose from ['cos', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 
@@ -56,7 +56,7 @@ def main():
     print(f"\n[INFO] args: {args}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 
@@ -174,7 +174,7 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, modules, epoch, device)
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, 1-epoch/epochs, device)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
         scheduler.step()
 
@@ -186,7 +186,7 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
+def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
     global g_train_loss, g_train_acc, result_path
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
@@ -212,7 +212,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
             features.extend(tmp_feature_out.numpy())
 
             ft_loss = cal_ft_loss(X, y, feature_out)
-            ft_loss /= 50
+            ft_loss /= 400
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
@@ -240,7 +240,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
     # 特征图可视化
-    draw_tsne(result_path, features, "train", y_train_list)
+    # draw_tsne(result_path, features, "train", y_train_list)
 
 
 def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
@@ -298,7 +298,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
     draw_classification_report("test", result_path, y_train_list, y_pred_list)
 
     # 特征图可视化
-    draw_tsne(result_path, features, "val", y_train_list)
+    # draw_tsne(result_path, features, "val", y_train_list)
     
 
 
