@@ -89,6 +89,7 @@ def main():
     result_path = os.path.join(config.output_model, "three-stage",
                                model_name, data_name, 
                                f"lr{args.lr}", f"th{args.threshold}",
+                               args.lr_scheduler, args.loss_type,
                                get_current_time())
     if not os.path.exists(result_path):
         os.makedirs(result_path)
