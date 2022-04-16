@@ -37,7 +37,7 @@ from sklearn.metrics import classification_report
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-10')
+parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 
 
@@ -73,7 +73,7 @@ def main():
     check_path(sift_image_path)
     grad_result_path = find_kernel(cfg, sift_image_path, device, args)
     check_path(grad_result_path)
-    view_layer_kernel(grad_result_path, cfg, args)
+    # view_layer_kernel(grad_result_path, cfg, args)
     kernel_dict_root_path = union_cls_kernel(cfg, grad_result_path, args)
     check_path(kernel_dict_root_path)
     # kernel_dict_root_path = "/nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict/resnet32-cifar-10-lt-ir100"
@@ -90,6 +90,8 @@ def get_dataset_root(data_name):
         return config.data_cifar100_lt_ir100
     elif data_name == "cifar-10":
         return config.data_cifar10
+    elif data_name == "cifar-10-lt-ir100":
+        return config.data_cifar10_lt_ir100
     
 
 def check_path(path, msg=None):
@@ -160,7 +162,7 @@ def get_sift_image(cfg, dataset_root, device, args):
         inputs, labels, names = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
 
         image_sift(outputs=outputs, labels=labels, names=names)
 
@@ -211,7 +213,7 @@ def find_kernel(cfg, sift_image_path, device, args):
         inputs = inputs.to(device)
         labels = labels.to(device)
 
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
         grad_sift(outputs, labels)
 
     grad_sift.sift()

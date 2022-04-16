@@ -2,16 +2,6 @@ import torch
 import torch.nn as nn
 
 
-class FeatureGRU(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, batch_first=True) -> None:
-        super().__init__()
-        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=batch_first)
-    
-    def forward(self, x):
-        xn, _ = self.gru(x)
-        return xn
-
-
 # no LRN
 class AlexNet(nn.Module):
     def __init__(self, in_channels: int = 3, num_classes: int = 10) -> None:
@@ -32,7 +22,6 @@ class AlexNet(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        # self.gru = FeatureGRU(36, 36, 1)
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(256 * 6 * 6, 4096),
@@ -45,13 +34,11 @@ class AlexNet(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        # feature = x
-        # xn = self.gru(torch.flatten(feature, 2))
-        # xn = torch.reshape(xn, x.shape)
+        feature = x
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
-        return x
+        return x, feature
 
 
 def alexnet(in_channels: int = 3, num_classes: int = 10) -> AlexNet:
@@ -66,5 +53,5 @@ if __name__ == '__main__':
     from torchsummary import summary
     alexnet = alexnet().cuda()
     # print(alexnet)
-    summary(model=alexnet, input_size=(3, 224, 224))
+    summary(model=alexnet, input_size=(3, 64, 64))
     

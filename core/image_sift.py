@@ -89,7 +89,7 @@ def sift_image(data_name, model_name, model_path, result_path):
     model = models.load_model(model_name=model_name,
                               in_channels=cfg['model']['in_channels'],
                               num_classes=cfg['model']['num_classes'])
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
     model.eval()
 
@@ -106,7 +106,7 @@ def sift_image(data_name, model_name, model_path, result_path):
         inputs, labels, names = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
 
         image_sift(outputs=outputs, labels=labels, names=names)
 
@@ -117,11 +117,7 @@ def sift_image(data_name, model_name, model_path, result_path):
 def main():
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
-    model_path = os.path.join(
-        config.model_pretrained,
-        "resnet32-cifar-10-lt-ir100-refl-th-0.4-wr",
-        'checkpoint.pth'
-    )
+    model_path = "/nfs/xwx/model-doctor-xwx/output/model/three-stage/resnet32/cifar-10-lt-ir100/lr0.001/th0.5/2022-04-15_19-08-36/best-model-20220415-191627-acc0.7323.pth"
     
     
     result_path = os.path.join(
