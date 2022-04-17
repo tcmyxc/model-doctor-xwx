@@ -36,7 +36,8 @@ import torch.nn.functional as F
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
-parser.add_argument('--lr', type=float, default='1e-5')
+parser.add_argument('--lr', type=float, default='1e-2')
+parser.add_argument('--lr_scheduler', type=str, default='custom')
 
 
 # global config
@@ -77,6 +78,7 @@ def main():
     weight_decay = float(cfg["optimizer"]["weight_decay"])
     # epochs = cfg["three_stage_epochs"]
     epochs = 200
+    print("\n[INFO] total epochs:", epochs)
     model_layers = range(cfg["model_layers"])
     kernel_percent_path = cfg["kernel_percent_path"]
 
@@ -112,13 +114,9 @@ def main():
 
     # kernel_grad = KernelGrad(model, modules, kernel_percent_path)
 
-    model.load_state_dict(torch.load(model_path)["model"])
+    # model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
-    # 单机多卡的代码，可以不用
-    # if torch.cuda.device_count() > 1:
-    #     print("\n[INFO] Use", torch.cuda.device_count(), "GPUs! \n")
-    #     model = nn.DataParallel(model, device_ids=[0, 1])
 
     # optimizer
     loss_fn = reduce_equalized_focal_loss
@@ -128,9 +126,14 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    scheduler = get_lr_scheduler(optimizer, True)
 
-    data_loader, _ = load_images("train")
+    if args.lr_scheduler == "custom":
+        scheduler = get_lr_scheduler(optimizer, True)
+    else:
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=cfg["epochs"]
+        )
 
     begin_time = time.time()
     for epoch in range(epochs):
@@ -140,7 +143,7 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loader, model, loss_fn, optimizer, modules, device, args, cfg)
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, device, args, cfg)
         test(data_loaders["val"], model, loss_fn, optimizer, epoch, device, args, cfg)
         scheduler.step()
 
@@ -199,10 +202,12 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
                     modules_grads[cls].append(module.weight.grad)
             
         for layer in kernel_percents.keys():
-            modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
-            if layer <= 19:
-                continue
-            kernel_weight = 1- torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
+            # modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
+            # if layer <= 19:
+            #     continue
+            kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
+            kernel_weight = torch.ones_like(kernel_weight) / kernel_weight.shape[0]
+            # print("\n[INFO] kernel_weight:", kernel_weight)
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), 0.1 * kernel_weight, 10 * kernel_weight)
             kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).unsqueeze(4).to(device)

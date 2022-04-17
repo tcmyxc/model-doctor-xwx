@@ -24,10 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 
-# 使用类别平衡采样和REFL对预训练模型进行调整
+# 使用01mask和REFL对预训练模型进行调整
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-10')
+parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-5')
 
@@ -45,7 +45,7 @@ def main():
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
@@ -68,6 +68,7 @@ def main():
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
     epochs = cfg["three_stage_epochs"]
+    print("\n[INFO] total epochs:", epochs)
     model_layers = range(cfg["model_layers"])
 
     # kernel
@@ -76,6 +77,7 @@ def main():
         cfg["kernel_dict_path"],
         f"{model_name}-{data_name}"
     )
+    # 01mask
     for cls in range(num_classes):
         mask_path_patten = f"{kernel_dict_path}/kernel_dict_label_{cls}.npy"
         modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
@@ -149,8 +151,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
     y_train_list = []
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
-    model.train()
-    # model.eval()
+    # model.train()
+    model.eval()
     for batch, (X, y, _) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
 
@@ -169,9 +171,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                 y_train_list.extend(y_cls_i.cpu().numpy())
                 # Compute prediction error
                 pred = model(x_cls_i)  # 网络前向计算
-                # loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                loss = loss_fn(pred, y_cls_i, threshold=threshold)
                 # loss = focal_loss(pred, y)
-                loss = nn.CrossEntropyLoss()(pred, y_cls_i)
+                # loss = nn.CrossEntropyLoss()(pred, y_cls_i)
 
                 train_loss += loss.item()
             
@@ -184,9 +186,6 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                 loss.backward()  # 得到模型中参数对当前输入的梯度
             
                 for layer in modify_dict.keys():
-                    # print("-"*42)
-                    # print(modify_dict[layer][0])
-                    if layer <= 1:  continue
                     for kernel_index in range(modify_dict[layer][0]):
                         # print(kernel_index)
                         if kernel_index not in modify_dict[layer][1]:
@@ -232,8 +231,8 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
             pred = model(X)
-            # loss = loss_fn(pred, y, threshold=threshold)
-            loss = nn.CrossEntropyLoss()(pred, y)
+            loss = loss_fn(pred, y, threshold=threshold)
+            # loss = nn.CrossEntropyLoss()(pred, y)
 
             test_loss += loss.item()
 
@@ -350,6 +349,7 @@ def update_best_model(result_path, model_state, model_name):
         os.remove(best_model_path)
 
     torch.save(model_state, cp_path)
+    torch.save(model_state, os.path.join(result_path, "best-model.pth"))
     best_model_path = cp_path
     print(f"Saved Best PyTorch Model State to {model_name} \n")
 

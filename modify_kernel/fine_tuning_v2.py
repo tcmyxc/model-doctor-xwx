@@ -172,7 +172,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args):
                     #     modules[int(layer)].weight.grad[:] = 0
                     # # # print("layer:", layer)
                     for kernel_index in range(modify_dict[layer][0]):
-                        if kernel_index not in modify_dict[layer][1]:
+                        if kernel_index in modify_dict[layer][1]:
                             modules[int(layer)].weight.grad[kernel_index, ::] = 0
             optimizer.step()  # 更新参数
     

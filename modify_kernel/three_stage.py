@@ -37,7 +37,7 @@ from sklearn.metrics import classification_report
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-10-lt-ir100')
+parser.add_argument('--data_name', default='cifar-100-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 
 
@@ -153,7 +153,7 @@ def get_sift_image(cfg, dataset_root, device, args):
     data_loader, _ = loaders.load_data(data_name=data_name, data_type='train')
 
     image_sift = ImageSift(class_nums=cfg['model']['num_classes'],
-                           image_nums=20,
+                           image_nums=5,  # FOR CIFAR100-LT100
                            is_high_confidence=True)
 
     # forward

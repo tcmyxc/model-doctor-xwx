@@ -31,8 +31,10 @@ import torch.nn.functional as F
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
-parser.add_argument('--lr', type=float, default='1e-4')
+parser.add_argument('--lr', type=float, default='1e-3')
+parser.add_argument('--lr_scheduler', type=str, default='custom', help="choose from ['cos', 'custom', 'constant']")
 parser.add_argument('--data_loader_type', type=int, default='0')
+parser.add_argument('--epochs', type=int, default='200')
 
 # global config
 modify_dicts = []
@@ -76,7 +78,7 @@ def main():
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
     # epochs = cfg["three_stage_epochs"]
-    epochs = 200
+    epochs = args.epochs
     print(f"\n[INFO] total epoch: {epochs}")
     model_layers = range(cfg["model_layers"])
 
@@ -135,11 +137,17 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    # scheduler = get_lr_scheduler(optimizer, True)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(
-        optimizer=optimizer,
-        T_max=epochs
-    )
+
+    # scheduler
+    if args.lr_scheduler == "custom":
+        scheduler = get_lr_scheduler(optimizer, True)
+    elif args.lr_scheduler == "cos":
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=cfg["epochs"]
+        )
+    elif args.lr_scheduler == "constant":
+        scheduler = None
 
     
     begin_time = time.time()
@@ -152,7 +160,7 @@ def main():
 
         train(data_loaders["train"], model, loss_fn, optimizer, modules, epoch, device)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
-        scheduler.step()
+        if scheduler is not None:  scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, result_path)
         print_time(time.time()-epoch_begin_time, epoch=True)
@@ -172,11 +180,11 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
     size = len(dataloader.dataset)
     # size = 5160  # 类平衡样本数
     num_batches = len(dataloader)
-    model.train()
-    # model.eval()
+    # model.train()
+    model.eval()
     for batch, (X, y, _) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
-        optimizer.zero_grad()
+        # optimizer.zero_grad()
         for cls, modify_dict in enumerate(modify_dicts):
             with torch.set_grad_enabled(True):
                 # 找到对应类别的图片
@@ -196,15 +204,18 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
                 
                 layer = 29
                 ft_loss = 0
+                # 不相关卷积核的特征图往相关卷积核的特征图靠近
+                ft_err, ft_true = torch.zeros_like(feature_out[:, 0, ::]), torch.zeros_like(feature_out[:, 0, ::])
                 for kernel_index in range(modify_dict[layer][0]):
                     if kernel_index not in modify_dict[layer][1]:
                         # ft_loss += torch.abs(feature_out[:, kernel_index, ::]).mean().item() / feature_out.shape[1]
                         # ft_loss += torch.abs(feature_out[:, kernel_index, ::]).mean().item()  # res32输出的特征图默认都是正值
-                        ft_err = feature_out[:, kernel_index, ::]
+                        ft_err += feature_out[:, kernel_index, ::]
                     else:
-                        ft_true = feature_out[:, kernel_index, ::]
+                        ft_true += feature_out[:, kernel_index, ::]
                     
-                    ft_loss += torch.abs(ft_err - ft_true).mean().item()
+                
+                ft_loss += torch.abs(ft_err - ft_true).mean().item()
                         
                 
                 
@@ -214,7 +225,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
                 features.extend(tmp_feature_out.numpy())
 
                 
-                ft_loss = ft_loss * 0.02
+                ft_loss = ft_loss / 10
                 # loss = loss_fn(pred, y_cls_i, threshold=threshold) + ft_loss
                 loss = nn.CrossEntropyLoss()(pred, y_cls_i) + ft_loss
                 train_loss += loss.item()
@@ -224,9 +235,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
                 correct += (pred.argmax(1) == y_cls_i).type(torch.float).sum().item()
 
 
-                
+                optimizer.zero_grad()
                 loss.backward()  # 得到模型中参数对当前输入的梯度
-        optimizer.step()  # 更新参数
+                optimizer.step()  # 更新参数
+        # optimizer.step()  # 更新参数
                 
 
         if batch % 10 == 0:
@@ -290,7 +302,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
             'epoch': epoch,  # 注意这里的epoch是从0开始的
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            "scheduler": scheduler.state_dict(),
+            "scheduler": scheduler.state_dict() if scheduler is not None  else "",
             'acc': best_acc
         }
         update_best_model(result_path, model_state, model_name)

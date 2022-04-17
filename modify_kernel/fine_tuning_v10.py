@@ -32,7 +32,7 @@ import torch.nn.functional as F
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-10-lt-ir100')
+parser.add_argument('--data_name', default='cifar-100-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
@@ -56,7 +56,7 @@ def main():
     print(f"\n[INFO] args: {args}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 

@@ -1,6 +1,4 @@
-from random import sample
 import sys
-from numpy import dtype
 sys.path.append('/nfs/xwx/model-doctor-xwx')
 
 import torch
@@ -15,11 +13,11 @@ import yaml
 
 from torch import optim
 from configs import config
-from core.grad_percent import KernelGrad
 from utils.lr_util import get_lr_scheduler
 from utils.time_util import print_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
+from hooks.grad_hook import GradHookModule
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -32,7 +30,7 @@ import torch.nn.functional as F
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
-parser.add_argument('--lr', type=float, default='1e-5')
+parser.add_argument('--lr', type=float, default='1e-2')
 
 
 # global config
@@ -41,20 +39,22 @@ kernel_percents = {}
 threshold = None
 best_acc = 0
 best_model_path = None
+result_path = None
 g_train_loss, g_train_acc = [], []
 g_test_loss, g_test_acc = [], []
+g_cls_test_acc = {}
 
 def main():
     args = parser.parse_args()
     print(f"\n[INFO] args: {args} \n")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('-' * 79, '\n[Info] train on ', device)
 
     # get cfg
-    global threshold
+    global threshold, result_path, g_cls_test_acc
     threshold = args.threshold
     data_name = args.data_name
     cfg_filename = "cbs_refl.yml"
@@ -65,24 +65,29 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
+    for idx in range(cfg['model']['num_classes']):
+        g_cls_test_acc[idx] = []
+
     model_name = cfg["model_name"]
     model_path = cfg["two_stage_model_path"]
     # lr = float(cfg["optimizer"]["lr"])
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
-    epochs = cfg["three_stage_epochs"]
+    # epochs = cfg["three_stage_epochs"]
+    epochs = 200
     model_layers = range(cfg["model_layers"])
     kernel_percent_path = cfg["kernel_percent_path"]
+
+    result_path = os.path.join(config.output_model, "three-stage",
+                               model_name, data_name, 
+                               f"lr{args.lr}", f"th{args.threshold}")
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
 
     for layer in range(cfg["model_layers"]):
         kernel_percent = np.load(os.path.join(kernel_percent_path, f"grads_percent_inputs_layer{layer}.npy"))
         kernel_percents[layer] = kernel_percent
-
-    # for k, v in kernel_percents.items():
-    #     print(f"{k}: {v}")
-    # print("-" * 42)
-    # return 
 
     # data
     data_loaders, _ = loaders.load_data(data_name=data_name)
@@ -105,9 +110,12 @@ def main():
         model_layers=model_layers
     )
 
-    kernel_grad = KernelGrad(model, modules, kernel_percent_path)
+    # hook the modules
+    grad_hook_modules = []
+    for module in modules:
+        grad_hook_modules.append(GradHookModule(model, module, cfg['model']['num_classes']))
 
-    model.load_state_dict(torch.load(model_path)["model"])
+    # model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
     # 单机多卡的代码，可以不用
@@ -123,7 +131,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=epochs
+    )
 
     begin_time = time.time()
     for epoch in range(epochs):
@@ -133,18 +145,18 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, modules, device, args, cfg)
-        test(data_loaders["val"], model, loss_fn, optimizer, epoch, device, args, cfg)
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, grad_hook_modules, device)
+        test(data_loaders["val"], model, loss_fn, optimizer, epoch, device)
         scheduler.step()
 
-        draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, args, cfg)
+        draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, result_path)
         print_time(time.time()-epoch_begin_time, epoch=True)
         
     print("Done!")
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
+def train(dataloader, model, loss_fn, optimizer, modules, grad_hook_modules, device):
     global g_train_loss, g_train_acc
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
@@ -168,35 +180,19 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
 
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
-            # kernel_grad.cal_kernel_grad(pred, y)
-            
             # Backpropagation
-            
-            # loss.backward()  # 得到模型中参数对当前输入的梯度
-
-            # nll_loss = F.nll_loss(pred, y, reduction="none")
-            nll_loss = F.cross_entropy(pred, y)
-            targets = y.view(-1, 1)  # 多加一个维度，为使用 gather 函数做准备
-            grads = torch.autograd.grad(outputs=-nll_loss, inputs=pred)[0]  # 求导, 32*10, batch_size*num_cls
-            grads = grads.gather(1, targets)  # 32*1
-
-            grads_i = [0 for _ in range(cfg['model']['num_classes'])]  # 每个类对应的梯度, 1*10
-            for truth_label, grad_i in zip(y, grads):
-                grads_i[truth_label] += grad_i.item()
-
-            # model.zero_grad()
-
             optimizer.zero_grad()
-            loss.backward()  # 得到模型中参数对当前输入的梯度
-            for layer in kernel_percents.keys():
-                # print(modules[int(layer)].weight.grad.shape)
-                kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
-                kernel_weight = torch.mm(torch.tensor(grads_i).view(1, -1), kernel_weight) # 1*16, 1*num_kernel
-                kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).to(device).expand(modules[int(layer)].weight.grad.shape).clone()
-                # print(kernel_weight.shape)
-                modules[int(layer)].weight.grad = kernel_weight
-            
+            # nll_loss = F.nll_loss(pred, y)
+            nll_loss = loss
+            kernel_percents = [module.grads(outputs=-nll_loss, inputs=module.activations, targets=y)  for module in grad_hook_modules]
 
+            loss.backward()  # 得到模型中参数对当前输入的梯度
+            for layer, kernel_weight in enumerate(kernel_percents):
+                if layer <= 19:
+                    continue
+                kernel_weight = torch.ones_like(kernel_weight) / kernel_weight.shape[0]
+                kernel_weight = kernel_weight.unsqueeze(1).unsqueeze(2).unsqueeze(3).to(device)
+                modules[int(layer)].weight.grad = kernel_weight * modules[int(layer)].weight.grad
             optimizer.step()  # 更新参数
 
         if batch % 10 == 0:
@@ -211,16 +207,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
-def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
-    model_name = cfg["model_name"]
-    data_name = args.data_name
-    result_path = os.path.join(config.output_model,
-                               "three-stage",
-                               str(args.lr),
-                               f"{model_name}-{data_name}-th{args.threshold}")
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
-    global best_acc, g_test_loss, g_test_acc
+def test(dataloader, model, loss_fn, optimizer, epoch, device):
+    global best_acc, g_test_loss, g_test_acc, result_path
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
@@ -264,22 +252,13 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     draw_classification_report("test", result_path, y_train_list, y_pred_list)
 
 
-def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
-    model_name = cfg["model_name"]
-    data_name = args.data_name
+def draw_acc(train_loss, test_loss, train_acc, test_acc, result_path):
     history = {
         'train_loss': train_loss,
         'train_acc': train_acc,
         'val_loss': test_loss,
         'val_acc': test_acc
     }
-    
-    result_path = os.path.join(config.output_model,
-                               "three-stage",
-                               str(args.lr),
-                               f"{model_name}-{data_name}-th{args.threshold}")
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
 
     np.save(os.path.join(result_path, 'model.npy'), history)
 
@@ -296,7 +275,6 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     plt.ylabel("Acc & Loss")
     plt.legend(loc="upper right")
     plt.grid(True)
-    plt.legend()
     plt.savefig(os.path.join(result_path, "three_stage_model.jpg"))
     plt.clf()
     plt.close()
@@ -316,6 +294,7 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
         accs.append(y_i["recall"])
         samplers.append(y_i["support"])
 
+    draw_cls_test_acc(labels, accs, result_path)
     plt.plot(labels, accs)
     plt.title("Acc of each class")
     plt.xlabel("Classes")
@@ -324,6 +303,24 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     plt.clf()
     plt.close()
 
+
+def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
+    global g_cls_test_acc
+    for idx in labels:
+        g_cls_test_acc[int(idx)].append(one_epoch_test_acc[int(idx)])
+
+    num_epochs = len(g_cls_test_acc[0])
+
+    for label in labels:
+        plt.plot(range(1, num_epochs + 1), g_cls_test_acc[int(label)], label=f"label {label}")
+
+    plt.xlabel("Training Epochs")
+    plt.ylabel("Acc")
+    plt.legend(loc="lower left")
+    plt.grid(True)
+    plt.savefig(os.path.join(result_path, "cls_test_acc_report.jpg"))
+    plt.clf()
+    plt.close()
 
 def get_cfg(cfg_filename):
     """获取配置"""
@@ -352,6 +349,7 @@ def update_best_model(result_path, model_state, model_name):
         os.remove(best_model_path)
 
     torch.save(model_state, cp_path)
+    torch.save(model_state, os.path.join(result_path, "best-model.pth"))
     best_model_path = cp_path
     print(f"Saved Best PyTorch Model State to {model_name} \n")
 

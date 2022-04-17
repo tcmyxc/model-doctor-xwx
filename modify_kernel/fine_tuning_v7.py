@@ -17,7 +17,7 @@ from utils.lr_util import get_lr_scheduler
 from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
-
+from hooks.grad_hook import GradHookModule
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -30,10 +30,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='imagenet-10-lt')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-2')
-parser.add_argument('--lr_scheduler', type=str, default='cos')
-parser.add_argument('--data_loader_type', type=int, default='0')
+
 
 # global config
+modify_dicts = []
+# kernel_percents = {}
 threshold = None
 best_acc = 0
 best_model_path = None
@@ -75,6 +76,7 @@ def main():
     # epochs = cfg["three_stage_epochs"]
     epochs = 200
     print(f"\n[INFO] total epoch: {epochs}")
+    model_layers = range(cfg["model_layers"])
 
     # result path
     result_path = os.path.join(config.output_model, "three-stage",
@@ -84,15 +86,20 @@ def main():
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
-    print(f"\n[INFO] result will save in:\n{result_path}\n")
+    # kernel
+    num_classes = cfg['model']['num_classes']
+    kernel_dict_path = os.path.join(
+        cfg["kernel_dict_path"],
+        f"{model_name}-{data_name}"
+    )
+    # 01mask
+    for cls in range(num_classes):
+        mask_path_patten = f"{kernel_dict_path}/kernel_dict_label_{cls}.npy"
+        modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
+        modify_dicts.append(modify_dict)
 
-    # data loader
-    if args.data_loader_type == 0:
-        # 常规数据加载器
-        data_loaders, _ = loaders.load_data(data_name=data_name)
-    elif args.data_loader_type == 1:
-        # 类平衡采样
-        data_loaders, _ = loaders.load_class_balanced_data(data_name=data_name)
+    # data
+    data_loaders, _ = loaders.load_data(data_name=data_name)
 
     # model
     model = models.load_model(
@@ -101,7 +108,14 @@ def main():
         num_classes=cfg['model']['num_classes']
     )
 
-    model.load_state_dict(torch.load(model_path)["model"], strict=False)
+    # modules
+    modules = models.load_modules(
+        model=model,
+        model_name=model_name,
+        model_layers=model_layers
+    )
+
+    # model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
     # optimizer
@@ -112,15 +126,12 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    if args.lr_scheduler == "custom":
-        scheduler = get_lr_scheduler(optimizer, True)
-    else:
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            optimizer=optimizer,
-            T_max=cfg["epochs"]
-        )
+    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    #     optimizer=optimizer,
+    #     T_max=epochs
+    # )
 
-    
     begin_time = time.time()
     for epoch in range(epochs):
         epoch_begin_time = time.time()
@@ -129,7 +140,7 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, epoch, device)
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, device)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
         scheduler.step()
 
@@ -138,66 +149,71 @@ def main():
         
     print("Done!")
     print_time(time.time()-begin_time)
-    
 
 
-def train(dataloader, model, loss_fn, optimizer, epoch, device):
+def train(dataloader, model, loss_fn, optimizer, modules, device):
     global g_train_loss, g_train_acc
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
-    features = []
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     model.train()
-
     for batch, (X, y, _) in enumerate(dataloader):
-        y_train_list.extend(y.numpy())
-
         X, y = X.to(device), y.to(device)
+        for cls, modify_dict in enumerate(modify_dicts):
+            with torch.set_grad_enabled(True):
+                # 找到对应类别的图片
+                x_pos = (y==cls).nonzero().squeeze()
+                # 处理只有一个样本的情况
+                if x_pos.shape == torch.Size([]):
+                    x_pos = x_pos.unsqueeze(dim=0)
+                # 处理没有样本的情况
+                if min(x_pos.shape) == 0:
+                    continue
+                x_cls_i = torch.index_select(X, dim=0, index=x_pos)
+                y_cls_i = torch.index_select(y, dim=0, index=x_pos)
+                y_train_list.extend(y_cls_i.cpu().numpy())
+                # Compute prediction error
+                pred = model(x_cls_i)  # 网络前向计算
+                loss = loss_fn(pred, y_cls_i, threshold=threshold)
+                # loss = focal_loss(pred, y)
 
-        with torch.set_grad_enabled(True):
-            # Compute prediction error
-            pred, feature = model(X)  # 网络前向计算
-
-            # 存储特征图
-            tmp_feature_out = feature.detach().cpu()
-            tmp_feature_out = torch.flatten(tmp_feature_out, 1)
-            features.extend(tmp_feature_out.numpy())
-
-            loss = loss_fn(pred, y, threshold=threshold)
-
-            train_loss += loss.item()
-        
-            y_pred_list.extend(pred.argmax(1).cpu().numpy())
-
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+                train_loss += loss.item()
             
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()  # 得到模型中参数对当前输入的梯度
-            optimizer.step()  # 更新参数
-    
+                y_pred_list.extend(pred.argmax(1).cpu().numpy())
+
+                correct += (pred.argmax(1) == y_cls_i).type(torch.float).sum().item()
+                
+                # Backpropagation
+                optimizer.zero_grad()
+                loss.backward()  # 得到模型中参数对当前输入的梯度
+            
+                for layer in modify_dict.keys():
+                    # if layer <= 19:
+                    #     continue
+                    # #     modules[int(layer)].weight.grad[:] = 0
+                    # # # # print("layer:", layer)
+                    for kernel_index in range(modify_dict[layer][0]):
+                        if kernel_index in modify_dict[layer][1]:
+                            modules[int(layer)].weight.grad[kernel_index, ::] = 0
+            
+
+                optimizer.step()  # 更新参数
+
+
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-    
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+
+    # train_loss /= (num_batches * len(modify_dicts))
     train_loss /= num_batches
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
     print("-" * 42)
     print(classification_report(y_train_list, y_pred_list, digits=4))
-
-    # TSNE 聚类特征图并可视化
-    from sklearn.manifold import TSNE
-    features_embedded = TSNE(n_components=2, init='pca', n_iter=10000).fit_transform(features)
-    plt.scatter(features_embedded[:, 0], features_embedded[:, 1], c=y_train_list)
-    plt.colorbar()
-    plt.savefig("tsne.jpg")
-    plt.clf()
-    plt.close()
 
 
 def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
@@ -215,7 +231,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
         X, y = X.to(device), y.to(device)
         with torch.set_grad_enabled(True):
-            pred, _ = model(X)  # 网络前向计算
+            pred = model(X)
             loss = loss_fn(pred, y, threshold=threshold)
 
             test_loss += loss.item()

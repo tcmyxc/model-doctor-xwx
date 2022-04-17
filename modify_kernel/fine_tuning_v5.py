@@ -73,7 +73,9 @@ def main():
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
-    epochs = cfg["three_stage_epochs"]
+    # epochs = cfg["three_stage_epochs"]
+    epochs = 50
+    print("\n[INFO] total epochs:", epochs)
     model_layers = range(cfg["model_layers"])
     kernel_percent_path = cfg["kernel_percent_path"]
 
@@ -125,7 +127,11 @@ def main():
         momentum=momentum,
         weight_decay=weight_decay
     )
-    scheduler = get_lr_scheduler(optimizer, True)
+    # scheduler = get_lr_scheduler(optimizer, True)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer=optimizer,
+        T_max=epochs
+    )
 
     begin_time = time.time()
     for epoch in range(epochs):
@@ -135,7 +141,9 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, modules, device, args, cfg)
+        weight_factor = 1-((epoch+1)/epochs)
+
+        train(data_loaders["train"], model, loss_fn, optimizer, modules, device, args, cfg, weight_factor)
         test(data_loaders["val"], model, loss_fn, optimizer, epoch, device, args, cfg)
         scheduler.step()
 
@@ -146,7 +154,7 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
+def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg, weight_factor):
     global g_train_loss, g_train_acc
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
@@ -197,10 +205,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
             modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
             if layer <= 19:
                 continue
-            kernel_weight = 1 - torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
+            kernel_weight = torch.from_numpy(kernel_percents[layer]).float()  # 10*16, num_cls*num_kernel
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), torch.zeros_like(kernel_weight), kernel_weight)
             # kernel_weight = torch.where(kernel_weight<torch.mean(kernel_weight), 0.1 * kernel_weight, 10 * kernel_weight)
-            kernel_weight = kernel_weight.unsqueeze(2).unsqueeze(3).unsqueeze(4).to(device)
+            kernel_weight = weight_factor * kernel_weight.unsqueeze(2).unsqueeze(3).unsqueeze(4).to(device)
             for cls, modules_grad in enumerate(modules_grads):
                 if modules_grad:
                     modules[int(layer)].weight.grad += kernel_weight[cls] * modules_grad[int(layer)]
@@ -215,6 +223,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, device, args, cfg):
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
+    print(f"\n[INFO] Train Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {train_loss:>8f} \n")
     print("-" * 42)
     print(classification_report(y_train_list, y_pred_list, digits=4), flush=True)
 
@@ -273,7 +282,7 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
         }
         update_best_model(result_path, model_state, model_name)
 
-    print(f"Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
+    print(f"\n[INFO] Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
     draw_classification_report("test", result_path, y_train_list, y_pred_list)
 
@@ -308,7 +317,8 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, args, cfg):
     plt.title("Acc and Loss of each epoch")
     plt.xlabel("Training Epochs")
     plt.ylabel("Acc & Loss")
-    plt.legend(loc="upper right")
+    # plt.legend(loc="upper right")
+    plt.legend(loc="best")
     plt.grid(True)
     plt.savefig(os.path.join(result_path, "three_stage_model.jpg"))
     plt.clf()
