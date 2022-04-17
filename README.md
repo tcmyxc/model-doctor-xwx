@@ -26,22 +26,6 @@ conda env create -f model-doctor-conf.yml
 
 
 # 常规数据集训练
-## 从头训练一个模型，resnet50+cifar-10
-
-```tex
-bets res is 194 epoch, optimizer is SGD (
-Parameter Group 0
-    dampening: 0
-    initial_lr: 0.01
-    lr: 2.2190176984600013e-05
-    momentum: 0.9
-    nesterov: False
-    weight_decay: 0.0005
-)
-```
-
-
-
 ## resnet50+cifar10
 1. 从头训练一个模型: 0.9489
 2. 原有的模型医生调整: 0.9548, + 0.5900%
@@ -140,28 +124,6 @@ alexnet 只有5层卷积
 | 7 | 139 |
 | 8 | 83 |
 | 9 | 50 |
-
-
-
-## resnet50+cifar-100(ρ=100)
-- 预训练：0.3770
-- 模型医生：0.3792
-
-## resnet50+cifar-10(ρ=100)
-- 预训练：0.7091
-- 模型医生：0.7198
-- 微调阶段只使用FL: acc1 is 73.60%, acc5 is 97.94%
-
-
-
-## resnet50+cifar-10(ρ=10)
-- 预训练：0.8848
-- 模型医生：0.8958
-
-
-## resnet50+cifar-10(ρ=50)
-- 预训练：0.7744
-- 模型医生：0.7753
 
 
 # ResNext50+ImageNet-lt
@@ -304,12 +266,6 @@ alexnet 只有5层卷积
 cifar 数据集大概调整 50 轮就可以了
 
 
-# 不使用长尾数据集
-
-## alexnet+cifar10
-- 预训练:      0.8304
-- 百分比卷积核: 0.8311
-- 01掩码: 
 
 应该对模块的输出求导，不应该对输入求导，需要修改很多部分：
 pattern_sift， 求梯度，模型模块定义那边
@@ -322,3 +278,14 @@ git config --global user.email 1282494272@qq.com
 ```bash
 $(date "+%Y%m%d-%H%M%S").log
 ```
+
+# ResNet32+Cifar-10-lt-ir100
+    - 预训练：71.82%(refl), (ce:69.34%, fl:69.20%)
+    - 同一个类别，不相关卷积核的特征图向相关卷积核靠近
+        - lr1e-3, fl, cosine: 73.03%, +1.21
+        - lr1e-3, ce, cosine: 72.59%, +0.77
+        - lr1e-3, refl, cosine: 73.21%, +1.39
+
+# ResNet32+Cifar-100-lt-ir100
+    - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
+    - 同一个类别，不相关卷积核的特征图向相关卷积核靠近
