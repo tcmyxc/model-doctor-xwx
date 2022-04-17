@@ -37,7 +37,7 @@ parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
 parser.add_argument('--epochs', type=int, default='200')
-parser.add_argument('--lr_scheduler', type=str, default='cos', help="choose from ['cos', 'custom', 'constant']")
+parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 
 # global config
@@ -56,7 +56,7 @@ def main():
     print(f"\n[INFO] args: {args}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 
@@ -152,7 +152,7 @@ def main():
     # scheduler
     if args.lr_scheduler == "custom":
         scheduler = get_lr_scheduler(optimizer, True)
-    elif args.lr_scheduler == "cos":
+    elif args.lr_scheduler == "cosine":
         scheduler = optim.lr_scheduler.CosineAnnealingLR(
             optimizer=optimizer,
             T_max=epochs
