@@ -40,6 +40,7 @@ cifar-10-lt-ir100:
   # two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth
   two_stage_model_path: /nfs/xwx/model-doctor-xwx/output/model/three-stage/resnet32/cifar-10-lt-ir100/lr0.001/th0.5/2022-04-15_19-08-36/best-model-20220415-191627-acc0.7323.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  ft_path: /nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/features/ft_centers.npy
 
 
 cifar-10:

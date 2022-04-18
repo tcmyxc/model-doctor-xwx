@@ -289,11 +289,32 @@ $(date "+%Y%m%d-%H%M%S").log
 
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
-- 同一个类别，不相关卷积核的特征图向相关卷积核靠近
+- 同一个类别，不相关卷积核的特征图向相关卷积核靠近(最多挑选5张图片筛选卷积核)
     - lr1e-3
         - fl
-            - cosine: 42.39%, +0.62
+            - cosine: **42.39%**, +0.62
+            - custom: 42.52
         - ce
             - cosine: 41.91%, +0.14
+            - custom: 41.91%
         - refl
-            - cosine: 42.38%, +0.61
+            - cosine: **42.38%**, +0.61
+            - custom: 42.27%
+    - lr0.1
+        - fl
+            - custom: 41.98%
+        - ce
+            - custom: 41.65%
+        - refl
+            - custom: 41.21%
+    - lr0.01
+        - fl
+            - custom: 
+        - ce
+            - custom: 41.91%
+        - refl
+            - custom: 42.08%
+
+
+
+timm 库 accuracy

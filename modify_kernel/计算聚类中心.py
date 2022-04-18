@@ -32,20 +32,10 @@ import torch.nn.functional as F
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='imagenet-10-lt')
-parser.add_argument('--threshold', type=float, default='0.5')
+parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--data_loader_type', type=int, default='0')
 
-# global config
-modify_dicts = []
-# kernel_percents = {}
-# threshold = None
-best_acc = 0
-best_model_path = None
-result_path = None
-g_train_loss, g_train_acc = [], []
-g_test_loss, g_test_acc = [], []
-g_cls_test_acc = {}
+ft_centers = None
 
 def main():
     args = parser.parse_args()
@@ -56,9 +46,6 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 
-    # get cfg
-    global result_path, g_cls_test_acc
-
     data_name = args.data_name
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
@@ -68,34 +55,9 @@ def main():
         print(f"{k}: {v}")
     print("-" * 42)
 
-    for idx in range(cfg['model']['num_classes']):
-        g_cls_test_acc[idx] = []
-
     model_name = cfg["model_name"]
     model_path = cfg["two_stage_model_path"]
-    model_layers = range(cfg["model_layers"])
-
-    # result path
-    result_path = os.path.join(config.output_model, "three-stage",
-                               model_name, data_name, 
-                               f"lr{args.lr}", f"th{args.threshold}",
-                               get_current_time())
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
-    
-    print(f"\n[INFO] result will save in:\n{result_path}\n")
-
-    # kernel
     num_classes = cfg['model']['num_classes']
-    kernel_dict_path = os.path.join(
-        cfg["kernel_dict_path"],
-        f"{model_name}-{data_name}"
-    )
-    # 01mask
-    for cls in range(num_classes):
-        mask_path_patten = f"{kernel_dict_path}/kernel_dict_label_{cls}.npy"
-        modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
-        modify_dicts.append(modify_dict)
 
     # data loader
     if args.data_loader_type == 0:
@@ -109,48 +71,63 @@ def main():
     model = models.load_model(
         model_name=model_name,
         in_channels=cfg['model']['in_channels'],
-        num_classes=cfg['model']['num_classes']
-    )
-
-    # modules
-    modules = models.load_modules(
-        model=model,
-        model_name=model_name,
-        model_layers=model_layers
+        num_classes=num_classes
     )
 
     model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
+
+    result_path = os.path.join(f"/nfs/xwx/model-doctor-xwx/output/result/{model_name}-{data_name}", 'features')
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
     
     begin_time = time.time()
 
-    train(data_loaders["train"], model, modules, device)
+    train(data_loaders["train"], model, num_classes, device)
+    np.save(os.path.join(result_path, "ft_centers.npy"), ft_centers)
+    # draw_tsne(result_path, ft_centers)
 
     print("Done!")
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, modules, epoch, device):
+def train(dataloader, model, num_classes, device):
+    global ft_centers
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
-    model.train()
+    model.eval()
     for batch, (X, y, _) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
         
         with torch.set_grad_enabled(True):
             # Compute prediction error
             pred, feature_out = model(X)  # 网络前向计算
+            
+            # 挑选分类对的
+            correct = pred.argmax(1) == y  # 分类正确的索引
+            feature_out = feature_out[correct]
+            y = y[correct]
 
-            cal_cluster_center(X, y, pred, feature_out)
+            cal_cluster_center(y, feature_out, num_classes)
                 
 
         if batch % 10 == 0:
-            loss, current = loss.item(), batch * len(X)
-            print(f"[{current:>5d}/{size:>5d}]", flush=True)
+            current =  batch * len(X)
+            print(f"\r[{current:>5d}/{size:>5d}]", flush=True)
+    
+    ft_centers /= num_batches
+    print(ft_centers.mean())
 
 
-def cal_cluster_center(X, y, pred, feature_out):
-    for cls, modify_dict in enumerate(modify_dicts):
+def cal_cluster_center(y, feature_out, num_classes):
+    _, k, h, w = feature_out.shape
+    global ft_centers
+    if ft_centers is None:
+        ft_centers = np.zeros((num_classes, k, h, w))
+    
+    # print(ft_centers.mean())
+
+    for cls in range(num_classes):
         # 找到对应类别的图片
         x_pos = (y==cls).nonzero().squeeze()
         # 处理只有一个样本的情况
@@ -161,17 +138,8 @@ def cal_cluster_center(X, y, pred, feature_out):
             continue
 
         ft_cls_i = torch.index_select(feature_out, dim=0, index=x_pos)
-
-        # 不相关卷积核的特征图往相关卷积核的特征图靠近
-        layer = 29
-        ft_err, ft_true = torch.zeros_like(ft_cls_i[:, 0, ::]), torch.zeros_like(ft_cls_i[:, 0, ::])
-        for kernel_index in range(modify_dict[layer][0]):
-            if kernel_index not in modify_dict[layer][1]:
-                ft_err += ft_cls_i[:, kernel_index, ::]
-            else:
-                ft_true += ft_cls_i[:, kernel_index, ::]
-            
-        ft_loss += torch.abs(ft_err - ft_true).mean().item()
+        ft_cls_i = torch.mean(ft_cls_i, dim=0)
+        ft_centers[cls] += ft_cls_i.detach().cpu().numpy()
                         
 
 def get_cfg(cfg_filename):
@@ -190,6 +158,25 @@ def get_cfg(cfg_filename):
     
     return cfg
 
+
+def draw_tsne(result_path, features):
+    features = torch.flatten(torch.tensor(features), 1).numpy()
+    # 特征图可视化
+    from sklearn.manifold import TSNE
+    # colorBoard=["dimgray","darkorange","tan","silver","forestgreen",\
+    #             "darkgreen","royalblue","navy","red","darksalmon","peru","olive",\
+    #             "yellow","cyan","mediumaquamarine","skyblue","purple","fuchsia",\
+    #             "indigo","khaki"]
+
+    colors = np.array(["C0","C1","C2","C3","C4","C5","C6","C7", "C8","C9"])
+    # colors = np.array(colorBoard)
+
+    features_embedded = TSNE(n_components=2, init='pca', n_iter=1000).fit_transform(features)
+    plt.scatter(features_embedded[:, 0], features_embedded[:, 1], c=colors)
+    # plt.colorbar()
+    plt.savefig(os.path.join(result_path, f"tsne.jpg"))
+    plt.clf()
+    plt.close()
 
 if __name__ == '__main__':
     main()
