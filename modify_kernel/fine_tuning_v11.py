@@ -219,7 +219,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             features.extend(tmp_feature_out.numpy())
 
             ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.detach().cpu())
-            ft_loss /= 100
+            ft_loss /= 10
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
@@ -423,14 +423,18 @@ def cal_ft_loss(X, y, pred, feature_out):
         # print(ft_cls_i.shape)
 
         # 不相关卷积核的特征图往聚类中心的特征图靠近
-        layer = 29
-        ft_err = torch.zeros_like(ft_cls_i[0, ::])
-        for kernel_index in range(modify_dict[layer][0]):
-            if kernel_index not in modify_dict[layer][1]:
-                ft_err += (ft_cls_i[kernel_index].numpy() - ft_centers[cls][kernel_index])
+        # layer = 29
+        # ft_err = torch.zeros_like(ft_cls_i[0, ::])
+        # for kernel_index in range(modify_dict[layer][0]):
+        #     if kernel_index not in modify_dict[layer][1]:
+        #         ft_err += (ft_cls_i[kernel_index].numpy() - ft_centers[cls][kernel_index])
         
-        ft_loss += torch.abs(ft_err).mean().item()  # l1
+        # ft_loss += torch.abs(ft_err).mean().item()  # l1
+
+        # 分类错误样本的特征图向聚类中心靠近
+        ft_loss += torch.abs(ft_cls_i - ft_centers[cls]).mean().item()
                         
+    ft_loss /= len(modify_dicts)
 
     return ft_loss
 
