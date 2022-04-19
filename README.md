@@ -282,39 +282,25 @@ $(date "+%Y%m%d-%H%M%S").log
 
 # ResNet32+Cifar-10-lt-ir100
 - 预训练：71.82%(refl), (ce:69.34%, fl:69.20%)
-- 同一个类别，不相关卷积核的特征图向相关卷积核靠近
-    - lr1e-3, fl, cosine: 73.03%, +1.21
-    - lr1e-3, ce, cosine: 72.59%, +0.77
-    - lr1e-3, refl, cosine: 73.21%, +1.39
+- 同一个类别，不相关卷积核的特征图向相关卷积核靠近(需要重做)
+    - lr1e-3, refl, cosine: (153612)
+    - lr1e-3, ce, cosine: 71.29%
+    - lr1e-3, fl, cosine: 72.65% (验证集acc一直下降)
+- 分类错误样本，不相关卷积核的特征图向聚类中心靠近(需要重做)
+    - lr1e-3, refl, cosine: 71.85% (152141)
+    - lr1e-3, ce, cosine: 71.51 (验证集acc呈下降趋势)
+    - lr1e-3, fl, cosine: 72.43% (验证集acc一直下降)
+- 分类错误样本的特征图向聚类中心靠近(需要重做)
+    - lr1e-3, refl, cosine: 
+    - lr1e-3, ce, cosine: 
+    - lr1e-3, fl, cosine: 
+- 分类错误样本，不相关卷积核的特征图向聚类中心靠近（训练的时候只使用特征图对应的loss，测试用ce_loss）
+    - lr1e-3, cosine:
+    - lr1e-3, custom:
 
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
 - 同一个类别，不相关卷积核的特征图向相关卷积核靠近(最多挑选5张图片筛选卷积核)
-    - lr1e-3
-        - fl
-            - cosine: **42.39%**, +0.62
-            - custom: 42.52
-        - ce
-            - cosine: 41.91%, +0.14
-            - custom: 41.91%
-        - refl
-            - cosine: **42.38%**, +0.61
-            - custom: 42.27%
-    - lr0.1
-        - fl
-            - custom: 41.98%
-        - ce
-            - custom: 41.65%
-        - refl
-            - custom: 41.21%
-    - lr0.01
-        - fl
-            - custom: 
-        - ce
-            - custom: 41.91%
-        - refl
-            - custom: 42.08%
-
 
 
 timm 库 accuracy

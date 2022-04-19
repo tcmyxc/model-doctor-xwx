@@ -15,7 +15,7 @@ import yaml
 
 from torch import optim
 from configs import config
-from utils.lr_util import get_lr_scheduler
+from utils.lr_util import get_lr_scheduler, get_lr_scheduler_10x
 from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss

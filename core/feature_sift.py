@@ -11,7 +11,7 @@ import os
 import models
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='imagenet-10-lt')
+parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 
 class HookModule:
     """hook module"""
@@ -43,9 +43,10 @@ class FeatureSift():
                 self.features[layer][labels[b]].append(output[b])
 
     def sift(self):
-        np.save(os.path.join(self.result_path, "features_all.npy"), np.array(self.features, dtype=object))
+        # np.save(os.path.join(self.result_path, "features_all.npy"), np.array(self.features, dtype=object))
         for layer in range(len(self.modules)):
             for label, feature in enumerate(self.features[layer]):
+                print(feature)
                 root_path = os.path.join(self.result_path, str(layer), str(label))
                 if not os.path.exists(root_path):
                     os.makedirs(root_path)
@@ -96,7 +97,7 @@ def main():
     data_loaders, _ = loaders.load_data(data_name=data_name)
     data_loader = data_loaders["train"]
     for i, samples in enumerate(data_loader):
-        print('\r[{}/{}]'.format(i, len(data_loader)), end='', flush=True)
+        print('\r[{}/{}]'.format(i+1, len(data_loader)), end='', flush=True)
         inputs, labels, _ = samples
         inputs = inputs.to(device)
         labels = labels.to(device)

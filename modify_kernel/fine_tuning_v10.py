@@ -32,7 +32,7 @@ import torch.nn.functional as F
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-100-lt-ir100')
+parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
 parser.add_argument('--data_loader_type', type=int, default='0')
@@ -213,7 +213,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             features.extend(tmp_feature_out.numpy())
 
             ft_loss = cal_ft_loss(X, y, feature_out)
-            ft_loss /= 400
+            ft_loss = ft_loss / 10
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
@@ -396,7 +396,7 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
 
 
 def cal_ft_loss(X, y, feature_out):
-    ft_loss = 0
+    ft_loss = torch.tensor(0.0, requires_grad=True)
     for cls, modify_dict in enumerate(modify_dicts):
         # 找到对应类别的图片
         x_pos = (y==cls).nonzero().squeeze()
@@ -414,12 +414,13 @@ def cal_ft_loss(X, y, feature_out):
         ft_err, ft_true = torch.zeros_like(ft_cls_i[:, 0, ::]), torch.zeros_like(ft_cls_i[:, 0, ::])
         for kernel_index in range(modify_dict[layer][0]):
             if kernel_index not in modify_dict[layer][1]:
-                ft_err += ft_cls_i[:, kernel_index, ::]
+                ft_err = ft_err + ft_cls_i[:, kernel_index, ::]
             else:
-                ft_true += ft_cls_i[:, kernel_index, ::]
+                ft_true = ft_true + ft_cls_i[:, kernel_index, ::]
         
-        ft_loss += torch.abs(ft_err - ft_true).mean().item()  # l1
+        ft_loss = ft_loss + torch.abs(ft_err - ft_true).mean()  # l1
                         
+    ft_loss = ft_loss / len(modify_dicts)
 
     return ft_loss
 
