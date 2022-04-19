@@ -401,7 +401,7 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
 
 
 def cal_ft_loss(X, y, pred, feature_out):
-    ft_loss = torch.tensor(0.0, requires_grad=True)
+    ft_loss = 0
     # 分类错误的样本的特征图向聚类中心靠近
     incorrect = pred.argmax(1) != y
     y = y[incorrect]
@@ -423,17 +423,17 @@ def cal_ft_loss(X, y, pred, feature_out):
 
         # 不相关卷积核的特征图往聚类中心的特征图靠近
         layer = 29
-        ft_err = torch.tensor(0)
+        ft_err = 0
         for kernel_index in range(modify_dict[layer][0]):
             if kernel_index not in modify_dict[layer][1]:
-                ft_err = ft_err + (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
+                ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
         
-        ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
+        ft_loss += torch.abs(ft_err).mean()  # l1
 
         # 分类错误样本的特征图向聚类中心靠近
         # ft_loss += torch.abs(ft_cls_i - ft_centers[cls]).mean().item()
                         
-    ft_loss = ft_loss / len(modify_dicts)
+    ft_loss /= len(modify_dicts)
 
     return ft_loss
 

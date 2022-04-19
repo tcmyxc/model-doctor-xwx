@@ -396,7 +396,7 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
 
 
 def cal_ft_loss(X, y, feature_out):
-    ft_loss = torch.tensor(0.0, requires_grad=True)
+    ft_loss = 0
     for cls, modify_dict in enumerate(modify_dicts):
         # 找到对应类别的图片
         x_pos = (y==cls).nonzero().squeeze()
@@ -411,16 +411,16 @@ def cal_ft_loss(X, y, feature_out):
 
         # 不相关卷积核的特征图往相关卷积核的特征图靠近
         layer = 29
-        ft_err, ft_true = torch.zeros_like(ft_cls_i[:, 0, ::]), torch.zeros_like(ft_cls_i[:, 0, ::])
+        ft_err, ft_true = 0, 0
         for kernel_index in range(modify_dict[layer][0]):
             if kernel_index not in modify_dict[layer][1]:
-                ft_err = ft_err + ft_cls_i[:, kernel_index, ::]
+                ft_err += ft_cls_i[:, kernel_index, ::]
             else:
-                ft_true = ft_true + ft_cls_i[:, kernel_index, ::]
+                ft_true += ft_cls_i[:, kernel_index, ::]
         
-        ft_loss = ft_loss + torch.abs(ft_err - ft_true).mean()  # l1
+        ft_loss += torch.abs(ft_err - ft_true).mean()  # l1
                         
-    ft_loss = ft_loss / len(modify_dicts)
+    ft_loss /= len(modify_dicts)
 
     return ft_loss
 

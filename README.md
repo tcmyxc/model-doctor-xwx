@@ -283,13 +283,13 @@ $(date "+%Y%m%d-%H%M%S").log
 # ResNet32+Cifar-10-lt-ir100
 - 预训练：71.82%(refl), (ce:69.34%, fl:69.20%)
 - 同一个类别，不相关卷积核的特征图向相关卷积核靠近(需要重做)
-    - lr1e-3, refl, cosine: (153612)
-    - lr1e-3, ce, cosine: 71.29%
-    - lr1e-3, fl, cosine: 72.65% (验证集acc一直下降)
+    - lr1e-3, refl, cosine: 
+    - lr1e-3, ce, cosine: 
+    - lr1e-3, fl, cosine: 
 - 分类错误样本，不相关卷积核的特征图向聚类中心靠近(需要重做)
-    - lr1e-3, refl, cosine: 71.85% (152141)
-    - lr1e-3, ce, cosine: 71.51 (验证集acc呈下降趋势)
-    - lr1e-3, fl, cosine: 72.43% (验证集acc一直下降)
+    - lr1e-3, refl, cosine: 
+    - lr1e-3, ce, cosine: 
+    - lr1e-3, fl, cosine: 
 - 分类错误样本的特征图向聚类中心靠近(需要重做)
     - lr1e-3, refl, cosine: 
     - lr1e-3, ce, cosine: 
