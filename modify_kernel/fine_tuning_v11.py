@@ -109,7 +109,7 @@ def main():
         modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
         modify_dicts.append(modify_dict)
 
-    # 分类正确的feature
+    # 分类正确的feature聚类中心
     ft_centers = torch.tensor(np.load(cfg["ft_path"]))
 
 
@@ -135,7 +135,7 @@ def main():
         model_layers=model_layers
     )
 
-    # model.load_state_dict(torch.load(model_path)["model"])
+    model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
     # loss
@@ -218,7 +218,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             tmp_feature_out = torch.flatten(tmp_feature_out, 1)
             features.extend(tmp_feature_out.numpy())
 
-            ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.cpu())
+            # ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.cpu())
+            ft_loss = 0
+            
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
 
@@ -422,16 +424,16 @@ def cal_ft_loss(X, y, pred, feature_out):
         # print(ft_cls_i.shape)
 
         # 不相关卷积核的特征图往聚类中心的特征图靠近
-        layer = 29
-        ft_err = 0
-        for kernel_index in range(modify_dict[layer][0]):
-            if kernel_index not in modify_dict[layer][1]:
-                ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
+        # layer = 29
+        # ft_err = 0
+        # for kernel_index in range(modify_dict[layer][0]):
+        #     if kernel_index not in modify_dict[layer][1]:
+        #         ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
         
-        ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
+        # ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
 
         # 分类错误样本的特征图向聚类中心靠近
-        # ft_loss = ft_loss + torch.abs(ft_cls_i - ft_centers[cls]).mean()
+        ft_loss = ft_loss + torch.abs(ft_cls_i - ft_centers[cls]).mean()
                         
     ft_loss = ft_loss / len(modify_dicts)
 
