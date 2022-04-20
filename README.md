@@ -282,25 +282,35 @@ $(date "+%Y%m%d-%H%M%S").log
 
 # ResNet32+Cifar-10-lt-ir100
 - 预训练：71.82%(refl), (ce:69.34%, fl:69.20%)
-- 同一个类别，不相关卷积核的特征图向相关卷积核靠近(需要重做)
-    - lr1e-3, refl, cosine: 
-    - lr1e-3, ce, cosine: 
-    - lr1e-3, fl, cosine: 
-- 分类错误样本，不相关卷积核的特征图向聚类中心靠近(需要重做)
-    - lr1e-3, refl, cosine: 
-    - lr1e-3, ce, cosine: 
-    - lr1e-3, fl, cosine: 
-- 分类错误样本的特征图向聚类中心靠近(需要重做)
-    - lr1e-3, refl, cosine: 
-    - lr1e-3, ce, cosine: 
-    - lr1e-3, fl, cosine: 
-- 分类错误样本，不相关卷积核的特征图向聚类中心靠近（训练的时候只使用特征图对应的loss，测试用ce_loss）
-    - lr1e-3, cosine:
-    - lr1e-3, custom:
+
+- 在预训练的基础上，重新训练，配置同预训练，不加额外损失
+    - lr0.1, refl, custom: 72.86%（首轮即终点）
+    - lr0.1, ce, custom:   72.06%（首轮即终点）
+    - lr0.1, fl, custom:   71.82%
+
+- 分类错误样本，不相关卷积核的特征图向聚类中心靠近(所有配置同预训练,加载预训练模型)
+    - lr0.1, refl, custom: 69.56%
+    - lr0.1, ce, custom:   70.91%
+    - lr0.1, fl, custom:   69.73%
+- 分类错误样本，不相关卷积核的特征图向聚类中心靠近(不加载预训练模型)
+    - lr0.1, refl, custom: 66.37%
+    - lr0.1, ce, custom:   63.08%
+    - lr0.1, fl, custom:   65.70%
+
+
+- 分类错误样本的特征图向聚类中心靠近(加载预训练模型)
+    - lr0.1, refl, custom: 72.25%
+    - lr0.1, ce, custom:   72.48%
+    - lr0.1, fl, custom:   72.41%（首轮即终点）
+- 分类错误样本的特征图向聚类中心靠近(不加载预训练模型)
+    - lr0.1, refl, custom: 74.22%
+    - lr0.1, ce, custom:   72.52%
+    - lr0.1, fl, custom:   72.18%
+
 
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
-- 同一个类别，不相关卷积核的特征图向相关卷积核靠近(最多挑选5张图片筛选卷积核)
+
 
 
 timm 库 accuracy
