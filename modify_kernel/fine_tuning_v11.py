@@ -15,14 +15,16 @@ import yaml
 
 from torch import optim
 from configs import config
-from utils.lr_util import get_lr_scheduler, get_lr_scheduler_10x
+from utils.lr_util import get_lr_scheduler
 from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
 from hooks.grad_hook import GradHookModule
 from modify_kernel.util.draw_util import draw_lr
+from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
+from utils.args_util import print_args
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -55,7 +57,8 @@ ft_centers = None
 
 def main():
     args = parser.parse_args()
-    print(f"\n[INFO] args: {args}")
+    # print(f"\n[INFO] args: {args}")
+    print_args(args)
 
     # device
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -69,11 +72,7 @@ def main():
     data_name = args.data_name
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
-
-    print("-" * 42)
-    for k, v in cfg.items():
-        print(f"{k}: {v}")
-    print("-" * 42)
+    print_yml_cfg(cfg)
 
     for idx in range(cfg['model']['num_classes']):
         g_cls_test_acc[idx] = []
@@ -136,7 +135,7 @@ def main():
         model_layers=model_layers
     )
 
-    model.load_state_dict(torch.load(model_path)["model"])
+    # model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
 
     # loss
@@ -152,7 +151,8 @@ def main():
         params=model.parameters(),
         lr=lr,
         momentum=momentum,
-        weight_decay=weight_decay
+        weight_decay=weight_decay,
+        # nesterov=True
     )
 
     # scheduler
@@ -401,7 +401,7 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
 
 
 def cal_ft_loss(X, y, pred, feature_out):
-    ft_loss = 0
+    ft_loss = torch.tensor(0.0, requires_grad=True)
     # 分类错误的样本的特征图向聚类中心靠近
     incorrect = pred.argmax(1) != y
     y = y[incorrect]
@@ -428,12 +428,12 @@ def cal_ft_loss(X, y, pred, feature_out):
             if kernel_index not in modify_dict[layer][1]:
                 ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
         
-        ft_loss += torch.abs(ft_err).mean()  # l1
+        ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
 
         # 分类错误样本的特征图向聚类中心靠近
-        # ft_loss += torch.abs(ft_cls_i - ft_centers[cls]).mean().item()
+        # ft_loss = ft_loss + torch.abs(ft_cls_i - ft_centers[cls]).mean()
                         
-    ft_loss /= len(modify_dicts)
+    ft_loss = ft_loss / len(modify_dicts)
 
     return ft_loss
 
