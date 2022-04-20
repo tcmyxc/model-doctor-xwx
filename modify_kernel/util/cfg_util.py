@@ -19,9 +19,15 @@ def get_cfg(cfg_filename):
     return cfg
 
 
-if __name__ == '__main__':
-    cfg = get_cfg("cbs_refl.yml")
-    print("-" * 42)
+def print_yml_cfg(cfg):
+    """打印从yml文件加载的配置"""
+
+    print("-" * 20, "yml cfg", "-" * 20)
     for k, v in cfg.items():
         print(f"{k}: {v}")
-    print("-" * 42)
+    print("-" * 18, "yml cfg end", "-" * 18)
+
+
+if __name__ == '__main__':
+    cfg = get_cfg("cbs_refl.yml")["cifar-10"]
+    print_yml_cfg(cfg)
