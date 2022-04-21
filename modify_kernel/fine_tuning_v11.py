@@ -218,8 +218,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             tmp_feature_out = torch.flatten(tmp_feature_out, 1)
             features.extend(tmp_feature_out.numpy())
 
-            # ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.cpu())
-            ft_loss = 0
+            ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.cpu())
             
             fn_loss = loss_fn(pred, y)
             loss = fn_loss + ft_loss
