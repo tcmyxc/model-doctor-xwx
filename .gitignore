@@ -11,3 +11,4 @@ nohup.out
 *.pth
 *.npy
 **/label_grads_layer
+images/

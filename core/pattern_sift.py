@@ -87,7 +87,8 @@ class GradSift:
         np.set_printoptions(threshold=np.inf)
         for layer in range(len(self.modules)):
             # 每个类别在某一层的梯度
-            sum_layer_grads = np.zeros( np.asarray(self.grads[layer][0]).shape[-1])
+            sum_layer_grads = np.zeros(np.asarray(self.grads[layer][0]).shape[-1])
+            sum_layer_grads += 1e-10
             # print("sum_layer_grads", sum_layer_grads)
             for label, grads in enumerate(self.grads[layer]):
                 grads = np.asarray(grads)  # image_nums, val
@@ -166,7 +167,7 @@ def main():
         inputs = inputs.to(device)
         labels = labels.to(device)
 
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
         grad_sift(outputs, labels)
 
     grad_sift.sift()
