@@ -307,6 +307,11 @@ $(date "+%Y%m%d-%H%M%S").log
     - lr0.1, ce, custom:   72.52%
     - lr0.1, fl, custom:   72.18%
 
+- 分类错误样本的特征图向聚类中心靠近(加载预训练模型)
+    - lr1e-3, refl, custom: 72.46%(cosine, 72.52%)
+    - lr1e-3, ce, custom:   72.19%(cosine, 72.00%)
+    - lr1e-3, fl, custom:   72.74%(cosine, 72.73%)
+
 
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
