@@ -22,10 +22,11 @@ def get_cfg(cfg_filename):
 def print_yml_cfg(cfg):
     """打印从yml文件加载的配置"""
 
+    print("\n")
     print("-" * 20, "yml cfg", "-" * 20)
     for k, v in cfg.items():
         print(f"{k}: {v}")
-    print("-" * 18, "yml cfg end", "-" * 18)
+    print("-" * 18, "yml cfg end", "-" * 18, flush=True)
 
 
 if __name__ == '__main__':
