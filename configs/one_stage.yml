@@ -1,0 +1,7 @@
+cifar-10-lt-ir100:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
