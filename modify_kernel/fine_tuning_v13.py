@@ -238,14 +238,14 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             optimizer.zero_grad()
             loss.backward()  # 得到模型中参数对当前输入的梯度
 
-            for kernel_index in range(modify_dicts[0][layer][0]):
-                if tailed_size > 0 and kernel_index not in kernel_tail:
-                    modules[int(layer)].weight.grad[kernel_index, ::] = 0
+            # for kernel_index in range(modify_dicts[0][layer][0]):
+            #     if tailed_size > 0 and kernel_index not in kernel_tail:
+            #         modules[int(layer)].weight.grad[kernel_index, ::] = 0
 
             
-            # for kernel_index in range(modify_dicts[0][layer][0]):
-            #     if kernel_index not in kernel_tail:
-            #         modules[int(layer)].weight.grad[kernel_index, ::] = 0
+            for kernel_index in range(modify_dicts[0][layer][0]):
+                if kernel_index not in kernel_tail:
+                    modules[int(layer)].weight.grad[kernel_index, ::] = 0
 
             optimizer.step()  # 更新参数
                 
