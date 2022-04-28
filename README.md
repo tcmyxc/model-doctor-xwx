@@ -306,11 +306,34 @@ $(date "+%Y%m%d-%H%M%S").log
     - lr0.1, refl, custom: 74.22%
     - lr0.1, ce, custom:   72.52%
     - lr0.1, fl, custom:   72.18%
-
 - 分类错误样本的特征图向聚类中心靠近(加载预训练模型)
     - lr1e-3, refl, custom: 72.46%(cosine, 72.52%)
     - lr1e-3, ce, custom:   72.19%(cosine, 72.00%)
     - lr1e-3, fl, custom:   72.74%(cosine, 72.73%)
+
+- 如果本次batch中存在尾部样本，那就只更新在kernel_tail中的卷积核；如果不存在尾部样本，就正常更新
+    - lr1e-3, cosine
+        - 后2个类+ce:   72.26%
+        - 后3个类+ce:   72.24%
+        - 后2个类+fl:   **73.06%**
+        - 后2个类+refl: 72.69%
+
+- 只更新在kernel_tail中的卷积核
+    - lr1e-3, cosine
+        - ce:   72.59%
+        - fl:   **73.12%**
+        - refl: 72.78%
+    - 使用和预训练一样的配置
+        - ce:   72.74%
+        - fl:   72.82%
+        - refl: 72.88%
+    - lr1e-2, cosine
+        - ce:   72.84%
+        - fl:   72.60%
+        - refl: 72.52%
+    - 更新的用力一点（10倍梯度）
+        - - lr1e-3, cosine: 
+
 
 
 # ResNet32+Cifar-100-lt-ir100

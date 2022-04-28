@@ -128,14 +128,9 @@ def main():
     data_name = 'cifar-10-lt-ir100'
     model_name = 'resnet32'
 
-    model_path = os.path.join(
-        config.model_pretrained,
-        "resnet32-cifar-10-lt-ir100-refl-th-0.4-wr",
-        'checkpoint.pth'
-    )
-    
-    input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/high/images"
-    result_path = os.path.join("/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100-all", 'grads')
+    model_path = "/nfs/xwx/model-doctor-xwx/output/model/three-stage/resnet32/cifar-10-lt-ir100/lr0.1/th0.5/custom_lr_scheduler/refl_loss/2022-04-26_20-25-01/best-model-20220426-210920-acc0.7288.pth"
+    input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/stage3/high/images"
+    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/stage3/grads"
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
