@@ -60,7 +60,7 @@ def main():
     print_args(args)
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 
@@ -246,6 +246,8 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             for kernel_index in range(modify_dicts[0][layer][0]):
                 if kernel_index not in kernel_tail:
                     modules[int(layer)].weight.grad[kernel_index, ::] = 0
+                else:
+                    modules[int(layer)].weight.grad[kernel_index, ::] *= 10
 
             optimizer.step()  # 更新参数
                 
@@ -401,6 +403,8 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
     for idx in labels:
         g_cls_test_acc[int(idx)].append(one_epoch_test_acc[int(idx)])
 
+    np.save(os.path.join(result_path, "cls_test_acc_report.npy"), g_cls_test_acc)
+    
     num_epochs = len(g_cls_test_acc[0])
 
     for label in labels:
@@ -415,49 +419,6 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
     plt.clf()
     plt.close()
 
-
-def cal_ft_loss(X, y, pred, feature_out):
-    ft_loss = torch.tensor(0.0, requires_grad=True)
-    # 分类错误的样本的特征图向聚类中心靠近
-    incorrect = pred.argmax(1) != y
-    y = y[incorrect]
-    feature_out = feature_out[incorrect]
-    global ft_centers
-    for cls, modify_dict in enumerate(modify_dicts):
-        # 找到对应类别的图片
-        x_pos = (y==cls).nonzero().squeeze()
-        # 处理只有一个样本的情况
-        if x_pos.shape == torch.Size([]):
-            x_pos = x_pos.unsqueeze(dim=0)
-        # 处理没有样本的情况
-        if min(x_pos.shape) == 0:
-            continue
-
-        ft_cls_i = torch.index_select(feature_out, dim=0, index=x_pos)
-        ft_cls_i = torch.mean(ft_cls_i, 0)
-        # print(ft_cls_i.shape)
-
-        # 不相关卷积核的特征图往聚类中心的特征图靠近
-        kernel_tail=[9, 10, 11, 13, 24, 31, 38, 39, 40, 41, 44, 47, 48, 54, 57, 62]
-        layer = 29
-        ft_err = torch.zeros_like(ft_cls_i[0])
-        for kernel_index in range(modify_dict[layer][0]):
-            if cls >= 6:
-                if kernel_index in kernel_tail:
-                    ft_err += ft_cls_i[kernel_index]
-        # for kernel_index in range(modify_dict[layer][0]):
-        #     if kernel_index not in modify_dict[layer][1]:
-        #         ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
-        
-        # ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
-        ft_loss = ft_loss + ft_err.mean()
-
-        # 分类错误样本的特征图向聚类中心靠近
-        # ft_loss = ft_loss + torch.abs(ft_cls_i - ft_centers[cls]).mean()
-                        
-    ft_loss = ft_loss / len(modify_dicts)
-
-    return ft_loss
 
 def get_cfg(cfg_filename):
     """获取配置"""
