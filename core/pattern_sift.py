@@ -84,12 +84,12 @@ class GradSift:
                 # self.visualize(grads, mask, method_name)
     
     def cal_percent(self):
+        # 垂直方向上值为1，横轴是卷积核，纵轴是类别
         np.set_printoptions(threshold=np.inf)
-        for layer in range(len(self.modules)):
-            # 每个类别在某一层的梯度
-            sum_layer_grads = np.zeros(np.asarray(self.grads[layer][0]).shape[-1])
+        for layer in range(len(self.modules)):  # 每个类别在某一层的梯度
+            sum_layer_grads = np.zeros(np.asarray(self.grads[layer][0]).shape[-1])  # 这一层的梯度和
             sum_layer_grads += 1e-10
-            # print("sum_layer_grads", sum_layer_grads)
+            # print("sum_layer_grads", sum_layer_grads.shape)
             for label, grads in enumerate(self.grads[layer]):
                 grads = np.asarray(grads)  # image_nums, val
                 # print('grads.shape', grads.shape)
@@ -104,8 +104,23 @@ class GradSift:
                 grads = np.sum(grads, axis=0)  # sum image_nums
                 grad_percent[label] = grads / sum_layer_grads
             
-            # print("grad_percent", grad_percent)
+            # print("grad_percent", grad_percent.shape)
 
+            method_name = 'inputs_layer{}'.format(layer)  # io
+            grad_percent_root_path = os.path.join(self.result_path, "grad_percent")
+            if not os.path.exists(grad_percent_root_path):
+                os.makedirs(grad_percent_root_path)
+            mask_path = os.path.join(grad_percent_root_path, 'grads_percent_{}.npy'.format(method_name))
+            np.save(mask_path, grad_percent)
+
+    def cal_percent_h(self):
+        # 水平方向上值为1，横轴是卷积核，纵轴是类别
+        np.set_printoptions(threshold=np.inf)
+        for layer in range(len(self.modules)):  # 每个类别在某一层的梯度
+            grads = np.asarray(self.grads[layer])
+            grads = np.sum(grads, axis=1)  # 加和
+            grad_percent = grads / np.sum(grads, axis=1, keepdims=True)
+            
             method_name = 'inputs_layer{}'.format(layer)  # io
             grad_percent_root_path = os.path.join(self.result_path, "grad_percent")
             if not os.path.exists(grad_percent_root_path):
@@ -165,7 +180,8 @@ def main():
         outputs, _ = model(inputs)
         grad_sift(outputs, labels)
 
-    grad_sift.sift()
+    # grad_sift.sift()
+    grad_sift.cal_percent_h()
 
 
 if __name__ == '__main__':
