@@ -32,7 +32,7 @@ parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--model_name', default='resnet32')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-2')
-parser.add_argument('--data_loader_type', type=int, default='0')
+parser.add_argument('--data_loader_type', type=int, default='0', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
@@ -55,11 +55,13 @@ def main():
     # result path
     result_path = os.path.join(config.model_pretrained,
                                model_name, data_name,
-                               f"lr{args.lr}", f"th{args.threshold}",
-                               f"{args.lr_scheduler}_lr_scheduler", f"{args.loss_type}_loss",
+                               f"lr{args.lr}", f"{args.lr_scheduler}_lr_scheduler", 
+                               f"{args.loss_type}_loss",
                                get_current_time())
     if not os.path.exists(result_path):
         os.makedirs(result_path)
+    
+    print(f"\n[INFO] result will save in:\n{result_path}\n")
     
     # add some cfg
     cfg["best_model_path"] = None
