@@ -56,8 +56,7 @@ def main():
     result_path = os.path.join(config.model_pretrained,
                                model_name, data_name,
                                f"lr{args.lr}", f"{args.lr_scheduler}_lr_scheduler", 
-                               f"{args.loss_type}_loss",
-                               get_current_time())
+                               f"{args.loss_type}_loss")
     if not os.path.exists(result_path):
         os.makedirs(result_path)
     
