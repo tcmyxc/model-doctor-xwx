@@ -203,7 +203,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
     size = len(dataloader.dataset)
     # size = 5160  # 类平衡样本数
     num_batches = len(dataloader)
-    kernel_tail=[9, 10, 11, 13, 24, 31, 38, 39, 40, 41, 44, 47, 48, 54, 57, 62]
+    # kernel_tail=[9, 10, 11, 13, 24, 31, 38, 39, 40, 41, 44, 47, 48, 54, 57, 62]
+    kernel_tail=[4, 5, 6, 9, 12, 13, 18, 21, 22, 27, 28, 31, 32, 34, 37,
+                 40, 43, 44, 45, 46, 48, 50, 51, 54, 55, 56, 58, 59, 60, 61]
     layer = 29
     model.train()
     for batch, (X, y, _) in enumerate(dataloader):
@@ -230,7 +232,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
 
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
-            # 有长尾样本的时候，更新那些不怎么用的卷积核
+            # 有长尾样本的时候，更新挑出来的卷积核
             tailed_size = (y>7).type(torch.float).sum().item()
             # print("tailde data size:", tailed_size)
             
@@ -238,16 +240,18 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             optimizer.zero_grad()
             loss.backward()  # 得到模型中参数对当前输入的梯度
 
-            # for kernel_index in range(modify_dicts[0][layer][0]):
-            #     if tailed_size > 0 and kernel_index not in kernel_tail:
-            #         modules[int(layer)].weight.grad[kernel_index, ::] = 0
-
-            
             for kernel_index in range(modify_dicts[0][layer][0]):
-                if kernel_index not in kernel_tail:
+                if tailed_size <= 0:
+                    modules[int(layer)].weight.grad = 0
+                    break
+                if tailed_size > 0 and kernel_index not in kernel_tail:
                     modules[int(layer)].weight.grad[kernel_index, ::] = 0
-                else:
-                    modules[int(layer)].weight.grad[kernel_index, ::] *= 10
+            
+            # for kernel_index in range(modify_dicts[0][layer][0]):
+            #     if kernel_index not in kernel_tail:
+            #         modules[int(layer)].weight.grad[kernel_index, ::] = 0
+            #     else:
+            #         modules[int(layer)].weight.grad[kernel_index, ::] *= 10
 
             optimizer.step()  # 更新参数
                 
