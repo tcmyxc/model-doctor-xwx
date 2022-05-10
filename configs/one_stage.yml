@@ -1,4 +1,4 @@
- cifar-10:
+cifar-10:
   model:
     in_channels: 3
     num_classes: 10
