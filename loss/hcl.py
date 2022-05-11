@@ -7,6 +7,9 @@ def hc_loss(logits, labels, reduction="mean"):
     incorrect_inx = (logits.argmax(1) != labels)
     hc_loss = ce_loss[incorrect_inx]
 
+    if min(hc_loss.shape) == 0:
+        hc_loss = torch.zeros_like(ce_loss)
+
     if reduction == "sum":
         hc_loss = hc_loss.sum()
     elif reduction == "mean":
