@@ -1,0 +1,96 @@
+cifar-10:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10/lr0.01/cosine_lr_scheduler/ce_loss/best-model-acc0.9207.pth
+
+cifar-10-lt-ir10:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-10-lt-ir50:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-10-lt-ir100:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-100:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-100-lt-ir10:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-100-lt-ir50:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+cifar-100-lt-ir100:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+mini-imagenet:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+stl-10:
+  model:
+    in_channels: 3
+    num_classes: 10
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+imagenet-lt:
+  model:
+    in_channels: 3
+    num_classes: 1000
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+
+inaturalist2018:
+  model:
+    in_channels: 3
+    num_classes: 8142
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
