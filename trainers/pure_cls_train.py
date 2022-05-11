@@ -19,7 +19,6 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
-from loss.hcl import hc_loss
 from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, draw_classification_report
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
@@ -169,7 +168,7 @@ def train(dataloader, model, loss_fn, optimizer, device):
             # Compute prediction error
             pred, _ = model(X)  # 网络前向计算
 
-            loss = loss_fn(pred, y) + hc_loss(pred, y)
+            loss = loss_fn(pred, y)
             train_loss += loss.item()
         
             y_pred_list.extend(pred.argmax(1).cpu().numpy())
