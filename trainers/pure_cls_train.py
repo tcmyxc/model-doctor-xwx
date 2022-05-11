@@ -19,6 +19,7 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
+from loss.hcl import hc_loss
 from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, draw_classification_report
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
@@ -56,7 +57,8 @@ def main():
     result_path = os.path.join(config.model_pretrained,
                                model_name, data_name,
                                f"lr{args.lr}", f"{args.lr_scheduler}_lr_scheduler", 
-                               f"{args.loss_type}_loss")
+                               f"{args.loss_type}_loss",
+                               get_current_time())
     if not os.path.exists(result_path):
         os.makedirs(result_path)
     
@@ -74,7 +76,7 @@ def main():
     print(f"\n[INFO] total epoch: {epochs}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 42, '\n[Info] train on ', device)
 
@@ -167,7 +169,7 @@ def train(dataloader, model, loss_fn, optimizer, device):
             # Compute prediction error
             pred, _ = model(X)  # 网络前向计算
 
-            loss = loss_fn(pred, y)
+            loss = loss_fn(pred, y) + hc_loss(pred, y)
             train_loss += loss.item()
         
             y_pred_list.extend(pred.argmax(1).cpu().numpy())
