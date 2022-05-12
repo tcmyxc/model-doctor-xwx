@@ -14,6 +14,7 @@ import datetime
 import time
 import matplotlib
 import yaml
+import math
 
 
 from torch import optim
@@ -120,8 +121,14 @@ def main():
 
     # 冻结特征层参数
     for i, param in enumerate(model.parameters()):
-        if i <= 93:
+        if i < 93:
             param.requires_grad = False
+    # 随机初始化权重
+    print(f"\n[DEBUG] pre linear weight[0]:{model.state_dict()['linear.weight'][0]}")
+    stdv = 1. / math.sqrt(model.state_dict()["linear.weight"].size(1))
+    model.state_dict()["linear.weight"].data.uniform_(-stdv, stdv)
+    print(f"\n[DEBUG] after modify linear weight[0]:{model.state_dict()['linear.weight'][0]}")
+
     parameters = [p for p in model.parameters() if p.requires_grad]
     # print(f"\n[DEBUG] requires_grad parameters: {parameters}")
 
