@@ -355,9 +355,10 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     samplers =[]
     for x_i, y_i in reports.items():
         if x_i == "accuracy": break
-        labels.append(x_i)
-        accs.append(y_i["recall"])
-        samplers.append(y_i["support"])
+        # print(f"\n[DEBUG] type: {type(x_i)}")
+        labels.append(float(x_i))
+        accs.append(float(y_i["recall"]))
+        samplers.append(float(y_i["support"]))
 
     # 如果得到了更好的模型，再绘制每个类别的ACC变化曲线
     if is_best:
