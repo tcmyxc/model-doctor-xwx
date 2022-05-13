@@ -24,7 +24,7 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
-from loss.hclv2 import hc_loss  # modify
+from loss.hcl import hc_loss
 from modify_kernel.util.draw_util import draw_lr
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
@@ -212,8 +212,8 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
             features.extend(tmp_feature_out.numpy())
             
             fn_loss = loss_fn(pred, y)
-            # loss_hc = hc_loss(pred, y)
-            loss = fn_loss # + loss_hc
+            loss_hc = hc_loss(pred, y)
+            loss = fn_loss + loss_hc
 
             train_loss += loss.item()
         
