@@ -112,15 +112,15 @@ def sift_image(data_name, model_name, model_path, result_path):
         image_sift(outputs=outputs, labels=labels, names=names)
 
     print('\n', end='', flush=True)
-    image_sift.save_image(config.data_cifar10_lt_ir100, result_path)  # 保存图片
+    image_sift.save_image(config.data_cifar10, result_path)  # 保存图片
 
 
 def main():
-    data_name = 'cifar-10-lt-ir100'
+    data_name = 'cifar-10'
     model_name = 'resnet32'
 
-    model_path = "/nfs/xwx/model-doctor-xwx/output/model/three-stage/resnet32/cifar-10-lt-ir100/lr0.1/th0.5/custom_lr_scheduler/refl_loss/2022-04-26_20-25-01/best-model-20220426-210920-acc0.7288.pth"
-    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/stage3/high"
+    model_path = "/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10/lr0.01/cosine_lr_scheduler/ce_loss/best-model.pth"
+    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10/high"
     
    
     if not os.path.exists(result_path):

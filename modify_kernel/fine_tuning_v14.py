@@ -36,7 +36,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
-parser.add_argument('--data_loader_type', type=int, default='0')
+parser.add_argument('--data_loader_type', type=int, default='1', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
@@ -194,7 +194,7 @@ def train(dataloader, model, loss_fn, optimizer, modules, model_layers, device):
     y_train_list = []
     features = []
     size = len(dataloader.dataset)
-    # size = 5160  # 类平衡样本数
+    size = 50000  # 类平衡样本数
     num_batches = len(dataloader)
 
     model.train()

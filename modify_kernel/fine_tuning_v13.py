@@ -204,8 +204,9 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
     # size = 5160  # 类平衡样本数
     num_batches = len(dataloader)
     # kernel_tail=[9, 10, 11, 13, 24, 31, 38, 39, 40, 41, 44, 47, 48, 54, 57, 62]
-    kernel_tail=[4, 5, 6, 9, 12, 13, 18, 21, 22, 27, 28, 31, 32, 34, 37,
-                 40, 43, 44, 45, 46, 48, 50, 51, 54, 55, 56, 58, 59, 60, 61]
+    # kernel_tail=[4, 5, 6, 9, 12, 13, 18, 21, 22, 27, 28, 31, 32, 34, 37,
+    #              40, 43, 44, 45, 46, 48, 50, 51, 54, 55, 56, 58, 59, 60, 61]
+    kernel_tail=[5, 9, 12, 13, 18, 21, 27, 31, 43, 44, 46, 48, 50, 64, 55, 56, 58, 61]
     layer = 29
     model.train()
     for batch, (X, y, _) in enumerate(dataloader):
@@ -240,9 +241,11 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             optimizer.zero_grad()
             loss.backward()  # 得到模型中参数对当前输入的梯度
 
+            # 如果不存在尾部类别，本次梯度不更新
+            # 如果存在，则只更新设计的卷积核的梯度
             for kernel_index in range(modify_dicts[0][layer][0]):
                 if tailed_size <= 0:
-                    modules[int(layer)].weight.grad = 0
+                    modules[int(layer)].weight.grad = torch.zeros_like(modules[int(layer)].weight.grad)
                     break
                 if tailed_size > 0 and kernel_index not in kernel_tail:
                     modules[int(layer)].weight.grad[kernel_index, ::] = 0

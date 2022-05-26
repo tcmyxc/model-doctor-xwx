@@ -20,11 +20,12 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
-from hooks.grad_hook import GradHookModule
+from loss.hcl import hc_loss
 from modify_kernel.util.draw_util import draw_lr
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
+from utils.general import init_seeds
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -37,15 +38,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', default='cifar-10-lt-ir100')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-3')
-parser.add_argument('--data_loader_type', type=int, default='0')
+parser.add_argument('--data_loader_type', type=int, default='0', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 
 # global config
-modify_dicts = []
-# kernel_percents = {}
-# threshold = None
 best_acc = 0
 best_model_path = None
 result_path = None
@@ -60,8 +58,10 @@ def main():
     # print(f"\n[INFO] args: {args}")
     print_args(args)
 
+    init_seeds()  # 固定种子
+
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('\n[INFO] train on ', device)
 
@@ -97,22 +97,6 @@ def main():
     
     print(f"\n[INFO] result will save in:\n{result_path}\n")
 
-    # kernel
-    num_classes = cfg['model']['num_classes']
-    kernel_dict_path = os.path.join(
-        cfg["kernel_dict_path"],
-        f"{model_name}-{data_name}"
-    )
-    # 01mask
-    for cls in range(num_classes):
-        mask_path_patten = f"{kernel_dict_path}/kernel_dict_label_{cls}.npy"
-        modify_dict = np.load(mask_path_patten, allow_pickle=True).item()
-        modify_dicts.append(modify_dict)
-
-    # 分类正确的feature聚类中心
-    ft_centers = torch.tensor(np.load(cfg["ft_path"]))
-
-
     # data loader
     if args.data_loader_type == 0:
         # 常规数据加载器
@@ -126,13 +110,6 @@ def main():
         model_name=model_name,
         in_channels=cfg['model']['in_channels'],
         num_classes=cfg['model']['num_classes']
-    )
-
-    # modules
-    modules = models.load_modules(
-        model=model,
-        model_name=model_name,
-        model_layers=model_layers
     )
 
     model.load_state_dict(torch.load(model_path)["model"])
@@ -181,7 +158,7 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, modules, 1-epoch/epochs, device)
+        train(data_loaders["train"], model, loss_fn, optimizer, model_layers, device)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
         scheduler.step()
 
@@ -193,17 +170,16 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
+def train(dataloader, model, loss_fn, optimizer, model_layers, device):
     global g_train_loss, g_train_acc, result_path
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
     features = []
-    f_list = []
     size = len(dataloader.dataset)
-    # size = 5160  # 类平衡样本数
     num_batches = len(dataloader)
+
     model.train()
     for batch, (X, y, _) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
@@ -217,11 +193,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
             tmp_feature_out = feature_out.detach().cpu()
             tmp_feature_out = torch.flatten(tmp_feature_out, 1)
             features.extend(tmp_feature_out.numpy())
-
-            ft_loss = cal_ft_loss(X.cpu(), y.cpu(), pred.cpu(), feature_out.cpu())
             
             fn_loss = loss_fn(pred, y)
-            loss = fn_loss + ft_loss
+            loss_hc = hc_loss(pred, y)
+            loss = fn_loss + loss_hc
 
             train_loss += loss.item()
         
@@ -237,9 +212,10 @@ def train(dataloader, model, loss_fn, optimizer, modules, epoch_decay, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"[{current:>5d}/{size:>5d}] loss: {loss:>7f}, fn_loss: {fn_loss:>7f}, ft_loss: {ft_loss:>7f}", flush=True)
+            print(f"[{current:>5d}/{size:>5d}] loss: {loss:>7f}, fn_loss: {fn_loss:>7f}, hc_loss: {loss_hc:>7f}", flush=True)
 
     train_loss /= num_batches
+    print(f"\n[DEBUG] train_loss: {train_loss:>7f}")
     correct /= size
     g_train_loss.append(train_loss)
     g_train_acc.append(correct)
@@ -287,6 +263,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
     g_test_loss.append(test_loss)
     correct /= size
     g_test_acc.append(correct)
+    is_best = (correct > best_acc)
     if correct > best_acc:
         best_acc = correct
         print(f"\n[FEAT] epoch {epoch+1}, update best acc: {best_acc:.4f}")
@@ -302,7 +279,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
     print(f"\n[INFO] Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
-    draw_classification_report("test", result_path, y_train_list, y_pred_list)
+    draw_classification_report("test", result_path, y_train_list, y_pred_list, is_best)
 
     # 特征图可视化
     # draw_tsne(result_path, features, "val", y_train_list)
@@ -357,7 +334,7 @@ def draw_acc(train_loss, test_loss, train_acc, test_acc, result_path):
     plt.close()
 
 
-def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list):
+def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list, is_best):
     """绘制在训练集/测试集上面的 classification_report"""
     reports = classification_report(y_train_list, y_pred_list, digits=4, output_dict=True)
     np.save(os.path.join(result_path, f"{mode_type}_classification_report.npy"), reports)
@@ -371,7 +348,10 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
         accs.append(y_i["recall"])
         samplers.append(y_i["support"])
 
-    draw_cls_test_acc(labels, accs, result_path)
+    # 如果得到了更好的模型，再绘制每个类别的ACC变化曲线
+    if is_best:
+        draw_cls_test_acc(labels, accs, result_path)
+
     plt.plot(labels, accs)
     plt.title("Acc of each class")
     plt.xlabel("Classes")
@@ -386,6 +366,8 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
     for idx in labels:
         g_cls_test_acc[int(idx)].append(one_epoch_test_acc[int(idx)])
 
+    np.save(os.path.join(result_path, "cls_test_acc_report.npy"), g_cls_test_acc)
+    
     num_epochs = len(g_cls_test_acc[0])
 
     for label in labels:
@@ -394,55 +376,12 @@ def draw_cls_test_acc(labels, one_epoch_test_acc, result_path):
     plt.xlabel("Training Epochs")
     plt.ylabel("Acc")
     # plt.legend(loc="best")
-    plt.legend(loc="lower left")
+    # plt.legend(loc="lower left")
     plt.grid(True)
     plt.savefig(os.path.join(result_path, "cls_test_acc_report.jpg"))
     plt.clf()
     plt.close()
 
-
-def cal_ft_loss(X, y, pred, feature_out):
-    ft_loss = torch.tensor(0.0, requires_grad=True)
-    # 分类错误的样本的特征图向聚类中心靠近
-    incorrect = pred.argmax(1) != y
-    y = y[incorrect]
-    feature_out = feature_out[incorrect]
-    global ft_centers
-    for cls, modify_dict in enumerate(modify_dicts):
-        # 找到对应类别的图片
-        x_pos = (y==cls).nonzero().squeeze()
-        # 处理只有一个样本的情况
-        if x_pos.shape == torch.Size([]):
-            x_pos = x_pos.unsqueeze(dim=0)
-        # 处理没有样本的情况
-        if min(x_pos.shape) == 0:
-            continue
-
-        ft_cls_i = torch.index_select(feature_out, dim=0, index=x_pos)
-        ft_cls_i = torch.mean(ft_cls_i, 0)
-        # print(ft_cls_i.shape)
-
-        # 不相关卷积核的特征图往聚类中心的特征图靠近
-        kernel_tail=[9, 10, 11, 13, 24, 31, 38, 39, 40, 41, 44, 47, 48, 54, 57, 62]
-        layer = 29
-        ft_err = torch.zeros_like(ft_cls_i[0])
-        for kernel_index in range(modify_dict[layer][0]):
-            if cls >= 6:
-                if kernel_index in kernel_tail:
-                    ft_err += ft_cls_i[kernel_index]
-        # for kernel_index in range(modify_dict[layer][0]):
-        #     if kernel_index not in modify_dict[layer][1]:
-        #         ft_err += (ft_cls_i[kernel_index] - ft_centers[cls][kernel_index])
-        
-        # ft_loss = ft_loss + torch.abs(ft_err).mean()  # l1
-        ft_loss = ft_loss + ft_err.mean()
-
-        # 分类错误样本的特征图向聚类中心靠近
-        # ft_loss = ft_loss + torch.abs(ft_cls_i - ft_centers[cls]).mean()
-                        
-    ft_loss = ft_loss / len(modify_dicts)
-
-    return ft_loss
 
 def get_cfg(cfg_filename):
     """获取配置"""

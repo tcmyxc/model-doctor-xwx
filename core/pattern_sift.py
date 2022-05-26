@@ -140,12 +140,12 @@ class GradSift:
 
 
 def main():
-    data_name = 'cifar-10-lt-ir100'
+    data_name = 'cifar-10'
     model_name = 'resnet32'
 
-    model_path = "/nfs/xwx/model-doctor-xwx/output/model/three-stage/resnet32/cifar-10-lt-ir100/lr0.1/th0.5/custom_lr_scheduler/refl_loss/2022-04-26_20-25-01/best-model-20220426-210920-acc0.7288.pth"
-    input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/stage3/high/images"
-    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10-lt-ir100/stage3/grads"
+    model_path = "/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10/lr0.01/cosine_lr_scheduler/ce_loss/best-model.pth"
+    input_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10/high/images"
+    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10/grads"
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
@@ -180,8 +180,8 @@ def main():
         outputs, _ = model(inputs)
         grad_sift(outputs, labels)
 
-    # grad_sift.sift()
-    grad_sift.cal_percent_h()
+    grad_sift.sift()
+    # grad_sift.cal_percent_h()
 
 
 if __name__ == '__main__':

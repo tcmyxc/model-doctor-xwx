@@ -34,18 +34,22 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-res32 = models.resnetv2.resnet32()
+model = models.resnetv2.resnet32(num_classes=10)
+weight_path = "/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth"
 
-for name in res32.state_dict():
-    print(name)
+model.load_state_dict(torch.load(weight_path)["model"])
+conv_weight = model.layer3[4].conv2.weight.detach().numpy()
+# print(conv_weight.shape) # out, in, k, k
+conv_weight = np.sum(conv_weight * conv_weight, axis=(1, 2, 3))
+conv_weight = conv_weight**0.5
 
-for i, param in enumerate(res32.parameters()):
-    if i <= 93:
-        param.requires_grad = False
-parameters = [p for p in res32.parameters() if p.requires_grad]
-# print(f"\n[DEBUG] requires_grad parameters: {parameters}")
-
-print(res32.state_dict()["linear.weight"][0])
-stdv = 1. / math.sqrt(res32.state_dict()["linear.weight"].size(1))
-res32.state_dict()["linear.weight"].data.uniform_(-stdv, stdv)
-print(res32.state_dict()["linear.weight"][0])
+plt.plot(range(len(conv_weight)), conv_weight, label='conv weight')
+plt.ylabel("l2 weight")
+# plt.xticks(range(len(conv_weight)))
+plt.title("conv weight")
+plt.xlabel("kernel")
+plt.legend(loc="upper right")
+plt.grid(True)
+plt.savefig("conv_weight.png")
+plt.clf()
+    
