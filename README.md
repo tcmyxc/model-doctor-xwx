@@ -385,6 +385,10 @@ $(date "+%Y%m%d-%H%M%S").log
         - fl:  73.90%
         - refl: 73.76%
 
+只训练分类头，使用正则化方法
+```python
+self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
+```
 
 
 # ResNet32+Cifar-100-lt-ir100

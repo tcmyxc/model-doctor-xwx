@@ -12,3 +12,4 @@ nohup.out
 *.npy
 **/label_grads_layer
 images/
+.vscode
