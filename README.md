@@ -391,6 +391,11 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 ```
 
 
+    - 20220627
+        - 修改头部类相关卷积核的特诊图
+            - 预训练: 71.82
+
+
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
 
