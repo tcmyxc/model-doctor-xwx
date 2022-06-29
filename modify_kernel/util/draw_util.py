@@ -82,3 +82,22 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     plt.savefig(os.path.join(result_path, f"{mode_type}_classification_report.jpg"))
     plt.clf()
     plt.close()
+
+
+def draw_fc_weight(result_path, fc_weight):
+    """绘制 fc weight"""
+
+    fc_weight = np.sum(fc_weight * fc_weight, axis=1)
+    fc_weight = fc_weight**0.5
+
+    plt.plot(range(len(fc_weight)), fc_weight, 'r', label='fc _weight')
+    
+    plt.title("fc weight")
+    plt.xlabel("class")
+    plt.ylabel("l2 weight")
+    plt.legend(loc="upper right")
+    plt.grid(True)
+    plt.savefig(os.path.join(result_path, "fc_weight.png"))
+    plt.clf()
+    plt.close()
+        

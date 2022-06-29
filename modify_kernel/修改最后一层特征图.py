@@ -27,7 +27,7 @@ from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
 from loss.hcl import hc_loss
-from modify_kernel.util.draw_util import draw_lr
+from modify_kernel.util.draw_util import draw_lr, draw_fc_weight
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
@@ -267,7 +267,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"[{current:>5d}/{size:>5d}] | loss: {loss:>7f}", flush=True)
+            print(f"[{current:>5d}/{size:>5d}] loss: {loss:>7f}", flush=True)
 
     test_loss /= num_batches
     g_test_loss.append(test_loss)
@@ -286,6 +286,10 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
             'acc': best_acc
         }
         update_best_model(result_path, model_state, model_name)
+        
+        # 可视化分类头权重
+        fc_weight = model.linear.weight.detach().cpu().numpy()
+        draw_fc_weight(result_path, fc_weight)
 
     print(f"\n[INFO] Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))

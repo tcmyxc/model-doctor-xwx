@@ -377,7 +377,7 @@ $(date "+%Y%m%d-%H%M%S").log
 
 - 只调整分类头，自定义学习率，同时附加hcl（200轮）
     - lr0.1
-        - ce:  75.09%
+        - ce:  75.09% (可视化个权重)
         - fl:  74.89%
         - refl: 75.11%
     - lr0.01
@@ -392,13 +392,18 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 ```
 - 20220627
-    - 修改头部类相关卷积核的特诊图
+    - 修改头部类相关卷积核的特诊图，附加hcl
         - 预训练: 71.82
         - lr1e-2, cosine, ce: 70.08 (epoch 125)
         - lr1e-3, cosine, ce: 76.04 (epoch 78)
         
         - lr1e-2, custom, ce: 72.67 (epoch 1)
         - lr1e-3, custom, ce: 75.41 (epoch 33)
+
+    - 修改头部类相关卷积核的特诊图
+        - lr1e-3, cosine, ce:
+        
+        - lr1e-3, custom, ce:
 ```
 
 
