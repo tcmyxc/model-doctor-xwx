@@ -203,8 +203,9 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
             features.extend(tmp_feature_out.numpy())
             
             fn_loss = loss_fn(pred, y)
-            loss_hc = hc_loss(pred, y)
-            loss = fn_loss + loss_hc
+            # loss_hc = hc_loss(pred, y)
+            # loss = fn_loss + loss_hc
+            loss = fn_loss
 
             train_loss += loss.item()
         
@@ -266,7 +267,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+            print(f"[{current:>5d}/{size:>5d}] | loss: {loss:>7f}", flush=True)
 
     test_loss /= num_batches
     g_test_loss.append(test_loss)
