@@ -90,7 +90,7 @@ def draw_fc_weight(result_path, fc_weight):
     fc_weight = np.sum(fc_weight * fc_weight, axis=1)
     fc_weight = fc_weight**0.5
 
-    plt.plot(range(len(fc_weight)), fc_weight, 'r', label='fc _weight')
+    plt.plot(range(len(fc_weight)), fc_weight, 'r', label='fc weight')
     
     plt.title("fc weight")
     plt.xlabel("class")
