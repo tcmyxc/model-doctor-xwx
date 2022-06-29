@@ -221,7 +221,7 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"[{current:>5d}/{size:>5d}] loss: {loss:>7f}, fn_loss: {fn_loss:>7f}", flush=True)
+            print(f"[train | {current:>5d}/{size:>5d}] loss: {loss:>7f}, fn_loss: {fn_loss:>7f}", flush=True)
 
     train_loss /= num_batches
     print(f"\n[DEBUG] train_loss: {train_loss:>7f}")
@@ -267,7 +267,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"[{current:>5d}/{size:>5d}] loss: {loss:>7f}", flush=True)
+            print(f"[val {current:>5d}/{size:>5d}] loss: {loss:>7f}", flush=True)
 
     test_loss /= num_batches
     g_test_loss.append(test_loss)
