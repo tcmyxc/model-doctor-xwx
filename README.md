@@ -391,19 +391,18 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 ```
 
 ```
-- 20220627
-    - 修改头部类相关卷积核的特诊图，附加hcl
-        - 预训练: 71.82
-        - lr1e-2, cosine, ce: 70.08 (epoch 125)
-        - lr1e-3, cosine, ce: 76.04 (epoch 78)
-        
-        - lr1e-2, custom, ce: 72.67 (epoch 1)
-        - lr1e-3, custom, ce: 75.41 (epoch 33)
+- 修改头部类相关卷积核的特诊图，附加hcl
+    - 预训练: 71.82
+    - lr1e-2, cosine, ce: 70.08 (epoch 125)
+    - lr1e-3, cosine, ce: 76.04 (epoch 78)
+    
+    - lr1e-2, custom, ce: 72.67 (epoch 1)
+    - lr1e-3, custom, ce: 75.41 (epoch 33)
 
-    - 修改头部类相关卷积核的特诊图
-        - lr1e-3, cosine, ce:
-        
-        - lr1e-3, custom, ce:
+- 修改头部类相关卷积核的特诊图
+    - lr1e-3, cosine, ce: 74.52 (epoch 163)
+    
+    - lr1e-3, custom, ce: 74.66 (epoch 141)
 ```
 
 
