@@ -262,7 +262,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"[val {current:>5d}/{size:>5d}] loss: {loss:>7f}", flush=True)
+            print(f"[val | {current:>5d}/{size:>5d}] loss: {loss:>7f}", flush=True)
 
     test_loss /= num_batches
     g_test_loss.append(test_loss)
