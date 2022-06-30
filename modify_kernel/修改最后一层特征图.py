@@ -203,8 +203,6 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
             features.extend(tmp_feature_out.numpy())
             
             fn_loss = loss_fn(pred, y)
-            # loss_hc = hc_loss(pred, y)
-            # loss = fn_loss + loss_hc
             loss = fn_loss
 
             train_loss += loss.item()
@@ -231,9 +229,6 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
     g_train_acc.append(correct)
     print("-" * 42)
     print(classification_report(y_train_list, y_pred_list, digits=4))
-
-    # 特征图可视化
-    # draw_tsne(result_path, features, "train", y_train_list)
 
 
 def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
@@ -294,30 +289,6 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
     print(f"\n[INFO] Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
     draw_classification_report("test", result_path, y_train_list, y_pred_list, is_best)
-
-    # 特征图可视化
-    # draw_tsne(result_path, features, "val", y_train_list)
-    
-
-
-def draw_tsne(result_path, features, mode, y_train_list):
-    # 特征图可视化
-    from sklearn.manifold import TSNE
-    # colorBoard=["dimgray","darkorange","tan","silver","forestgreen",\
-    #             "darkgreen","royalblue","navy","red","darksalmon","peru","olive",\
-    #             "yellow","cyan","mediumaquamarine","skyblue","purple","fuchsia",\
-    #             "indigo","khaki"]
-
-    colors = np.array(["C0","C1","C2","C3","C4","C5","C6","C7", "C8","C9"])
-    # colors = np.array(colorBoard)
-
-    features_embedded = TSNE(n_components=2, init='pca', n_iter=1000).fit_transform(features)
-    plt.scatter(features_embedded[:, 0], features_embedded[:, 1], c=colors[y_train_list])
-    # plt.colorbar()
-    plt.title(f"{mode} dataset tsne")
-    plt.savefig(os.path.join(result_path, f"{mode}_tsne.jpg"))
-    plt.clf()
-    plt.close()
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc, result_path):

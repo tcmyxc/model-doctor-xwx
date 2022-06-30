@@ -400,8 +400,12 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-3, custom, ce: 75.41 (epoch 33)
 
 - 修改头部类相关卷积核的特诊图
+    - lr1e-1, cosine, ce: 74.19 (epoch 179)
+    - lr1e-2, cosine, ce: 75.51 (epoch 71)
     - lr1e-3, cosine, ce: 74.52 (epoch 163)
     
+    - lr1e-1, custom, ce: 74.02 (epoch 3)
+    - lr1e-2, custom, ce: 76.30 (epoch 119)
     - lr1e-3, custom, ce: 74.66 (epoch 141)
 ```
 
