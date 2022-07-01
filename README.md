@@ -405,12 +405,16 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-3, cosine, ce: 74.52 (epoch 163)
 
     - lr1e-1, cosine, refl: 71.95 (epoch 179)
-    - lr1e-2, cosine, refl: 
-    - lr1e-3, cosine, refl: 
+    - lr1e-2, cosine, refl: 75.13 (epoch 88)
+    - lr1e-3, cosine, refl: 74.52 (epoch 163)
     
     - lr1e-1, custom, ce: 74.02 (epoch 3)
     - lr1e-2, custom, ce: 76.30 (epoch 119)
     - lr1e-3, custom, ce: 74.66 (epoch 141)
+
+    - lr1e-1, custom, refl: 74.40 (epoch 3)
+    - lr1e-2, custom, refl: 75.36 (epoch 134)
+    - lr1e-3, custom, refl: 74.43 (epoch 163)
 ```
 
 
@@ -423,3 +427,22 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 # ResNet32+Cifar-100-lt-ir100
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
+
+
+# 2022-07-01预训练模型
+
+- cifar-10-lt-ir10
+    - lr1e-1, custom, ce: 87.49
+
+- cifar-10-lt-ir100
+    - lr1e-1, custom, ce: 72.94
+
+- cifar-100-lt-ir10
+    - lr1e-1, custom, ce: 59.22
+
+
+- cifar-100-lt-ir50
+    - lr1e-1, custom, ce: 45.47
+
+- cifar-100-lt-ir100
+    - lr1e-1, custom, ce: 39.12

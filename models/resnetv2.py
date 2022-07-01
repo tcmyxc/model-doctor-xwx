@@ -110,17 +110,28 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x, Y=None, modify_feature=False, kernels=None, head=None):
+        # kernels = [4, 18, 20, 27, 29, 30, 35, 45, 50, 51, 55, 58, 59]
+        # head = [0, 1, 2]
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
         feature = out
+        
+        if self.training and modify_feature:
+            for idx, acts in enumerate(out):
+                # print(acts.shape)
+                cls = Y[idx]
+                if cls in head:
+                    for kernel_idx, act in enumerate(acts):
+                        if kernel_idx in kernels:
+                            # print("before", act[:2])
+                            stdv = float(act.std())
+                            act.data.uniform_(-stdv, stdv)
+                            # print("after", act[:2])
+                            
         out = F.avg_pool2d(out, out.size()[3])
-
-        # xn = self.gru(torch.flatten(out, 2))
-        # xn = torch.reshape(xn, out.shape)
-        # out = out * xn
 
         out = out.view(out.size(0), -1)
         out = self.linear(out)
@@ -154,4 +165,7 @@ def resnet1202():
 if __name__ == "__main__":
     from torchsummary import summary
     model = resnet32().cuda()
-    summary(model=model, input_size=(3, 224, 224))
+    model.train()
+    inputs = torch.rand((2, 3, 96, 96)).cuda()
+    labels = torch.tensor([1, 8]).cuda()
+    model(inputs, labels)

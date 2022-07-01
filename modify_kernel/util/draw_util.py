@@ -86,6 +86,8 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
 
 def draw_fc_weight(result_path, fc_weight):
     """绘制 fc weight"""
+    
+    np.save(os.path.join(result_path, "fc_weight.npy"), fc_weight)
 
     fc_weight = np.sum(fc_weight * fc_weight, axis=1)
     fc_weight = fc_weight**0.5

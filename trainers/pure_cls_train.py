@@ -19,7 +19,8 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
-from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, draw_classification_report
+from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
+    draw_classification_report, draw_fc_weight
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
@@ -237,6 +238,10 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
             'acc': best_acc,
         }
         update_best_model(cfg, model_state, model_name)
+        
+        # 可视化分类头权重
+        fc_weight = model.linear.weight.detach().cpu().numpy()
+        draw_fc_weight(cfg["result_path"], fc_weight)
         
     print(f"\nTest Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
