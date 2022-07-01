@@ -400,6 +400,8 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-3, custom, ce: 75.41 (epoch 33)
 
 - 修改头部类相关卷积核的特诊图
+    - 预训练: 71.82
+    
     - lr1e-1, cosine, ce: 74.19 (epoch 179)
     - lr1e-2, cosine, ce: 75.51 (epoch 71)
     - lr1e-3, cosine, ce: 74.52 (epoch 163)
@@ -432,17 +434,21 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 # 2022-07-01预训练模型
 
 - cifar-10-lt-ir10
-    - lr1e-1, custom, ce: 87.49
+    - lr1e-1, custom
+        - ce: 87.49
 
 - cifar-10-lt-ir100
-    - lr1e-1, custom, ce: 72.94
+    - lr1e-1, custom
+        - ce: 72.94
 
 - cifar-100-lt-ir10
-    - lr1e-1, custom, ce: 59.22
-
+    - lr1e-1, custom
+        - ce: 59.22
 
 - cifar-100-lt-ir50
-    - lr1e-1, custom, ce: 45.47
+    - lr1e-1, custom
+        - ce: 45.47
 
 - cifar-100-lt-ir100
-    - lr1e-1, custom, ce: 39.12
+    - lr1e-1, custom
+        - ce: 39.12
