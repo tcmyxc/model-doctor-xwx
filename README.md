@@ -436,19 +436,30 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar-10-lt-ir10
     - lr1e-1, custom
         - ce: 87.49
+        - fl: 86.34
+        - refl: 86.80
 
 - cifar-10-lt-ir100
     - lr1e-1, custom
         - ce: 72.94
+        - fl: 71.37
+        - refl: 73.43 
 
 - cifar-100-lt-ir10
     - lr1e-1, custom
         - ce: 59.22
+        - fl: 57.70
+        - refl: 58.52
+
 
 - cifar-100-lt-ir50
     - lr1e-1, custom
         - ce: 45.47
+        - fl: 44.47
+        - refl: 44.77
 
 - cifar-100-lt-ir100
     - lr1e-1, custom
         - ce: 39.12
+        - fl: 40.59
+        - refl: 39.19
