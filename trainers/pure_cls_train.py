@@ -24,6 +24,7 @@ from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
+from utils.general import update_best_model
 
 import torch.nn as nn
 
@@ -39,10 +40,6 @@ parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose f
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 
 
-best_acc = 0
-g_train_loss, g_train_acc = [], []
-g_test_loss, g_test_acc = [], []
-
 def main():
     args = parser.parse_args()
     print_args(args)
@@ -52,6 +49,7 @@ def main():
     model_name   = args.model_name
     cfg_filename = "one_stage.yml"
     cfg = get_cfg(cfg_filename)[data_name]
+    print_yml_cfg(cfg)
 
     # result path
     result_path = os.path.join(config.model_pretrained,
@@ -67,7 +65,11 @@ def main():
     # add some cfg
     cfg["best_model_path"] = None
     cfg["result_path"] = result_path
-    print_yml_cfg(cfg)
+    cfg["best_acc"] = 0
+    cfg["g_train_loss"] = []
+    cfg["g_train_acc"] = []
+    cfg["g_test_loss"] = []
+    cfg["g_test_acc"] = []
 
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
@@ -78,7 +80,7 @@ def main():
     # device
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print('-' * 42, '\n[Info] train on ', device)
+    print('-' * 42, '\n[Info] use device:', device)
 
     # data loader
     if args.data_loader_type == 0:
@@ -138,11 +140,11 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, device)
+        train(data_loaders["train"], model, loss_fn, optimizer, device, cfg)
         test(data_loaders["val"], model, loss_fn, optimizer, epoch, device, args, cfg)
         scheduler.step()
 
-        draw_acc_and_loss(g_train_loss, g_test_loss, g_train_acc, g_test_acc, result_path)
+        draw_acc_and_loss(cfg["g_train_loss"], cfg["g_test_loss"], cfg["g_train_acc"], cfg["g_test_acc"], result_path)
         draw_lr(result_path, lr_list)
 
         print_time(time.time()-epoch_begin_time, epoch=True)
@@ -151,8 +153,7 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, device):
-    global g_train_loss, g_train_acc
+def train(dataloader, model, loss_fn, optimizer, device, cfg):
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
     y_pred_list = []
@@ -183,19 +184,18 @@ def train(dataloader, model, loss_fn, optimizer, device):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+            print(f"train | loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
     
     train_loss /= num_batches
     correct /= size
-    g_train_loss.append(train_loss)
-    g_train_acc.append(correct)
+    cfg["g_train_loss"].append(train_loss)
+    cfg["g_train_acc"].append(correct)
     print("-" * 42)
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
 def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     model_name = args.model_name
-    global best_acc, g_test_loss, g_test_acc
     # 这里加入了 classification_report
     y_pred_list = []
     y_train_list = []
@@ -220,22 +220,22 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
+            print(f"val | loss: {loss:>7f}  [{current:>5d}/{size:>5d}]", flush=True)
 
     test_loss /= num_batches
-    g_test_loss.append(test_loss)
+    cfg["g_test_loss"].append(test_loss)
     correct /= size
-    g_test_acc.append(correct)
+    cfg["g_test_acc"].append(correct)
 
-    if correct > best_acc:
-        best_acc = correct
-        print(f"\n[FEAT] Epoch {epoch+1}, update best acc:", best_acc)
-        model_name=f"best-model-acc{best_acc:.4f}.pth"
+    if correct > cfg["best_acc"]:
+        cfg["best_acc"] = correct
+        print(f"\n[FEAT] Epoch {epoch+1}, update best acc:", correct)
+        model_name=f"best-model-acc{correct:.4f}.pth"
         model_state = {
             'epoch': epoch,  # 注意这里的epoch是从0开始的
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            'acc': best_acc,
+            'acc': correct,
         }
         update_best_model(cfg, model_state, model_name)
         
@@ -247,21 +247,6 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     print(classification_report(y_train_list, y_pred_list, digits=4))
     draw_classification_report("test", cfg["result_path"], y_train_list, y_pred_list)
 
-
-def update_best_model(cfg, model_state, model_name):
-    """更新权重文件"""
-
-    result_path = cfg["result_path"]
-    cp_path = os.path.join(result_path, model_name)
-
-    if cfg["best_model_path"] is not None:
-        # remove previous model weights
-        os.remove(cfg["best_model_path"])
-
-    torch.save(model_state, cp_path)
-    torch.save(model_state, os.path.join(result_path, "best-model.pth"))
-    cfg["best_model_path"] = cp_path
-    print(f"Saved Best PyTorch Model State to {model_name} \n")
 
 
 if __name__ == '__main__':

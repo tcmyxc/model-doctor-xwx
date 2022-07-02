@@ -431,7 +431,7 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - 预训练：41.77%(REFL), (CE:40.58%, FL:39.11%)
 
 
-# 2022-07-01预训练模型
+# 2022年7月的预训练模型
 
 - cifar-10-lt-ir10
     - lr1e-1, custom
