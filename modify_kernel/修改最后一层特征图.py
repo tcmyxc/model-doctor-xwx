@@ -85,7 +85,7 @@ def main():
         g_cls_test_acc[idx] = []
 
     model_name = cfg["model_name"]
-    model_path = cfg["two_stage_model_path"]
+    model_path = cfg["pretrained_model_path"]
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
     weight_decay = float(cfg["optimizer"]["weight_decay"])
