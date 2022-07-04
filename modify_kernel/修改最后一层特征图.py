@@ -31,7 +31,7 @@ from modify_kernel.util.draw_util import draw_lr, draw_fc_weight
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
-from utils.general import init_seeds
+from utils.general import init_seeds, get_head_and_kernel, get_head_ratio
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -79,7 +79,6 @@ def main():
     data_name = args.data_name
     cfg_filename = "cbs_refl.yml"
     cfg = get_cfg(cfg_filename)[data_name]
-    print_yml_cfg(cfg) # yml cfg
 
     for idx in range(cfg['model']['num_classes']):
         g_cls_test_acc[idx] = []
@@ -92,6 +91,14 @@ def main():
     epochs = args.epochs
     print(f"\n[INFO] total epoch: {epochs}")
     model_layers = range(cfg["model_layers"])
+    
+    channel_path = os.path.join(config.result_channels, f"{model_name}-{data_name}", "channels_-1.npy")
+    print(f"\n[INFO] channel_path: {channel_path}")
+    head_ratio = get_head_ratio(data_name)
+    kernels, head = get_head_and_kernel(channel_path, head_ratio)
+    cfg["kernels"] = kernels
+    cfg["head"] = head
+    print_yml_cfg(cfg) # yml cfg
 
     # result path
     result_path = os.path.join(config.output_model, "three-stage",
@@ -166,7 +173,7 @@ def main():
         print("[INFO] lr is:", cur_lr)
         print("-" * 42)
 
-        train(data_loaders["train"], model, loss_fn, optimizer, model_layers, device)
+        train(data_loaders["train"], model, loss_fn, optimizer, model_layers, device, cfg)
         test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
         scheduler.step()
 
@@ -178,7 +185,7 @@ def main():
     print_time(time.time()-begin_time)
 
 
-def train(dataloader, model, loss_fn, optimizer, model_layers, device):
+def train(dataloader, model, loss_fn, optimizer, model_layers, device, cfg):
     global g_train_loss, g_train_acc, result_path
     train_loss, correct = 0, 0
     # 这里加入了 classification_report
@@ -195,7 +202,7 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device):
         
         with torch.set_grad_enabled(True):
             # Compute prediction error
-            pred, feature_out = model(X, y)  # 网络前向计算
+            pred, feature_out = model(X, y, modify_feature=True, kernels=cfg["kernels"], head=cfg["head"])  # 网络前向计算
 
             # 存储特征图，用于TSEN聚类
             tmp_feature_out = feature_out.detach().cpu()
