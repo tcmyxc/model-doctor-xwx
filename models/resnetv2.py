@@ -111,8 +111,6 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x, Y=None, modify_feature=False, kernels=None, head=None):
-        # kernels = [4, 18, 20, 27, 29, 30, 35, 45, 50, 51, 55, 58, 59]
-        # head = [0, 1, 2]
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
         out = self.layer2(out)
@@ -121,7 +119,6 @@ class ResNet(nn.Module):
         
         if self.training and modify_feature:
             for idx, acts in enumerate(out):
-                # print(acts.shape)
                 cls = Y[idx]
                 if cls in head:
                     for kernel_idx, act in enumerate(acts):
