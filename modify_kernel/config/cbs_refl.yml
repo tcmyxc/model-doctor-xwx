@@ -24,4 +24,39 @@ cifar-10-lt-ir10:
   pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_00-25-40/best-model-acc0.8749.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
 
+cifar-100-lt-ir10:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+  model_name: resnet32
+  model_layers: 30
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_02-13-11/best-model-acc0.5922.pth
+    
+cifar-100-lt-ir50:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+  model_name: resnet32
+  model_layers: 30
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir50/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_03-14-39/best-model-acc0.4547.pth
 
+
+cifar-100-lt-ir100:
+  model:
+    in_channels: 3
+    num_classes: 100
+  optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+  model_name: resnet32
+  model_layers: 30
+  # 预训练模型路径
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir100/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_04-04-08/best-model-acc0.3912.pth
