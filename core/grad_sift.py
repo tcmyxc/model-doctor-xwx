@@ -30,7 +30,7 @@ class GradSift:
                                       grads.shape[1],  # C
                                       grads.shape[2],  # H
                                       grads.shape[3])) # W
-            print(self.grads.shape)
+            # print(self.grads.shape)
 
         softmax = torch.softmax(outputs, dim=1)
         scores, predicts = torch.max(softmax, dim=1) # 通道维度上的最大值以及索引（也就是正确的标签）
@@ -77,16 +77,16 @@ def view_channel(grads, result_path, model_layer, epoch):
     grads_sum = torch.sum(grads, dim=(1, 3, 4)).detach().numpy()
     grads_path = os.path.join(
         result_path, 
-        'channel_grads_{}_epoch{}.npy'.format(model_layer, epoch)
+        'channel_grads_{}.npy'.format(model_layer)
     )
     np.save(grads_path, grads_sum)
 
     # grads numpy view
     grads_path = os.path.join(
         result_path, 
-        'channel_grads_{}_epoch{}.png'.format(model_layer, epoch)
+        'channel_grads_{}.png'.format(model_layer)
     )
-    image_util.view_grads(grads_sum, 512, 10, grads_path)
+    image_util.view_grads(grads_sum, 64, 10, grads_path)
 
     # # grads numpy sort view
     # grads_sum_sort = -np.sort(-grads_sum, axis=1)
@@ -100,7 +100,7 @@ def sift_channel(result_path, model_layer, epoch, threshold=None):  # high respo
     """根据梯度生成 channel mask，同时保存到文件"""
     grads_path = os.path.join(
         result_path, 
-        'channel_grads_{}_epoch{}.npy'.format(model_layer, epoch)
+        'channel_grads_{}.npy'.format(model_layer)
     )
     channels_grads = np.load(grads_path)   # (Class, channel)
 
@@ -117,15 +117,15 @@ def sift_channel(result_path, model_layer, epoch, threshold=None):  # high respo
 
     channel_path = os.path.join(
         result_path, 
-        'channels_{}_epoch{}.npy'.format(model_layer, epoch)
+        'channels_{}.npy'.format(model_layer)
     )
     np.save(channel_path, channels)  # 相当于将预测正确类 对信道响应大于平均值的信道置1，其余置0
 
     png_channel_path = os.path.join(
         result_path, 
-        'channels_{}_epoch{}.png'.format(model_layer, epoch)
+        'channels_{}.png'.format(model_layer)
     )
-    image_util.view_grads(channels, 512, 10, png_channel_path)
+    image_util.view_grads(channels, 64, 10, png_channel_path)
 
     # print(channels)
     # print(channels_threshold)
@@ -161,11 +161,11 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
         print('\r[{}/{}]'.format(i+1, len(train_loader)), end='', flush=True)
-        inputs, labels = samples
+        inputs, labels, _ = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
 
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
         nll_loss = torch.nn.NLLLoss()(outputs, labels)
         
         activations = module.activations
@@ -209,38 +209,24 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
 
 def main():
-    # 数据集(dataset name)
-    data_name = 'cifar-100-lt-ir100'
-    # 模型名(model name)
-    model_list = [
-        # 'alexnetv3',
-        # 'alexnet',
-        # 'vgg16',
-        'resnet32',
-        # 'senet34',
-        # 'wideresnet28',
-        # 'resnext50',
-        # 'densenet121',
-        # 'simplenetv1',
-        # 'efficientnetv2s',
-        # 'googlenet',
-        # 'xception',
-        # 'mobilenetv2',
-        # 'inceptionv3',
-        # 'shufflenetv2',
-        # 'squeezenet',
-        # 'mnasnet'
-    ]
-    model_name = model_list[0]
-    model_layers = [-1]
+    import argparse
+    import shutil
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_name', type=str, default='cifar-10-lt-ir10')
+    parser.add_argument('--model_name', type=str, default='resnet32')
+    parser.add_argument('--model_path', type=str, default='/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_00-25-40/best-model-acc0.8749.pth')
+    parser.add_argument('--model_layers', default='[-1]')
+    
+    args = parser.parse_args()
+    
+    data_name    = args.data_name
+    model_name   = args.model_name
+    model_path   = args.model_path
+    model_layers = eval(args.model_layers)
+    model_layers = [model_layers] if isinstance(model_layers, int) else model_layers  # to list
     epoch = 0  # best weight
 
-    # 模型路径(model path)
-    model_path = os.path.join(
-        config.model_pretrained, 
-        f"{model_name}-{data_name}-refl-th-0.5",
-        "checkpoint.pth"
-    )
     if not os.path.exists(model_path):
         print("-" * 79, "\n ERROR, the model path does not exist")
         return
@@ -248,48 +234,23 @@ def main():
     print("-" * 79, "\n model_path:", model_path)
 
     # 保存结果路径(the channel mask path)
-    result_path = os.path.join(
-        config.result_channels, 
-            config.result_channels, 
-        config.result_channels, 
-            config.result_channels, 
-        config.result_channels, 
-        f"{model_name}-{data_name}-refl-th-0.5"
-    )
+    result_path = os.path.join(config.result_channels, f"{model_name}-{data_name}")
+    
+    # 删除以前的结果(remove previous result)
+    if os.path.exists(result_path):
+        shutil.rmtree(result_path)
 
     if not os.path.exists(result_path):
         os.makedirs(result_path)
     
     print("-" * 79, "\n result_path:", result_path)
-    # return  # for test
 
-    readme_file_path = os.path.join(result_path, "README.MD")
-    with open(readme_file_path, 'w') as readme_file:
-        readme_file.write("倒数第一层卷积层")
+    # readme_file_path = os.path.join(result_path, "README.MD")
+    # with open(readme_file_path, 'w') as readme_file:
+    #     readme_file.write("卷积层")
     
 
     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
-
-    # 对不同 epoch 生成 channel mask 文件
-    # for epoch in range(0, 201, 5):
-    #     # 2021-12-25 modify
-    #     # 预训练模型
-    #     model_path = os.path.join(
-    #         config.model_pretrained, 
-    #         "resnet50-cifar-10-prune",
-    #         f'checkpoint-{epoch}.pth'
-    #     )
-    #     print("model_path:", model_path)
-    
-    #     result_path = os.path.join(
-    #         config.result_channels, 
-    #         "resnet50-cifar-10-prune-ztd"
-    #     )
-
-    #     if not os.path.exists(result_path):
-    #         os.makedirs(result_path)
-
-    #     sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
 
 if __name__ == '__main__':
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
