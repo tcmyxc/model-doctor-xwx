@@ -1,3 +1,6 @@
+"""
+筛选高置信度或者低置信度图片
+"""
 import sys
 import os
 import torch
@@ -8,6 +11,7 @@ import loaders
 import models
 from configs import config
 from utils import file_util
+import shutil
 
 
 class ImageSift:
@@ -58,11 +62,13 @@ class ImageSift:
                         self.nums[label] += 1
 
     def save_image(self, dataset_root, result_path):
+        """保存图片到result_path"""
         # print(self.scores)
         # print(self.nums)
 
         # 训练集
         image_dir = os.path.join(dataset_root, 'train')
+        print(f"[INFO] image dir: {image_dir}", flush=True)
 
         class_names = sorted([d.name for d in os.scandir(image_dir) if d.is_dir()])
 
@@ -97,6 +103,7 @@ def sift_image(data_name, model_name, model_path, result_path):
     # data，训练集
     data_loader, _ = loaders.load_data(data_name=data_name, data_type='train')
 
+    # 筛选高信度图片
     image_sift = ImageSift(class_nums=cfg['model']['num_classes'],
                            image_nums=20,
                            is_high_confidence=True)
@@ -112,17 +119,45 @@ def sift_image(data_name, model_name, model_path, result_path):
         image_sift(outputs=outputs, labels=labels, names=names)
 
     print('\n', end='', flush=True)
-    image_sift.save_image(config.data_cifar10, result_path)  # 保存图片
+    
+    # 数据集根路径(dataset root path)
+    if data_name == 'cifar-10-lt-ir10':
+        dataset_root = config.data_cifar10_lt_ir10
+    elif data_name == 'cifar-10-lt-ir100':
+        dataset_root = config.data_cifar10_lt_ir100
+    elif data_name == 'cifar-100-lt-ir10':
+        dataset_root = config.data_cifar100_lt_ir10
+    elif data_name == 'cifar-100-lt-ir50':
+        dataset_root = config.data_cifar100_lt_ir50
+    elif data_name == 'cifar-100-lt-ir100':
+        dataset_root = config.data_cifar100_lt_ir100
+        
+    image_sift.save_image(dataset_root, result_path)  # 保存图片
 
 
 def main():
-    data_name = 'cifar-10'
-    model_name = 'resnet32'
-
-    model_path = "/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10/lr0.01/cosine_lr_scheduler/ce_loss/best-model.pth"
-    result_path = "/nfs/xwx/model-doctor-xwx/output/result/resnet32-cifar-10/high"
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_name', type=str, default='cifar-10-lt-ir100')
+    parser.add_argument('--model_name', type=str, default='resnet32')
+    parser.add_argument('--model_path', type=str, default='')
+    parser.add_argument('--image_type', type=str, default='high')
+    parser.add_argument('--result_path', type=str, 
+                        default='/nfs/xwx/model-doctor-xwx/output/result')
     
-   
+    args = parser.parse_args()
+    
+    data_name   = args.data_name
+    model_name  = args.model_name
+    model_path  = args.model_path
+    image_type  = args.image_type
+    result_path = f"{args.result_path}/{model_name}-{data_name}/{image_type}"
+    print(f"[INFO] result_path: {result_path}", flush=True)
+    
+    # 删除以前的结果(remove previous result)
+    if os.path.exists(result_path):
+        shutil.rmtree(result_path)
+    
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
