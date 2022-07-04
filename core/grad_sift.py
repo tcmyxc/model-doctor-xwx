@@ -57,7 +57,7 @@ class GradSift:
     def sum_channel(self, result_path, model_layer, epoch):
         # print(self.scores)
         # print(self.nums)
-        flag = 1
+        flag = 2
         if flag == 1:
             # 原始模型医生
             grads = torch.abs(self.grads) # grads : (B, C, H, W)
@@ -156,7 +156,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
     # grad
     module = HookModule(model=model, module=models.load_modules(model, model_name, model_layers)[0]) # 指定layer加入hook
-    grad_sift = GradSift(class_nums=cfg['model']['num_classes'], grad_nums=100)  # 每个类别T个sample，对应grad_nums
+    grad_sift = GradSift(class_nums=cfg['model']['num_classes'], grad_nums=20)  # 每个类别T个sample，对应grad_nums
 
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
