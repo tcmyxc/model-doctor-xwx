@@ -436,6 +436,9 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar-10-lt-ir10
     - lr1e-1, custom
         - ce: 87.49
+            - lr1e-3, custom, ce: 88.69 (+1.2)
+            - lr1e-2, custom, ce: 88.76 (+1.27)
+            - lr1e-1, custom, ce: 86.42 (epoch 1)
         - fl: 86.34
         - refl: 86.80
 
