@@ -436,8 +436,8 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar-10-lt-ir10
     - lr1e-1, custom
         - ce: 87.49
-            - lr1e-3, custom, ce: 88.69 (+1.2)
-            - lr1e-2, custom, ce: 88.76 (+1.27)
+            - lr1e-3, custom, ce: 88.69 (+1.2) 88.75
+            - lr1e-2, custom, ce: 88.76 (+1.27) 88.69
             - lr1e-1, custom, ce: 86.42 (epoch 1)
         - fl: 86.34
         - refl: 86.80
@@ -445,12 +445,18 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar-10-lt-ir100
     - lr1e-1, custom
         - ce: 72.94
+            - lr1e-3, custom, ce: 74.79
+            - lr1e-2, custom, ce: 75.67
         - fl: 71.37
         - refl: 73.43 
+
 
 - cifar-100-lt-ir10
     - lr1e-1, custom
         - ce: 59.22
+            - 修改前5%
+            - lr1e-3, custom, ce: 59.25
+            - lr1e-2, custom, ce: 58.89
         - fl: 57.70
         - refl: 58.52
 
@@ -458,11 +464,17 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar-100-lt-ir50
     - lr1e-1, custom
         - ce: 45.47
+            - 修改前5%
+            - lr1e-3, custom, ce: 46.02
+            - lr1e-2, custom, ce: 45.92
         - fl: 44.47
         - refl: 44.77
 
 - cifar-100-lt-ir100
     - lr1e-1, custom
         - ce: 39.12
+            - 修改前5%
+            - lr1e-3, custom, ce: 39.97
+            - lr1e-2, custom, ce: 40.03
         - fl: 40.59
         - refl: 39.19
