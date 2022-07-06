@@ -5,8 +5,10 @@ from loaders.cifar100_loader import load_images as load_cifar100_images
 from loaders.imagenet_lt_loader import load_images as load_imagenet_lt_images
 from loaders.imagenet_lt_loader import load_class_balanced_imagenet_lt_images
 
-from loaders.cifar_lt_loader import load_cifar_lt_images
-from loaders.cifar_lt_loader import load_class_balanced_cifar_lt_images
+# from loaders.cifar_lt_loader import load_cifar_lt_images
+# from loaders.cifar_lt_loader import load_class_balanced_cifar_lt_images
+from loaders.imbalance_cifar import load_cifar_lt_images
+from loaders.imbalance_cifar import load_class_balanced_cifar_lt_images
 
 from loaders.inaturalist_data_loaders import load_images as load_inaturalist2018_images
 
