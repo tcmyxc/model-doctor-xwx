@@ -113,7 +113,7 @@ def draw_fc_weight_history(result_path, fc_weight_list):
     W = np.concatenate(fc_weight_list)
     W = W.reshape((num_epochs, -1))
 
-    plt.imshow(W, cmap='jet', vmin=0)
+    plt.imshow(W, cmap='jet')
     plt.colorbar()
     plt.xlabel('class ID sorted by cardinality')
     plt.ylabel('training epochs')
