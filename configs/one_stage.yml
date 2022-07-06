@@ -54,22 +54,6 @@ cifar-100-lt-ir100:
     momentum: 0.9
     weight_decay: 5e-4
 
-mini-imagenet:
-  model:
-    in_channels: 3
-    num_classes: 100
-  optimizer:
-    momentum: 0.9
-    weight_decay: 5e-4
-
-stl-10:
-  model:
-    in_channels: 3
-    num_classes: 10
-  optimizer:
-    momentum: 0.9
-    weight_decay: 5e-4
-
 imagenet-lt:
   model:
     in_channels: 3
