@@ -473,7 +473,7 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
                 - lr1e-2, custom, ce: 45.92
             - 修改前 10%
                 - lr1e-3, custom, ce: 46.34
-                - lr1e-2, custom, ce: 
+                - lr1e-2, custom, ce: 46.24
         - fl: 44.47
         - refl: 44.77
 
@@ -483,5 +483,8 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
             - 修改前5%
                 - lr1e-3, custom, ce: 39.97
                 - lr1e-2, custom, ce: 40.03
+            - 修改前 10%
+                - lr1e-3, custom, ce: 40.64
+                - lr1e-2, custom, ce: 40.49
         - fl: 40.59
         - refl: 39.19
