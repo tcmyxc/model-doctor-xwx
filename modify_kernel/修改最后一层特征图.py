@@ -27,7 +27,7 @@ from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
 from loss.hcl import hc_loss
-from modify_kernel.util.draw_util import draw_lr, draw_fc_weight
+from modify_kernel.util.draw_util import draw_lr, draw_fc_weight, draw_fc_weight_history
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
@@ -38,6 +38,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+from copy import deepcopy
 
 
 parser = argparse.ArgumentParser()
@@ -98,6 +99,7 @@ def main():
     kernels, head = get_head_and_kernel(channel_path, head_ratio)
     cfg["kernels"] = kernels
     cfg["head"] = head
+    cfg["fc_weights"] = []
     print_yml_cfg(cfg) # yml cfg
 
     # result path
@@ -174,7 +176,7 @@ def main():
         print("-" * 42)
 
         train(data_loaders["train"], model, loss_fn, optimizer, model_layers, device, cfg)
-        test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device)
+        test(data_loaders["val"], model, loss_fn, optimizer, scheduler, epoch, device, cfg)
         scheduler.step()
 
         draw_acc(g_train_loss, g_test_loss, g_train_acc, g_test_acc, result_path)
@@ -238,7 +240,7 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device, cfg):
     print(classification_report(y_train_list, y_pred_list, digits=4))
 
 
-def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
+def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device, cfg):
     global best_acc, g_test_loss, g_test_acc, result_path
     # 这里加入了 classification_report
     y_pred_list = []
@@ -275,6 +277,11 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
     g_test_loss.append(test_loss)
     correct /= size
     g_test_acc.append(correct)
+    
+    fc_weight = deepcopy(model.linear.weight.detach().cpu())
+    tmp = torch.linalg.norm(fc_weight, ord=2, dim=1).detach().numpy()
+    cfg["fc_weights"].append(tmp)
+    
     is_best = (correct > best_acc)
     if correct > best_acc:
         best_acc = correct
@@ -290,12 +297,13 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
         update_best_model(result_path, model_state, model_name)
         
         # 可视化分类头权重
-        fc_weight = model.linear.weight.detach().cpu().numpy()
-        draw_fc_weight(result_path, fc_weight)
+        draw_fc_weight(result_path, fc_weight.numpy())
 
     print(f"\n[INFO] Test Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+    
     draw_classification_report("test", result_path, y_train_list, y_pred_list, is_best)
+    draw_fc_weight_history(result_path, cfg["fc_weights"])
 
 
 def draw_acc(train_loss, test_loss, train_acc, test_acc, result_path):
