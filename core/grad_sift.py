@@ -134,7 +134,7 @@ def sift_channel(result_path, model_layer, epoch, threshold=None):  # high respo
 # ----------------------------------------
 # test
 # ----------------------------------------
-def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch):
+def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch, img_sample):
     # device
     device = torch.device('cuda:0')
 
@@ -156,7 +156,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
 
     # grad
     module = HookModule(model=model, module=models.load_modules(model, model_name, model_layers)[0]) # 指定layer加入hook
-    grad_sift = GradSift(class_nums=cfg['model']['num_classes'], grad_nums=20)  # 每个类别T个sample，对应grad_nums
+    grad_sift = GradSift(class_nums=cfg['model']['num_classes'], grad_nums=img_sample)  # 每个类别T个sample，对应grad_nums
 
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
@@ -217,12 +217,14 @@ def main():
     parser.add_argument('--model_name', type=str, default='resnet32')
     parser.add_argument('--model_path', type=str, default='/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_00-25-40/best-model-acc0.8749.pth')
     parser.add_argument('--model_layers', default='[-1]')
+    parser.add_argument('--img_sample', type=int, default='20')
     
     args = parser.parse_args()
     
     data_name    = args.data_name
     model_name   = args.model_name
     model_path   = args.model_path
+    img_sample   = args.img_sample
     model_layers = eval(args.model_layers)
     model_layers = [model_layers] if isinstance(model_layers, int) else model_layers  # to list
     epoch = 0  # best weight
@@ -250,7 +252,7 @@ def main():
     #     readme_file.write("卷积层")
     
 
-    sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch)
+    sift_grad(data_name, model_name, model_layers, model_path, result_path, epoch, img_sample)
 
 if __name__ == '__main__':
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
