@@ -1,25 +1,42 @@
 #!/bin/bash
 
-python3 ./one_stage.py \
-    --data_name cifar-100-lt-ir100 \
-    --num_classes 100 \
-    --model_name resnet32 \
-    --threshold 0.4 \
-    > cifar-100-lt-ir100-resnet32-th0.4.log &
-wait
-
-python3 ./one_stage.py \
-    --data_name cifar-100-lt-ir50 \
-    --num_classes 100 \
-    --model_name resnet32 \
-    --threshold 0.4 \
-    > cifar-100-lt-ir50-resnet32-th0.4.log &
-wait
-
-python3 ./one_stage.py \
+python3 /nfs/xwx/model-doctor-xwx/trainers/pure_cls_train.py \
     --data_name cifar-100-lt-ir10 \
-    --num_classes 100 \
-    --model_name resnet32 \
-    --threshold 0.4 \
-    > cifar-100-lt-ir10-resnet32-th0.4.log &
+    --lr 0.1 \
+    --lr_scheduler custom \
+    --loss_type ce \
+    > $(date "+%Y%m%d-%H%M%S").log
 wait
+
+python3 /nfs/xwx/model-doctor-xwx/trainers/pure_cls_train.py \
+    --data_name cifar-100-lt-ir50 \
+    --lr 0.1 \
+    --lr_scheduler custom \
+    --loss_type ce \
+    > $(date "+%Y%m%d-%H%M%S").log
+wait
+
+python3 /nfs/xwx/model-doctor-xwx/trainers/pure_cls_train.py \
+    --data_name cifar-100-lt-ir100 \
+    --lr 0.1 \
+    --lr_scheduler custom \
+    --loss_type ce \
+    > $(date "+%Y%m%d-%H%M%S").log
+wait
+
+python3 /nfs/xwx/model-doctor-xwx/trainers/pure_cls_train.py \
+    --data_name cifar-10-lt-ir10 \
+    --lr 0.1 \
+    --lr_scheduler custom \
+    --loss_type ce \
+    > $(date "+%Y%m%d-%H%M%S").log
+wait
+
+python3 /nfs/xwx/model-doctor-xwx/trainers/pure_cls_train.py \
+    --data_name cifar-10-lt-ir100 \
+    --lr 0.1 \
+    --lr_scheduler custom \
+    --loss_type ce \
+    > $(date "+%Y%m%d-%H%M%S").log
+wait
+
