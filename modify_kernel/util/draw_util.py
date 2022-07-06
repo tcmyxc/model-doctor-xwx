@@ -85,7 +85,7 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
 
 
 def draw_fc_weight(result_path, fc_weight):
-    """绘制 fc weight"""
+    """绘制fc weight"""
     
     np.save(os.path.join(result_path, "fc_weight.npy"), fc_weight)
 
@@ -102,4 +102,25 @@ def draw_fc_weight(result_path, fc_weight):
     plt.savefig(os.path.join(result_path, "fc_weight.png"))
     plt.clf()
     plt.close()
+    
+
+def draw_fc_weight_history(result_path, fc_weight_list):
+    """绘制 fc weight 变化情况"""
+    
+    np.save(os.path.join(result_path, "fc_weight_history.npy"), fc_weight_list)
+
+    num_epochs = len(fc_weight_list)
+    W = np.concatenate(fc_weight_list)
+    W = W.reshape((num_epochs, -1))
+
+    plt.imshow(W, cmap='jet', vmin=0)
+    plt.colorbar()
+    plt.xlabel('class ID sorted by cardinality')
+    plt.ylabel('training epochs')
+    plt.title('norms of per-class weights in the classifier')
+    
+    plt.savefig(os.path.join(result_path, "fc_weight_history.png"))
+    plt.clf()
+    plt.close()
+    
         

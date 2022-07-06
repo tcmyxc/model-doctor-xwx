@@ -20,17 +20,18 @@ from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
 from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
-    draw_classification_report, draw_fc_weight
+    draw_classification_report, draw_fc_weight, draw_fc_weight_history
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
 from utils.general import update_best_model
 
 import torch.nn as nn
+from copy import deepcopy
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_name', default='cifar-10-lt-ir100')
+parser.add_argument('--data_name', default='cifar-100-lt-ir100')
 parser.add_argument('--model_name', default='resnet32')
 parser.add_argument('--threshold', type=float, default='0.5')
 parser.add_argument('--lr', type=float, default='1e-2')
@@ -70,6 +71,7 @@ def main():
     cfg["g_train_acc"] = []
     cfg["g_test_loss"] = []
     cfg["g_test_acc"] = []
+    cfg["fc_weights"] = []
 
     lr = float(args.lr)
     momentum = cfg["optimizer"]["momentum"]
@@ -227,6 +229,10 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
     correct /= size
     cfg["g_test_acc"].append(correct)
 
+    fc_weight = deepcopy(model.linear.weight.detach().cpu())
+    tmp = torch.linalg.norm(fc_weight, ord=2, dim=1).detach().numpy()
+    cfg["fc_weights"].append(tmp)
+    
     if correct > cfg["best_acc"]:
         cfg["best_acc"] = correct
         print(f"\n[FEAT] Epoch {epoch+1}, update best acc:", correct)
@@ -239,13 +245,14 @@ def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
         }
         update_best_model(cfg, model_state, model_name)
         
-        # 可视化分类头权重
-        fc_weight = model.linear.weight.detach().cpu().numpy()
-        draw_fc_weight(cfg["result_path"], fc_weight)
+        # 可视化最好的epoch分类头权重
+        draw_fc_weight(cfg["result_path"], fc_weight.numpy())
         
     print(f"\nTest Error: Accuracy: {(100*correct):>0.2f}%, Avg loss: {test_loss:>8f} \n")
     print(classification_report(y_train_list, y_pred_list, digits=4))
+    
     draw_classification_report("test", cfg["result_path"], y_train_list, y_pred_list)
+    draw_fc_weight_history(cfg["result_path"], cfg["fc_weights"])
 
 
 
