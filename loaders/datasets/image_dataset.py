@@ -12,7 +12,7 @@ def _img_loader(path, mode='RGB'):
 
 def _find_classes(root):
     classes = [d.name for d in os.scandir(root) if d.is_dir()]
-    # classes.sort()
+    classes.sort()
     classes_indices = {classes[i]: i for i in range(len(classes))}
     # print(classes_indices)
     return classes, classes_indices  # 'class_name':index
@@ -61,5 +61,5 @@ class ImageDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dataset = ImageDataset(image_dir="/nfs/xwx/dataset/cifar100_lt_ir100/images/train")
+    dataset = ImageDataset(image_dir="/nfs/xwx/dataset/cifar100_lt_ir100/images/test")
     print(dataset[10])
