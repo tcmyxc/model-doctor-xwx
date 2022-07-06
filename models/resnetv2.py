@@ -36,15 +36,6 @@ from torch.autograd import Variable
 
 __all__ = ['ResNet', 'resnet20', 'resnet32', 'resnet44', 'resnet56', 'resnet110', 'resnet1202']
 
-class FeatureGRU(nn.Module):
-    def __init__(self, input_size, num_layers, batch_first=True) -> None:
-        super().__init__()
-        self.gru = nn.GRU(input_size, input_size, num_layers, batch_first=batch_first)
-    
-    def forward(self, x):
-        xn, _ = self.gru(x)
-        return xn
-
 
 class LambdaLayer(nn.Module):
     def __init__(self, lambd):
@@ -98,8 +89,6 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 32, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 64, num_blocks[2], stride=2)
         self.linear = nn.Linear(64, num_classes)
-
-        # self.gru = FeatureGRU(1, 1)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
