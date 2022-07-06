@@ -68,10 +68,6 @@ class IMBALANCECIFAR10(torchvision.datasets.CIFAR10):
             cls_num_list.append(self.num_per_cls_dict[i])
         return cls_num_list
     
-    def __getitem__(self, index):
-        img, target = super().__getitem__(index)
-
-        return img, target, target
 
 class IMBALANCECIFAR100(IMBALANCECIFAR10):
     """`CIFAR100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
@@ -216,7 +212,7 @@ if __name__ == '__main__':
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
 
-    for batch, (X, y, _) in enumerate(dataloader):
+    for batch, (X, y) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
         y_pred_list.extend(y.numpy())
     

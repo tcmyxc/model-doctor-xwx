@@ -161,7 +161,7 @@ def sift_grad(data_name, model_name, model_layers, model_path, result_path, epoc
     # forward
     for i, samples in enumerate(train_loader): # 对train_loader中所有数据进行预测
         print('\r[{}/{}]'.format(i+1, len(train_loader)), end='', flush=True)
-        inputs, labels, _ = samples
+        inputs, labels = samples
         inputs = inputs.to(device)
         labels = labels.to(device)
 

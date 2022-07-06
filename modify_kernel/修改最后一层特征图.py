@@ -196,7 +196,7 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device, cfg):
     num_batches = len(dataloader)
 
     model.train()
-    for batch, (X, y, _) in enumerate(dataloader):
+    for batch, (X, y) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
         X, y = X.to(device), y.to(device)
         
@@ -249,7 +249,7 @@ def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
-    for batch, (X, y, _) in enumerate(dataloader):
+    for batch, (X, y) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
 
         X, y = X.to(device), y.to(device)
