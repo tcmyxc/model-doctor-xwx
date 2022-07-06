@@ -101,8 +101,17 @@ def load_class_balanced_cifar_lt_images(data_type, dataset_name):
 
 
 if __name__ == '__main__':
-    train_loader, train_size = load_class_balanced_cifar_lt_images("train", "cifar-10-lt-ir100")
-    print(train_size)
-    for idx, (image, label) in enumerate(train_loader):
-        print("image:", image.size(), "\nlabel:", label.size())
-        break
+    from sklearn.metrics import classification_report
+    
+    dataloader, _ = load_cifar_lt_images("train", "cifar-100-lt-ir100")
+    y_pred_list = []
+    y_train_list = []
+    
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+
+    for batch, (X, y, _) in enumerate(dataloader):
+        y_train_list.extend(y.numpy())
+        y_pred_list.extend(y.numpy())
+    
+    print(classification_report(y_train_list, y_pred_list, digits=4))
