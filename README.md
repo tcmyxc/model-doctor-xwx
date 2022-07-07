@@ -435,16 +435,15 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 - cifar-10-lt-ir10
     - lr1e-1, custom
-        - ce: 87.49
+        - ce: 87.49 (87.68)
             - lr1e-3, custom, ce: 88.69 (+1.2) 88.75
             - lr1e-2, custom, ce: 88.76 (+1.27) 88.69
-            - lr1e-1, custom, ce: 86.42 (epoch 1)
         - fl: 86.34
         - refl: 86.80
 
 - cifar-10-lt-ir100
     - lr1e-1, custom
-        - ce: 72.94
+        - ce: 72.94 (73.45)
             - lr1e-3, custom, ce: 74.79
             - lr1e-2, custom, ce: 75.67
         - fl: 71.37
@@ -454,37 +453,37 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 - cifar100修改前30%基本上没效果
 - cifar-100-lt-ir10
     - lr1e-1, custom
-        - ce: 59.22
+        - ce: 59.22 (58.10)
             - 修改前 5%
                 - lr1e-3, custom, ce: 59.25
                 - lr1e-2, custom, ce: 58.89
             - 修改前 10%
-                - lr1e-3, custom, ce: 59.27
-                - lr1e-2, custom, ce: 58.70
+                - lr1e-3, custom, ce: 59.27 (58.23)
+                - lr1e-2, custom, ce: 58.70 (57.78)
         - fl: 57.70
         - refl: 58.52
 
 
 - cifar-100-lt-ir50
     - lr1e-1, custom
-        - ce: 45.47
+        - ce: 45.47 (45.24)
             - 修改前5%
                 - lr1e-3, custom, ce: 46.02
                 - lr1e-2, custom, ce: 45.92
             - 修改前 10%
-                - lr1e-3, custom, ce: 46.34
-                - lr1e-2, custom, ce: 46.24
+                - lr1e-3, custom, ce: 46.34 (45.98)
+                - lr1e-2, custom, ce: 46.24 (45.88)
         - fl: 44.47
         - refl: 44.77
 
 - cifar-100-lt-ir100
     - lr1e-1, custom
-        - ce: 39.12
+        - ce: 39.12 (40.35)
             - 修改前5%
                 - lr1e-3, custom, ce: 39.97
                 - lr1e-2, custom, ce: 40.03
             - 修改前 10%
-                - lr1e-3, custom, ce: 40.64
-                - lr1e-2, custom, ce: 40.49
+                - lr1e-3, custom, ce: 40.64 (41.91)
+                - lr1e-2, custom, ce: 40.49 (42.06)
         - fl: 40.59
         - refl: 39.19
