@@ -11,7 +11,8 @@ def _img_loader(path, mode='RGB'):
 
 
 def _find_classes(root):
-    classes = [d.name for d in os.scandir(root) if d.is_dir()]
+    # eval 是将cifar数据集目录中的类别字符串转为数字
+    classes = [eval(d.name) for d in os.scandir(root) if d.is_dir()]
     classes.sort()
     classes_indices = {classes[i]: i for i in range(len(classes))}
     # print(classes_indices)
@@ -25,7 +26,7 @@ def _make_dataset(image_dir):
 
     for class_name in sorted(class_names):
         class_idx = class_indices[class_name]
-        target_dir = os.path.join(image_dir, class_name)
+        target_dir = os.path.join(image_dir, str(class_name))
 
         if not os.path.isdir(target_dir):
             continue
@@ -53,8 +54,8 @@ class ImageDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image, target, name
-        # return image, target
+        # return image, target, name
+        return image, target
 
     def __len__(self):
         return len(self.samples)
