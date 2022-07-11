@@ -35,7 +35,8 @@ cifar-100-lt-ir10:
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
-  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_21-16-55/best-model-acc0.5810.pth
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-11_19-27-32/best-model-acc0.5903.pth
+  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_21-16-55/best-model-acc0.5810.pth
   # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_02-13-11/best-model-acc0.5922.pth
     
 cifar-100-lt-ir50:
@@ -48,7 +49,8 @@ cifar-100-lt-ir50:
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
-  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir50/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_21-51-12/best-model-acc0.4524.pth
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir50/lr0.1/custom_lr_scheduler/ce_loss/2022-07-11_20-34-40/best-model-acc0.4506.pth
+  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir50/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_21-51-12/best-model-acc0.4524.pth
   # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir50/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_03-14-39/best-model-acc0.4547.pth
 
 cifar-100-lt-ir100:
@@ -61,5 +63,6 @@ cifar-100-lt-ir100:
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
-  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir100/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_22-19-48/best-model-acc0.4035.pth
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir100/lr0.1/custom_lr_scheduler/ce_loss/2022-07-11_21-31-10/best-model-acc0.4096.pth
+  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir100/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_22-19-48/best-model-acc0.4035.pth
   # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-100-lt-ir100/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_04-04-08/best-model-acc0.3912.pth
