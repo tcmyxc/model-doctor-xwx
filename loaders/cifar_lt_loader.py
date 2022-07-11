@@ -110,7 +110,7 @@ if __name__ == '__main__':
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
 
-    for batch, (X, y, _) in enumerate(dataloader):
+    for batch, (X, y) in enumerate(dataloader):
         y_train_list.extend(y.numpy())
         y_pred_list.extend(y.numpy())
     
