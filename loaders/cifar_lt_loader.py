@@ -12,6 +12,7 @@ from loaders.ClassAwareSampler import get_sampler
 
 
 def load_cifar_lt_images(data_type, dataset_name):
+    print("load cifar dataset from image dir\n", flush=True)
     assert data_type in ['train', 'test']
 
     if dataset_name == "cifar-10-lt-ir10":
