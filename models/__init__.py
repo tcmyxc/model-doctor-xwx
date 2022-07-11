@@ -151,7 +151,7 @@ def load_modules(model, model_name, model_layers):
             27: model.layer3[3].conv2,
             28: model.layer3[4].conv1,
             29: model.layer3[4].conv2,
-            # -1: model.layer3[4].conv2,
+            -1: model.layer3[4].conv2,
         }
     elif model_name == 'resnet34':
         module_modules = {
