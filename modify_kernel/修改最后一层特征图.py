@@ -100,6 +100,7 @@ def main():
     print(f"\n[INFO] channel_path: {channel_path}")
     head_ratio = get_head_ratio(data_name)
     kernels, head = get_head_and_kernel(channel_path, head_ratio)
+    print("kernels len:", len(kernels))
     cfg["kernels"] = kernels
     cfg["head"] = head
     cfg["fc_weights"] = []
