@@ -50,6 +50,9 @@ parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
 parser.add_argument('--gpu_id', type=str, default='0')
+parser.add_argument('--head_ratio', type=float, default='0.3')
+parser.add_argument('--modify_feature', action="store_true")
+
 
 # global config
 best_acc = 0
