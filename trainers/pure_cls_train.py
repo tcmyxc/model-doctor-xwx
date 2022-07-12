@@ -19,6 +19,7 @@ from utils.time_util import print_time, get_current_time
 from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
+from loss.bsl import balanced_softmax_loss
 from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
     draw_classification_report, draw_fc_weight, draw_fc_weight_history
 from modify_kernel.util.cfg_util import print_yml_cfg
@@ -28,6 +29,7 @@ from utils.general import update_best_model
 
 import torch.nn as nn
 from copy import deepcopy
+import numpy as np
 
 
 parser = argparse.ArgumentParser()
@@ -38,7 +40,7 @@ parser.add_argument('--lr', type=float, default='1e-2')
 parser.add_argument('--data_loader_type', type=int, default='0', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
-parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
+parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl', 'bsl']")
 
 
 def main():
@@ -80,7 +82,7 @@ def main():
     print(f"\n[INFO] total epoch: {epochs}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 42, '\n[Info] use device:', device)
 
@@ -107,6 +109,9 @@ def main():
         loss_fn = focal_loss
     elif args.loss_type == "refl":
         loss_fn = partial(reduce_equalized_focal_loss, threshold=args.threshold)
+    elif args.loss_type == "bsl":
+        sample_per_class = np.load(cfg["sample_per_class_path"])
+        loss_fn = partial(balanced_softmax_loss, sample_per_class=sample_per_class)
     
     # optimizer
     optimizer = optim.SGD(
@@ -197,6 +202,7 @@ def train(dataloader, model, loss_fn, optimizer, device, cfg):
 
 
 def test(dataloader, model, loss_fn, optimizer, epoch, device, args, cfg):
+    loss_fn = nn.CrossEntropyLoss()
     model_name = args.model_name
     # 这里加入了 classification_report
     y_pred_list = []

@@ -21,6 +21,7 @@ cifar-10-lt-ir100:
   optimizer:
     momentum: 0.9
     weight_decay: 2e-4
+  sample_per_class_path: /nfs/xwx/model-doctor-xwx/configs/sample_per_class/cifar-10-lt-ir100.npy
     
 cifar-100:
   model:
