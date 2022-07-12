@@ -522,7 +522,25 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-1, custom
         - ce: 40.96
             - 修改前 30%
-                - lr1e-2, custom, ce: 41.88
-                - lr1e-3, custom, ce: 
+                - lr1e-2
+                    - custom, ce: 41.88
+                    - cosine, ce, 只训练分类头
+                        - 10 epoch: 40.83
+
+                - lr1e-3
+                    - custom, ce: 
+                - lr1e-1
+                    - cosine, ce, 只训练分类头
+                        - 10 epoch: 41.09 (epoch 1)
         - fl: 
         - refl: 
+
+
+# 训练更强的baseline
+
+- cifar-10-lt-ir100
+    - lr1e-1, custom
+        - bsl: 77.28
+        - cbl:
+        - ce:
+        - fl:
