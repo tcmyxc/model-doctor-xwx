@@ -21,8 +21,8 @@ cifar-10-lt-ir10:
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
-  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_22-45-03/best-model-acc0.8768.pth
-  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_00-25-40/best-model-acc0.8749.pth
+  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-06_22-45-03/best-model-acc0.8768.pth
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir10/lr0.1/custom_lr_scheduler/ce_loss/2022-07-01_00-25-40/best-model-acc0.8749.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
 
 cifar-100-lt-ir10:
