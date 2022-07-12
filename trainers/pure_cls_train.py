@@ -20,6 +20,7 @@ from sklearn.metrics import classification_report
 from loss.refl import reduce_equalized_focal_loss
 from loss.fl import focal_loss
 from loss.bsl import balanced_softmax_loss
+from loss.cbl import CB_loss
 from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
     draw_classification_report, draw_fc_weight, draw_fc_weight_history
 from modify_kernel.util.cfg_util import print_yml_cfg
@@ -40,7 +41,7 @@ parser.add_argument('--lr', type=float, default='1e-2')
 parser.add_argument('--data_loader_type', type=int, default='0', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
-parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl', 'bsl']")
+parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl', 'bsl', 'cbl']")
 
 
 def main():
@@ -112,6 +113,16 @@ def main():
     elif args.loss_type == "bsl":
         sample_per_class = np.load(cfg["sample_per_class_path"])
         loss_fn = partial(balanced_softmax_loss, sample_per_class=sample_per_class)
+    elif args.loss_type == "cbl":
+        sample_per_class = np.load(cfg["sample_per_class_path"])
+        loss_fn = partial(CB_loss,
+                          samples_per_cls=sample_per_class, 
+                          no_of_classes=cfg["model"]["num_classes"], 
+                          loss_type="softmax", 
+                          beta=0.9999, 
+                          gamma=2, 
+                          device=device
+                          )
     
     # optimizer
     optimizer = optim.SGD(
