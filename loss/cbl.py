@@ -52,7 +52,7 @@ def focal_loss(labels, logits, alpha, gamma):
 
 
 
-def CB_loss(labels, logits, samples_per_cls, no_of_classes, loss_type, beta, gamma, device):
+def CB_loss(logits, labels, samples_per_cls, no_of_classes, loss_type, beta, gamma, device):
     """Compute the Class Balanced Loss between `logits` and the ground truth `labels`.
 
     Class Balanced Loss: ((1-beta)/(1-beta^n))*Loss(labels, logits)
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     gamma = 2.0
     samples_per_cls = [2,3,1,2,2]
     loss_type = "focal"
-    cb_loss = CB_loss(labels, logits, samples_per_cls, no_of_classes,loss_type, beta, gamma)
+    cb_loss = CB_loss(logits, labels,samples_per_cls, no_of_classes,loss_type, beta, gamma)
     print(cb_loss)
