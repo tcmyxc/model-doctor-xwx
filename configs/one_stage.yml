@@ -12,7 +12,7 @@ cifar-10-lt-ir10:
     num_classes: 10
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 2e-4
 
 cifar-10-lt-ir100:
   model:
@@ -20,7 +20,7 @@ cifar-10-lt-ir100:
     num_classes: 10
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 2e-4
     
 cifar-100:
   model:
@@ -36,7 +36,7 @@ cifar-100-lt-ir10:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
 
 cifar-100-lt-ir50:
   model:
@@ -44,7 +44,7 @@ cifar-100-lt-ir50:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
 
 cifar-100-lt-ir100:
   model:
@@ -52,7 +52,7 @@ cifar-100-lt-ir100:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
 
 imagenet-lt:
   model:
