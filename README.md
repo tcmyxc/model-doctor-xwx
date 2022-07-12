@@ -435,15 +435,15 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 - cifar-10-lt-ir10
     - lr1e-1, custom
-        - ce: 87.49 (87.68)
-            - lr1e-3, custom, ce: 88.69 (+1.2) 88.75, 88.15
-            - lr1e-2, custom, ce: 88.76 (+1.27) 88.69
+        - ce: 87.49
+            - lr1e-3, custom, ce: 88.69 (+1.2) 
+            - lr1e-2, custom, ce: 88.76 (+1.27) 
         - fl: 86.34
         - refl: 86.80
 
 - cifar-10-lt-ir100
     - lr1e-1, custom
-        - ce: 72.94 (73.45)
+        - ce: 72.94
             - lr1e-3, custom, ce: 74.79
             - lr1e-2, custom, ce: 75.67
         - fl: 71.37
@@ -499,27 +499,11 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 # 2022年7月11日的预训练模型
 
-- cifar-10-lt-ir10
-    - lr1e-1, custom
-        - ce: 
-            - lr1e-3, custom, ce: 
-            - lr1e-2, custom, ce: 
-        - fl: 
-        - refl: 
-
-- cifar-10-lt-ir100
-    - lr1e-1, custom
-        - ce: 
-            - lr1e-3, custom, ce: 
-            - lr1e-2, custom, ce: 
-        - fl: 
-        - refl:  
-
 - cifar-100-lt-ir10
     - lr1e-1, custom
         - ce: 59.03
             - 修改前 30%
-                - lr1e-2, custom, ce: 
+                - lr1e-2, custom, ce: 57.77
                 - lr1e-3, custom, ce: 
         - fl: 
         - refl: 
@@ -529,7 +513,7 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-1, custom
         - ce: 45.06
             - 修改前 30%
-                - lr1e-2, custom, ce: 
+                - lr1e-2, custom, ce: 46.36
                 - lr1e-3, custom, ce: 
         - fl: 
         - refl: 
@@ -538,7 +522,7 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
     - lr1e-1, custom
         - ce: 40.96
             - 修改前 30%
-                - lr1e-2, custom, ce: 
+                - lr1e-2, custom, ce: 41.88
                 - lr1e-3, custom, ce: 
         - fl: 
         - refl: 
