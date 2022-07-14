@@ -4,12 +4,14 @@ cifar-10-lt-ir100:
     num_classes: 10
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 2e-4
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
-  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth
+  pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir100/lr0.1/custom_lr_scheduler/bsl_loss/2022-07-12_16-04-15/best-model-acc0.7728.pth
+  # pretrained_model_path: /nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32-cifar-10-lt-ir100-refl-th-0.4-wr/checkpoint.pth
   kernel_dict_path: /nfs/xwx/model-doctor-xwx/modify_kernel/kernel_dict
+  sample_per_class_path: /nfs/xwx/model-doctor-xwx/configs/sample_per_class/cifar-10-lt-ir100.npy
 
 cifar-10-lt-ir10:
   model:
@@ -17,7 +19,7 @@ cifar-10-lt-ir10:
     num_classes: 10
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 2e-4
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
@@ -31,7 +33,7 @@ cifar-100-lt-ir10:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
@@ -45,7 +47,7 @@ cifar-100-lt-ir50:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
@@ -59,7 +61,7 @@ cifar-100-lt-ir100:
     num_classes: 100
   optimizer:
     momentum: 0.9
-    weight_decay: 5e-4
+    weight_decay: 1e-3
   model_name: resnet32
   model_layers: 30
   # 预训练模型路径
