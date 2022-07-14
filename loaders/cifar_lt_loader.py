@@ -7,6 +7,8 @@ from loaders.datasets import image_mask_transforms as im_transforms
 from loaders.datasets.image_dataset import ImageDataset
 from loaders.datasets.image_mask_dataset import ImageMaskDataset
 
+from loaders.auto_aug import CIFAR10Policy, Cutout
+
 # sampler
 from loaders.ClassAwareSampler import get_sampler
 
@@ -27,23 +29,24 @@ def load_cifar_lt_images(data_type, dataset_name):
         image_dir = os.path.join(config.data_cifar100_lt_ir100, data_type)
     
     if data_type == 'train':
-        data_set = ImageDataset(image_dir=image_dir,
-                                transform=transforms.Compose([
-                                    transforms.RandomCrop(32, padding=4),
-                                    transforms.RandomHorizontalFlip(),
-                                    transforms.ToTensor(),
-                                    transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                         (0.2023, 0.1994, 0.2010)),
-
-                                ]))
+        data_set = ImageDataset(
+            image_dir=image_dir,
+            transform=transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ])
+        )
 
     else:
-        data_set = ImageDataset(image_dir=image_dir,
-                                transform=transforms.Compose([
-                                    transforms.ToTensor(),
-                                    transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                                         (0.2023, 0.1994, 0.2010)),
-                                ]))
+        data_set = ImageDataset(
+            image_dir=image_dir,
+            transform=transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ])
+        )
 
     data_loader = DataLoader(dataset=data_set,
                              batch_size=128,
