@@ -115,9 +115,9 @@ def draw_fc_weight_history(result_path, fc_weight_list):
 
     plt.imshow(W, cmap='jet')
     plt.colorbar()
-    plt.xlabel('class ID sorted by cardinality')
+    plt.xlabel('class ID')
     plt.ylabel('training epochs')
-    plt.title('norms of per-class weights in the classifier')
+    # plt.title('norms of per-class weights in the classifier')
     
     plt.savefig(os.path.join(result_path, "fc_weight_history.png"))
     plt.clf()
