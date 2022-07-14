@@ -42,6 +42,7 @@ parser.add_argument('--data_loader_type', type=int, default='0', help='0 is defa
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
 parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl', 'bsl', 'cbl']")
+parser.add_argument('--gpu_id', type=str, default='0')
 
 
 def main():
@@ -83,7 +84,7 @@ def main():
     print(f"\n[INFO] total epoch: {epochs}")
 
     # device
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('-' * 42, '\n[Info] use device:', device)
 
