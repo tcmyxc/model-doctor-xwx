@@ -39,6 +39,10 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from copy import deepcopy
+import pandas as pd
+
+from loss.bsl import balanced_softmax_loss
+from loss.cbl import CB_loss
 
 
 parser = argparse.ArgumentParser()
@@ -48,7 +52,7 @@ parser.add_argument('--lr', type=float, default='1e-1')
 parser.add_argument('--data_loader_type', type=int, default='0', help='0 is default, 1 for cbs')
 parser.add_argument('--epochs', type=int, default='200')
 parser.add_argument('--lr_scheduler', type=str, default='cosine', help="choose from ['cosine', 'custom', 'constant']")
-parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl']")
+parser.add_argument('--loss_type', type=str, default='ce', help="choose from ['ce', 'fl', 'refl', 'bsl', 'cbl']")
 parser.add_argument('--gpu_id', type=str, default='0')
 parser.add_argument('--head_ratio', type=float, default='0.3')
 parser.add_argument('--modify_feature', action="store_true")
@@ -135,6 +139,17 @@ def main():
     model.load_state_dict(torch.load(model_path)["model"])
     model.to(device)
     
+    # 冻结特征层参数
+    for param in model.parameters():
+        param.requires_grad = False
+        
+    for param in model.linear.parameters():
+        param.requires_grad = True
+    for param in model.layer3.parameters():
+        param.requires_grad = True
+    
+    parameters = [p for p in model.parameters() if p.requires_grad]
+    
 
     # loss
     if args.loss_type == "ce":
@@ -143,10 +158,24 @@ def main():
         loss_fn = focal_loss
     elif args.loss_type == "refl":
         loss_fn = partial(reduce_equalized_focal_loss, threshold=threshold)
+    elif args.loss_type == "bsl":
+        sample_per_class = np.load(cfg["sample_per_class_path"])
+        loss_fn = partial(balanced_softmax_loss, sample_per_class=sample_per_class)
+    elif args.loss_type == "cbl":
+        sample_per_class = np.load(cfg["sample_per_class_path"])
+        loss_fn = partial(CB_loss,
+                          samples_per_cls=sample_per_class, 
+                          no_of_classes=cfg["model"]["num_classes"], 
+                          loss_type="softmax", 
+                          beta=0.9999, 
+                          gamma=2, 
+                          device=device
+                          )
 
     # optimizer
     optimizer = optim.SGD(
-        params=model.parameters(),
+        # params=model.parameters(),
+        params=parameters,
         lr=lr,
         momentum=momentum,
         weight_decay=weight_decay,
@@ -245,6 +274,7 @@ def train(dataloader, model, loss_fn, optimizer, model_layers, device, cfg):
 
 
 def test(dataloader, model, loss_fn, optimizer, scheduler, epoch, device, cfg):
+    loss_fn = nn.CrossEntropyLoss()
     global best_acc, g_test_loss, g_test_acc, result_path
     # 这里加入了 classification_report
     y_pred_list = []
@@ -356,6 +386,9 @@ def draw_classification_report(mode_type, result_path, y_train_list, y_pred_list
     # 如果得到了更好的模型，再绘制每个类别的ACC变化曲线
     if is_best:
         draw_cls_test_acc(labels, accs, result_path)
+        # 将最好的结果保存到excel文件
+        df = pd.DataFrame(reports).transpose()
+        df.to_excel(os.path.join(result_path, "classification_report.xlsx"))
 
     plt.plot(labels, accs)
     plt.title("Acc of each class")
