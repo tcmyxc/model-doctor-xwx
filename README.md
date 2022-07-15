@@ -540,7 +540,57 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
 - cifar-10-lt-ir100
     - lr1e-1, custom
-        - bsl: 77.28
-        - cbl:
-        - ce:
-        - fl:
+        - bsl:  77.28
+            - lr1e-1, custom, bsl: 76.18 (epoch 1)
+            - lr1e-2, custom, bsl: 77.83
+            - lr1e-3, custom, bsl: 77.04 (epoch 1)
+
+            - lr1e-1, cosine, bsl, all:
+                - epoch 10: 78.26, 78.26, 78.26
+
+            - lr1e-1, cosine, bsl, linear: 
+                - epoch 10: 78.04, 78.04, 78.04
+
+            - lr1e-1, cosine, bsl, linear+layer3: 
+                - epoch 10:  78.61, 78.61, 78.61
+                - epoch 20:  78.77, 78.77
+                - epoch 30:  78.85
+                - epoch 40:  79.11
+                - epoch 50:  79.19
+                - epoch 60:  78.96
+                - epoch 70:  78.65
+                - epoch 80:  78.36
+                - epoch 90:  78.69
+                - epoch 100: 78.22
+                - epoch 110: 78.91
+                - epoch 120: 78.02
+                - epoch 130: 77.59
+                - epoch 140: 78.13
+                - epoch 150: 77.94
+                - epoch 160: 77.89
+                - epoch 170: 77.75
+                - epoch 180: 78.27
+                - epoch 190: 77.83
+                - epoch 200: 77.33
+        
+        - cbl:  73.95
+        - ce:   70.46
+        - fl:   73.50
+        - refl: 70.99
+
+        - bsl+auto_aug: 82.45
+            - lr1e-1, cosine, bsl, linear+layer3: 
+                - epoch 10: 74.93 (一路下降)
+            
+            - lr1e-1, custom, bsl: 80.76 (epoch 1)
+            - lr1e-2, custom, bsl: 82.84
+            - lr1e-3, custom, bsl: 83.18
+
+            - lr1e-1, cosine, bsl: 69.89 (epoch 1)
+            - lr1e-2, cosine, bsl: 
+            - lr1e-3, cosine, bsl: 
+
+            - 在预训练模型基础上重新训练, 只修改学习率, 其余配置不变
+                - lr1e-1: 
+                - lr1e-2: 
+                - lr1e-3: 
