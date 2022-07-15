@@ -31,3 +31,4 @@ result_channels      = output_result + '/channels'
 # model
 output_model = output_dir + '/model'
 model_pretrained = output_model + '/pretrained'
+model_retrain = output_model + '/retrain'
