@@ -588,9 +588,8 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
 
             - lr1e-1, cosine, bsl: 69.89 (epoch 1)
             - lr1e-2, cosine, bsl: 82.89
-            - lr1e-3, cosine, bsl: 
+            - lr1e-3, cosine, bsl: 83.23
 
             - 在预训练模型基础上重新训练, 配置不变: 83.88
             - 在预训练模型基础上重新训练, 只修改学习率, 其余配置不变
-                - lr1e-2: 
-                - lr1e-3: 
+                - lr1e-2: 83.47
