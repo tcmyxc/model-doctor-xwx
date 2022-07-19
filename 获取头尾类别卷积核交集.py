@@ -4,10 +4,11 @@ sys.path.append('/nfs/xwx/model-doctor-xwx')
 from utils.general import get_head_and_kernel
 np.set_printoptions(linewidth=100000)
 
-channel_path = "/nfs/xwx/model-doctor-xwx/output/result/channels/resnet32-cifar-10-lt-ir10/channels_-1.npy"
+channel_path = "/nfs/xwx/model-doctor-xwx/output/result/channels/resnet32-cifar-100-lt-ir100/channels_-1.npy"
+# channel_path = "/nfs/xwx/model-doctor-xwx/output/result/channels/resnet32-cifar-100-lt-ir100-img_num-20/channels_-1.npy"
 
 modify_dict = np.load(channel_path)
-cls_num = int(len(modify_dict) * 0.3)
+cls_num = int(len(modify_dict) * 0.1)
     
 head_sum = np.sum(modify_dict[:cls_num], axis=0)
 head_sum = np.where(head_sum > 0, 1, 0)
@@ -23,5 +24,5 @@ for idx, val in enumerate(kernel):
         modify_kernel.append(idx)
 
 print(modify_kernel, len(modify_kernel))
-print(get_head_and_kernel(channel_path))
+# print(get_head_and_kernel(channel_path))
 
