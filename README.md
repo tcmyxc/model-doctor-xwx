@@ -593,3 +593,27 @@ self.weight = self.weight / torch.norm(self.weight, 2, 1, keepdim=True)
             - 在预训练模型基础上重新训练, 配置不变: 83.88
             - 在预训练模型基础上重新训练, 只修改学习率, 其余配置不变
                 - lr1e-2: 83.47
+
+
+# 同等配置下比较平衡数据集和长尾数据集的区别
+
+
+配置为:
+
+```yml
+lr: 0.01
+lr_scheduler: cosine
+loss_type: ce
+optimizer:
+    momentum: 0.9
+    weight_decay: 5e-4
+```
+
+- cifar-10: 92.24
+```bash
+/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10/lr0.01/cosine_lr_scheduler/ce_loss/2022-07-15_18-12-52/best-model-acc0.9224.pth
+```
+- cifar-10-lt-ir100: 71.44
+```bash
+/nfs/xwx/model-doctor-xwx/output/model/pretrained/resnet32/cifar-10-lt-ir100/lr0.01/cosine_lr_scheduler/ce_loss/2022-07-15_17-27-58/best-model-acc0.7144.pth
+```
