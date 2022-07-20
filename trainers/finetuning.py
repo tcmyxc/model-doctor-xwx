@@ -23,6 +23,7 @@ from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, draw_classi
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
+from utils.general import init_seeds
 
 import torch.nn as nn
 
@@ -45,6 +46,8 @@ g_test_loss, g_test_acc = [], []
 def main():
     args = parser.parse_args()
     print_args(args)
+    
+    init_seeds()  # 固定种子
 
     # get cfg
     data_name    = args.data_name

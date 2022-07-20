@@ -26,7 +26,7 @@ from modify_kernel.util.draw_util import draw_lr, draw_acc_and_loss, \
 from modify_kernel.util.cfg_util import print_yml_cfg
 from functools import partial
 from utils.args_util import print_args
-from utils.general import update_best_model
+from utils.general import update_best_model, init_seeds
 
 import torch.nn as nn
 from copy import deepcopy
@@ -48,6 +48,8 @@ parser.add_argument('--gpu_id', type=str, default='0')
 def main():
     args = parser.parse_args()
     print_args(args)
+    
+    init_seeds()  # 固定种子
 
     # get cfg
     data_name    = args.data_name
