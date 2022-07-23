@@ -2,7 +2,7 @@
 # 1. 使用普通的数据加载器
 
 import sys
-sys.path.append('/nfs/xwx/model-doctor-xwx')
+sys.path.append('/mnt/nfs/xwx/model-doctor-xwx')
 
 import torch
 import models
