@@ -68,8 +68,9 @@ def get_head_and_kernel(channel_path, head_ratio=0.3):
     head_num = int(len(modify_dict) * 0.3)
     head = [i for i in range(head_num)]
         
-    head_sum = np.sum(modify_dict[:cls_num], axis=0)
-    head_sum = np.where(head_sum > 0, 1, 0)
+    # 修改头部类中等卷积核
+    head_sum = np.sum(1 - modify_dict[:cls_num], axis=0)
+    head_sum = np.where(head_sum > math.ceil(cls_num/2), 1, 0)
 
     tail_sum = np.sum(modify_dict[-cls_num:], axis=0)
     tail_sum = np.where(tail_sum > 0, 1, 0)
