@@ -4,7 +4,7 @@
 头部类别相关卷积核输出特诊图随机化
 """
 import sys
-sys.path.append('/nfs/xwx/model-doctor-xwx')
+sys.path.append('/mnt/nfs/xwx/model-doctor-xwx')
 
 import torch
 import torchvision
