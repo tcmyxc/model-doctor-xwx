@@ -30,6 +30,7 @@ import yaml
 
 
 def init_seeds(seed=0):
+    """固定随机种子"""
     # Initialize random number generator (RNG) seeds https://pytorch.org/docs/stable/notes/randomness.html
     # cudnn seed 0 settings are slower and more reproducible, else faster and less reproducible
     import torch.backends.cudnn as cudnn
@@ -64,7 +65,8 @@ def get_head_and_kernel(channel_path, head_ratio=0.3):
     modify_dict = np.load(channel_path)
     cls_num = int(len(modify_dict) * head_ratio)
     
-    head = [i for i in range(cls_num)]
+    head_num = int(len(modify_dict) * 0.3)
+    head = [i for i in range(head_num)]
         
     head_sum = np.sum(modify_dict[:cls_num], axis=0)
     head_sum = np.where(head_sum > 0, 1, 0)
