@@ -31,6 +31,20 @@ def save_cv(img, path):
     cv2.imwrite(path, img)
 
 
+def cv_show(image, end=0, name=None):
+    cv2.imshow('test', image)
+    if end:
+        cv2.waitKey(0)
+
+
+def cv_save(img, path):
+    print(path)
+    img_dir, _ = os.path.split(path)
+    if not os.path.exists(img_dir):
+        os.makedirs(img_dir)
+    cv2.imwrite(path, img)
+
+
 # def deprocess_image(img):
 #     """ see https://github.com/jacobgil/keras-grad-cam/blob/master/grad-cam.py#L65 """
 #     img = img - np.mean(img)
@@ -64,3 +78,28 @@ def view_grads(grads, fig_w, fig_h, fig_path):
     # sns.heatmap(grads)
     # plt.savefig(fig_path, bbox_inches='tight')
     # plt.clf()
+
+
+def heatmap(vals, fig_path, fig_w=None, fig_h=None, annot=False):
+    if fig_w is None:
+        fig_w = vals.shape[1]
+    if fig_h is None:
+        fig_h = vals.shape[0]
+
+    f, ax = plt.subplots(figsize=(fig_w, fig_h), ncols=1)
+    sns.heatmap(vals, ax=ax, annot=annot)
+    plt.savefig(fig_path, bbox_inches='tight')
+    plt.clf()
+
+
+def scatter(vals, fig_path):
+    x = [i for i in range(len(vals[0]))]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    vals = [vals[0]]
+    for val in vals:
+        p1 = ax.scatter(x, val, marker='.', color='black', s=8)
+    # plt.show()
+    plt.savefig(fig_path)
+    plt.clf()

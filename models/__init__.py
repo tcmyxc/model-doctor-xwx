@@ -1,9 +1,6 @@
 import torchvision
-from models import simnet, alexnet, alexnetv2, alexnetv3, vgg, resnet, \
-    senet, resnext, densenet, simplenetv1, \
-    efficientnetv2, googlenet, xception, mobilenetv2, \
-    inceptionv3, wideresnet, shufflenetv2, squeezenet, mnasnet, resnetv2,\
-    vggv2
+import torch
+from models import resnet, resnext,  resnetv2
 
 
 def load_model(model_name, in_channels=3, num_classes=10):
@@ -12,112 +9,20 @@ def load_model(model_name, in_channels=3, num_classes=10):
     print('-' * 40)
 
     model = None
-    if model_name == 'simnet':
-        model = simnet.simnet()
-    elif model_name == 'alexnet':
-        model = alexnet.alexnet(in_channels, num_classes)
-    elif model_name == 'alexnetv2':
-        model = alexnetv2.alexnet(in_channels, num_classes)
-    elif model_name == 'alexnetv3':
-        model = alexnetv3.alexnet(in_channels, num_classes)
-    elif model_name == 'vgg16':
-        model = vggv2.vgg16_bn(in_channels, num_classes)
-    elif model_name == 'resnet18':
-        model = resnet.resnet18(in_channels, num_classes)
-    elif model_name == 'resnet32':
+    if model_name == 'resnet32':
         model = resnetv2.resnet32(in_channels, num_classes)
-    elif model_name == 'resnet34':
-        model = resnet.resnet34(in_channels, num_classes)
     elif model_name == 'resnet50':
         model = resnet.resnet50(in_channels, num_classes)
-    elif model_name == 'resnet152':
-        model = resnet.resnet152(in_channels, num_classes)
-    elif model_name == 'senet34':
-        model = senet.seresnet34(in_channels, num_classes)
-    elif model_name == 'wideresnet28':
-        model = wideresnet.wide_resnet28_10(in_channels, num_classes)
     elif model_name == 'resnext50':
         model = resnext.resnext50(in_channels, num_classes)
-    elif model_name == 'densenet121':
-        model = densenet.densenet121(in_channels, num_classes)
-    elif model_name == 'simplenetv1':
-        model = simplenetv1.simplenet(in_channels, num_classes)
-    elif model_name == 'efficientnetv2s':
-        model = efficientnetv2.effnetv2_s(in_channels, num_classes)
-    elif model_name == 'efficientnetv2l':
-        model = efficientnetv2.effnetv2_l(in_channels, num_classes)
-    elif model_name == 'googlenet':
-        model = googlenet.googlenet(in_channels, num_classes)
-    elif model_name == 'xception':
-        model = xception.xception(in_channels, num_classes)
-    elif model_name == 'mobilenetv2':
-        model = mobilenetv2.mobilenetv2(in_channels, num_classes)
-    elif model_name == 'inceptionv3':
-        model = inceptionv3.inceptionv3(in_channels, num_classes)
-    elif model_name == 'shufflenetv2':
-        model = shufflenetv2.shufflenetv2(in_channels, num_classes)
-    elif model_name == 'squeezenet':
-        model = squeezenet.squeezenet(in_channels, num_classes)
-    elif model_name == 'mnasnet':
-        model = mnasnet.mnasnet(in_channels, num_classes)
+    
     return model
 
 
 def load_modules(model, model_name, model_layers):
     module_modules = None
-    if model_name == 'alexnet':
-        module_modules = {
-            -2: model.features[10], # CONV
-            -1: model.classifier[4], # FC
-        }
-    elif model_name == 'alexnetv2':
-        module_modules = {
-            # 0: model.features[0],  # 64*11*11
-            0: model.features[3],  # 192*5*5
-            1: model.features[6],  # 384*3*3
-            2: model.features[8],  # 256*3*3
-            3: model.features[10], # 256*3*3
-            # -1: model.classifier[4], # FC
-        }
-    elif model_name == 'alexnetv3':
-        module_modules = {
-            -2: model.features[10], # CONV
-            -1: model.classifier[4], # FC
-        }
-    elif model_name == 'vgg16':
-        module_modules = {
-            0: model.features[3],  # 64, 224, 224
-            1: model.features[10],  # 128, 112, 112
-            2: model.features[20],  # 256, 56, 56
-            3: model.features[30],  # 512, 28, 28
-            4: model.features[34],  # 512, 14, 14
-            5: model.features[37],  # 512, 14, 14
-            -2: model.features[40],  # 512, 14, 14, CONV
-            -1: model.classifier[3], # FC
-        }
-    elif model_name == 'resnet18':
-        module_modules = {
-            1: model.conv2_x[0].residual_function[0],
-            2: model.conv2_x[0].residual_function[3],
-            3: model.conv2_x[1].residual_function[0],
-            4: model.conv2_x[1].residual_function[3],
-
-            5: model.conv3_x[0].residual_function[0],
-            6: model.conv3_x[0].residual_function[3],
-            7: model.conv3_x[1].residual_function[0],
-            8: model.conv3_x[1].residual_function[3],
-
-            9: model.conv4_x[0].residual_function[0],
-            10: model.conv4_x[0].residual_function[3],
-            11: model.conv4_x[1].residual_function[0],
-            12: model.conv4_x[1].residual_function[3],
-
-            13: model.conv5_x[0].residual_function[0],
-            14: model.conv5_x[0].residual_function[3],
-            15: model.conv5_x[1].residual_function[0],
-            16: model.conv5_x[1].residual_function[3],
-        }
-    elif model_name == 'resnet32':
+    
+    if model_name == 'resnet32':
         module_modules = {
             0: model.layer1[0].conv1,  # 卷积核, 16*3*3
             1: model.layer1[0].conv2,
@@ -152,10 +57,6 @@ def load_modules(model, model_name, model_layers):
             28: model.layer3[4].conv1,
             29: model.layer3[4].conv2,
             -1: model.layer3[4].conv2,
-        }
-    elif model_name == 'resnet34':
-        module_modules = {
-            -1: model.conv5_x[2].residual_function[3]  # 512,4,4
         }
     elif model_name == 'resnet50':
         module_modules = {
@@ -214,19 +115,6 @@ def load_modules(model, model_name, model_layers):
             -1: model.conv5_x[2].residual_function[6],
             # 48: model.conv5_x[2].residual_function[6],
         }
-    elif model_name == 'resnet152':
-        module_modules = {
-            -1: model.conv5_x[2].residual_function[6],
-        }
-    elif model_name == 'senet34':
-        module_modules = {
-            -2: model.stage4[2].residual[3],  # CONV, 512,4,4
-            -1: model.stage4[2].excitation[2],  # FC, 512, 32
-        }
-    elif model_name == 'wideresnet28':
-        module_modules = {
-            -1: model.layer3[3].conv2  # 640,8,8
-        }
     elif model_name == 'resnext50':
         module_modules = {
             0: model.conv2[0].split_transforms[0],
@@ -283,51 +171,7 @@ def load_modules(model, model_name, model_layers):
 
             # -1: model.conv5[2].split_transforms[6]  # 2048,4,4
         }
-    elif model_name == 'densenet121':
-        module_modules = {
-            -1: model.features.dense_block3.bottle_neck_layer_15.bottle_neck[5]  # 32, 4, 4
-        }
-    elif model_name == 'simplenetv1':
-        module_modules = {
-            -1: model.features[46]  # 256, 1, 1
-        }
-    elif model_name == 'efficientnetv2s':
-        module_modules = {
-            -1: model.features[40].conv[7]  # 256, 1, 1
-        }
-    elif model_name == 'efficientnetv2l':
-        module_modules = {
-            -1: model.features[79].conv[7]  # 640, 1, 1
-        }
-    elif model_name == 'googlenet':
-        module_modules = {
-            -1: model.b5.b4[1]  # 128, 4, 4
-        }
-    elif model_name == 'xception':
-        module_modules = {
-            -1: model.exit_flow.conv[3]  # 2048, 4, 4
-        }
-    elif model_name == 'mobilenetv2':
-        module_modules = {
-            -1: model.conv1[0]  # 1280, 5, 5
-        }
-    elif model_name == 'inceptionv3':
-        module_modules = {
-            -1: model.Mixed_7c.branch_pool[1].conv  # 192, 6, 6
-        }
-    elif model_name == 'shufflenetv2':
-        module_modules = {
-            -1: model.conv5[0]  # 1024, 4, 4
-        }
-    elif model_name == 'squeezenet':
-        module_modules = {
-            -1: model.fire9.expand_3x3[0]  # 256, 4, 4
-        }
-    elif model_name == 'mnasnet':
-        module_modules = {
-            -1: model.features[18][0]  # 1280, 1, 1
-        }
-
+   
     # 转成数组形式，索引从0开始
     if model_layers is not None:
         modules = [module_modules[layer] for layer in model_layers]
@@ -340,6 +184,33 @@ def load_modules(model, model_name, model_layers):
     print('-' * 40)
 
     return modules
+
+
+def load_modules(model, model_layers=None):
+    assert model_layers is None or type(model_layers) is list
+
+    modules = []
+    for module in model.modules():
+        if isinstance(module, torch.nn.Conv2d):
+            modules.append(module)
+        if isinstance(module, torch.nn.Linear):
+            modules.append(module)
+
+    modules.reverse()  # reverse order
+    if model_layers is None:
+        model_modules = modules
+    else:
+        model_modules = []
+        for layer in model_layers:
+            model_modules.append(modules[layer])
+
+    print('-' * 50)
+    print('Model Layers:', model_layers)
+    print('Model Modules:', model_modules)
+    print('Model Modules Len:', len(model_modules))
+    print('-' * 50)
+
+    return model_modules
 
 
 if __name__ == '__main__':

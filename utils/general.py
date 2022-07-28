@@ -82,6 +82,7 @@ def get_head_and_kernel(channel_path, head_ratio=0.3):
         if val != 0:
             modify_kernel.append(idx)
     
+    modify_kernel = [1, 9, 15, 16, 17, 26, 28, 33, 43, 53, 58, 59, 60, 62, 63]
     return modify_kernel, head
 
 
